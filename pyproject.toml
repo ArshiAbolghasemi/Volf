@@ -1,0 +1,21 @@
+[project]
+name = "volf"
+version = "0.1.0"
+authors = [
+    {name = "Arshia Abolghasemi", email = "arshiabolghasemi@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+dependencies = [
+    "pandas",
+    "numpy",
+    "google-cloud-bigquery",
+    "google-cloud-bigquery-storage",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.14.1",
+]
