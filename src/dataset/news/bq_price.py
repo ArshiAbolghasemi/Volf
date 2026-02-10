@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from google.cloud import bigquery
 
-from dataset.bq_query import agriculture_query, commodity_query, total_news_query
+from dataset.news.bq_query import agriculture_query, commodity_query, total_news_query
 
 logging.basicConfig(
     level=logging.INFO,
