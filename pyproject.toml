@@ -11,6 +11,9 @@ license = {text = "MIT"}
 dependencies = [
     "pandas",
     "numpy",
+    "requests",
+    "dynaconf",
+    "tenacity",
     "google-cloud-bigquery",
     "google-cloud-bigquery-storage",
 ]

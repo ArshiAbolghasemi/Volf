@@ -5,14 +5,14 @@ from typing import cast
 import pandas as pd
 from pandas.core.dtypes.dtypes import NaTType
 
-from src.dataset.epu import (
+from src.dataset.news.epu import (
     calculate_categorical_epu_features,
     calculate_epu_index_feature,
     load_categorical_epu,
     load_epu_daily,
 )
-from src.dataset.frbsf import calculate_frbsf_sentiment_feature, load_frbsf_sentiment
-from src.dataset.gdelt import (
+from src.dataset.news.frbsf import calculate_frbsf_sentiment_feature, load_frbsf_sentiment
+from src.dataset.news.gdelt import (
     calculate_gdelt_news_features,
     fetch_gdelt_agriculture_news,
     fetch_gdelt_commodity_news,
