@@ -1,5 +1,5 @@
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -18,8 +18,8 @@ logging.basicConfig(
 
 
 def generate_date_range(start_date: str, end_date: str) -> list[datetime]:
-    start = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC)
-    end = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=UTC)
+    start = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    end = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
 
     dates = []
     current = start
