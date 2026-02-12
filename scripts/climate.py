@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from pandas.core.indexing import sys
 
@@ -11,14 +10,12 @@ from src.dataset.climate.prism import (
     generate_date_range,
     get_filename,
 )
+from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = PROJECT_ROOT / "data" / "climate"
 
 
 def main() -> int:  # noqa: PLR0915

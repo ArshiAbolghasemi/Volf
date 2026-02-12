@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import cast
 
 import pandas as pd
@@ -18,14 +17,12 @@ from src.dataset.news.gdelt import (
     fetch_gdelt_commodity_news,
     fetch_gdelt_total_news,
 )
+from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_ROOT / "data"
 
 
 def generate_week_starts(start_date: str, end_date: str) -> list[pd.Timestamp | NaTType]:

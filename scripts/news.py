@@ -3,7 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-from src.dataset.news.dataset import DATA_DIR, build_weekly_dataset
+from src.dataset.news.dataset import build_weekly_dataset
+from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
