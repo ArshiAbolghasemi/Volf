@@ -2,20 +2,16 @@ import logging
 from typing import cast
 
 import pandas as pd
-from pandas.core.dtypes.dtypes import NaTType
 
 from src.dataset.news.epu import (
-    calculate_categorical_epu_features,
-    calculate_epu_index_feature,
+    calculate_weekly_categorical_epu,
+    calculate_weekly_epu_index,
     load_categorical_epu,
     load_epu_daily,
 )
-from src.dataset.news.frbsf import calculate_frbsf_sentiment_feature, load_frbsf_sentiment
-from src.dataset.news.gdelt import (
-    calculate_gdelt_news_features,
-    fetch_gdelt_agriculture_news,
-    fetch_gdelt_commodity_news,
-    fetch_gdelt_total_news,
+from src.dataset.news.frbsf import (
+    calculate_weekly_frbsf_sentiment,
+    load_frbsf_sentiment,
 )
 from src.util.path import DATA_DIR
 
@@ -25,70 +21,42 @@ logging.basicConfig(
 )
 
 
-def generate_week_starts(start_date: str, end_date: str) -> list[pd.Timestamp | NaTType]:
-    start = pd.to_datetime(start_date)
-    end = pd.to_datetime(end_date)
-
-    start_monday = start - pd.Timedelta(days=start.weekday())
-    end_monday = end - pd.Timedelta(days=end.weekday())
-
-    weeks = pd.date_range(start=start_monday, end=end_monday, freq="W-MON")
-    return [pd.Timestamp(w) for w in weeks]
-
-
-def build_weekly_dataset(
-    *, start_date: str, end_date: str, include_gdelt: bool
-) -> pd.DataFrame:
+def build_dataset(*, start_date: str, end_date: str) -> pd.DataFrame:
     logger.info("Loading local sources...")
-    frbsf_df = load_frbsf_sentiment(DATA_DIR / "frbsf.csv")
-    epu_daily_df = load_epu_daily(DATA_DIR / "epu_daily.csv")
-    epu_cat_df = load_categorical_epu(DATA_DIR / "categorical_epu_indices.csv")
+    frbsf_daily = load_frbsf_sentiment(DATA_DIR / "news" / "frbsf.csv")
+    epu_daily = load_epu_daily(DATA_DIR / "news" / "epu_daily.csv")
+    epu_monthly = load_categorical_epu(DATA_DIR / "news" / "categorical_epu_indices.csv")
 
-    wheat = corn = soy = ag = total = None
-    if include_gdelt:
-        logger.info("Querying GDELT from BigQuery (with caching)...")
-        wheat = fetch_gdelt_commodity_news(
-            start_date, end_date, "wheat", cache_dir=DATA_DIR
-        )
-        corn = fetch_gdelt_commodity_news(start_date, end_date, "corn", cache_dir=DATA_DIR)
-        soy = fetch_gdelt_commodity_news(
-            start_date, end_date, "soybeans", cache_dir=DATA_DIR
-        )
-        ag = fetch_gdelt_agriculture_news(start_date, end_date, cache_dir=DATA_DIR)
-        total = fetch_gdelt_total_news(start_date, end_date, cache_dir=DATA_DIR)
+    logger.info("Resampling to weekly (W-MON)...")
+    frbsf_weekly = calculate_weekly_frbsf_sentiment(frbsf_daily)
+    epu_weekly = calculate_weekly_epu_index(epu_daily)
+    epu_cat_weekly = calculate_weekly_categorical_epu(epu_monthly)
 
-    week_starts = generate_week_starts(start_date, end_date)
-    logger.info("Building weekly rows: %d weeks", len(week_starts))
+    if frbsf_weekly is None:
+        msg = "frbsf_weekly dataset is empty"
+        raise ValueError(msg)
+    df_frbsf = frbsf_weekly.reset_index().rename(columns={"sentiment": "frbsf_sentiment"})
 
-    rows: list[dict] = []
-    for ws in week_starts:
-        if isinstance(ws, NaTType):
-            continue
+    if epu_weekly is None:
+        msg = "epu_weekly dataset is empty"
+        raise ValueError(msg)
+    df_epu = epu_weekly.reset_index().rename(columns={"daily_policy_index": "epu_index"})
 
-        row: dict = {"Date": ws}
+    if epu_cat_weekly is None:
+        msg = "epu_cat_weekly dataset is empty"
+        raise ValueError(msg)
+    df_epu_cat = epu_cat_weekly.reset_index()
 
-        row["frbsf_sentiment"] = calculate_frbsf_sentiment_feature(ws, frbsf_df)
+    df = df_frbsf.merge(df_epu, on="Date", how="outer").merge(
+        df_epu_cat, on="Date", how="outer"
+    )
 
-        row["epu_index"] = calculate_epu_index_feature(ws, epu_daily_df)
-        row.update(calculate_categorical_epu_features(ws, epu_cat_df))
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df = df.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
 
-        if include_gdelt:
-            datasets = {
-                "wheat_news_data": wheat,
-                "corn_news_data": corn,
-                "soybeans_news_data": soy,
-                "ag_news_data": ag,
-                "total_news_data": total,
-            }
-            row.update(calculate_gdelt_news_features(week_start=ws, datasets=datasets))
+    start_dt = pd.to_datetime(start_date)
+    end_dt = pd.to_datetime(end_date)
+    df = df[(df["Date"] >= start_dt) & (df["Date"] <= end_dt)].copy()
 
-        rows.append(row)
-
-    df = pd.DataFrame(rows).sort_values("Date").reset_index(drop=True)
-
-    df = df[
-        (df["Date"] >= pd.to_datetime(start_date))
-        & (df["Date"] <= pd.to_datetime(end_date))
-    ].copy()
-
+    logger.info("Built dataset: %d rows, %d columns", len(df), df.shape[1])
     return cast("pd.DataFrame", df)

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from google.cloud import bigquery
 
-from dataset.news.bq_query import agriculture_query, commodity_query, total_news_query
+from src.dataset.news.bq_query import agriculture_query, commodity_query, total_news_query
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -181,7 +181,7 @@ def fetch_all_gdelt_data(
 def calculate_gdelt_news_features(
     *,
     week_start: pd.Timestamp,
-    datasets: dict[str, pd.DataFrame],
+    datasets: dict[str, pd.DataFrame | None],
 ) -> dict[str, float]:
     """Calculate GDELT news features for the week for wheat, corn, and soybeans.
 

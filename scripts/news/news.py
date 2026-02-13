@@ -1,9 +1,8 @@
 import argparse
 import logging
 import os
-from pathlib import Path
 
-from src.dataset.news.dataset import build_weekly_dataset
+from src.dataset.news.dataset import build_dataset
 from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
@@ -29,12 +28,6 @@ def main() -> None:
         default="2025-03-17",
         help="end date for retreiving new features",
     )
-    parser.add_argument(
-        "--include_gdelt",
-        type=bool,
-        default=False,
-        help="For including GDELT news features",
-    )
 
     logging.basicConfig(
         level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -45,15 +38,13 @@ def main() -> None:
 
     start_date = args.start_date
     end_date = args.end_date
-    include_gdelt = args.include_gdelt
 
-    df = build_weekly_dataset(
-        start_date=start_date, end_date=end_date, include_gdelt=include_gdelt
-    )
-    Path.mkdir(DATA_DIR / "features.csv", exist_ok=True)
-    df.to_csv(DATA_DIR / "news.csv", index=False)
+    df = build_dataset(start_date=start_date, end_date=end_date)
+    output_path = DATA_DIR / "news" / "news.csv"
+    output_path.parent.mkdir(exist_ok=True)
+    df.to_csv(output_path, index=False)
 
-    logger.info("Wrote %d rows -> %s", len(df), "../data/features.csv")
+    logger.info("Wrote %d rows -> %s", len(df), "../data/news/news.csv")
     logger.info("Columns: %s", list(df.columns))
 
 

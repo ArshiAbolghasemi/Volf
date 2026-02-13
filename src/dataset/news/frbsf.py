@@ -1,48 +1,43 @@
 import logging
-from datetime import timedelta
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger(__name__)
 
 
 def load_frbsf_sentiment(filepath: Path) -> pd.DataFrame | None:
-    """Load FRBSF Daily News Sentiment Index from local CSV file.
-
-    Args:
-        filepath: Path to news_sentiment.csv file
-
-    Returns:
-        DataFrame with date index and sentiment values, or None if loading fails
-
-    """
     logger.info("Loading FRBSF sentiment from %s...", filepath)
 
-    if not Path.exists(filepath):
+    if not filepath.exists():
         logger.error("File not found: %s", filepath)
         return None
 
     try:
         df = pd.read_csv(filepath)
-        df["date"] = (
-            df["date"]
-            .astype(str)
-            .str.strip()
-            .pipe(pd.to_datetime, format="%m/%d/%Y", errors="coerce")
+
+        df["date"] = pd.to_datetime(
+            df["date"].astype(str).str.strip(),
+            dayfirst=True,
+            errors="coerce",
         )
-        df = df.set_index("date")
-        df = df.rename(columns={"News Sentiment": "sentiment"})
+
+        df = (
+            df.dropna(subset=["date"])
+            .rename(columns={"News Sentiment": "sentiment"})
+            .set_index("date")
+            .sort_index()
+        )
+
+        df["sentiment"] = pd.to_numeric(df["sentiment"], errors="coerce")
+
         logger.info(
-            "Loaded FRBSF data: %s days from %s to %s",
+            "Loaded FRBSF data: %s rows from %s to %s",
             len(df),
             df.index.min(),
             df.index.max(),
         )
+
     except Exception:
         logger.exception("Error loading FRBSF data")
         return None
@@ -50,32 +45,26 @@ def load_frbsf_sentiment(filepath: Path) -> pd.DataFrame | None:
         return df
 
 
-def calculate_frbsf_sentiment_feature(
-    week_start: pd.Timestamp, frbsf_data: pd.DataFrame | None
-) -> float:
-    """Calculate weekly FRBSF sentiment feature.
-
-    Args:
-        week_start: Monday of the week
-        frbsf_data: DataFrame with daily FRBSF sentiment
-
-    Returns:
-        Weekly average sentiment value, or NaN if data unavailable
-
-    """
-    if frbsf_data is None:
-        return np.nan
-
-    week_end = week_start + timedelta(days=6)
+def calculate_weekly_frbsf_sentiment(
+    frbsf_daily: pd.DataFrame | None,
+) -> pd.DataFrame | None:
+    if frbsf_daily is None or frbsf_daily.empty:
+        logger.warning("FRBSF daily data is empty or None")
+        return None
 
     try:
-        mask = (frbsf_data.index >= week_start) & (frbsf_data.index <= week_end)
-        week_data = frbsf_data.loc[mask]
+        s = frbsf_daily[["sentiment"]].sort_index()
 
-        if len(week_data) > 0 and not week_data["sentiment"].isna().all():
-            return float(week_data["sentiment"].mean(skipna=True))
+        full_daily = s.resample("D").asfreq()
+
+        full_daily["sentiment"] = full_daily["sentiment"].interpolate(method="time")
+
+        weekly = full_daily.resample("W-MON").mean().rename_axis("Date")
+
+        logger.info("Computed weekly FRBSF sentiment: %s weeks", len(weekly))
+
     except Exception:
-        logger.exception("Error calculating FRBSF sentiment for week %s", week_start)
-        return np.nan
+        logger.exception("Error computing weekly FRBSF sentiment")
+        return None
     else:
-        return np.nan
+        return weekly
