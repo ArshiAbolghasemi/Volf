@@ -16,6 +16,7 @@ dependencies = [
     "tenacity",
     "pytrends",
     "pyarrow",
+    "scikit-learn",
     "google-cloud-bigquery",
     "google-cloud-bigquery-storage",
 ]
