@@ -20,9 +20,9 @@ MONTH_NUM = {m: i + 1 for i, m in enumerate(MONTHS)}
 
 
 def main() -> None:
-    df = pd.read_csv(DATA_DIR / "climate" / "nao.csv")
+    nao_df = pd.read_csv(DATA_DIR / "climate" / "nao.csv")
 
-    long_df = df.melt(
+    long_df = nao_df.melt(
         id_vars=["Year"],
         value_vars=MONTHS,
         var_name="Month",

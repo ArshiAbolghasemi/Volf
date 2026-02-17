@@ -14,35 +14,35 @@ def load_frbsf_sentiment(filepath: Path) -> pd.DataFrame | None:
         return None
 
     try:
-        df = pd.read_csv(filepath)
+        frbsf_df = pd.read_csv(filepath)
 
-        df["date"] = pd.to_datetime(
-            df["date"].astype(str).str.strip(),
+        frbsf_df["date"] = pd.to_datetime(
+            frbsf_df["date"].astype(str).str.strip(),
             dayfirst=True,
             errors="coerce",
         )
 
-        df = (
-            df.dropna(subset=["date"])
+        frbsf_df = (
+            frbsf_df.dropna(subset=["date"])
             .rename(columns={"News Sentiment": "sentiment"})
             .set_index("date")
             .sort_index()
         )
 
-        df["sentiment"] = pd.to_numeric(df["sentiment"], errors="coerce")
+        frbsf_df["sentiment"] = pd.to_numeric(frbsf_df["sentiment"], errors="coerce")
 
         logger.info(
             "Loaded FRBSF data: %s rows from %s to %s",
-            len(df),
-            df.index.min(),
-            df.index.max(),
+            len(frbsf_df),
+            frbsf_df.index.min(),
+            frbsf_df.index.max(),
         )
 
     except Exception:
         logger.exception("Error loading FRBSF data")
         return None
     else:
-        return df
+        return frbsf_df
 
 
 def calculate_weekly_frbsf_sentiment(

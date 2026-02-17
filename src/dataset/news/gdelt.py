@@ -32,18 +32,18 @@ def _load_from_cache(cache_path: Path) -> pd.DataFrame | None:
         return None
     try:
         logger.info("Loading from cache: %s", cache_path.name)
-        df = pd.read_parquet(cache_path)
-        logger.info("✓ Loaded %s rows from cache", len(df))
+        gdelt_df = pd.read_parquet(cache_path)
+        logger.info("✓ Loaded %s rows from cache", len(gdelt_df))
     except Exception:
         logger.exception("Error loading cache from %s", cache_path.name)
         return None
     else:
-        return df
+        return gdelt_df
 
 
-def _save_to_cache(df: pd.DataFrame, cache_path: Path) -> None:
+def _save_to_cache(gdelt_df: pd.DataFrame, cache_path: Path) -> None:
     try:
-        df.to_parquet(cache_path, index=False)
+        gdelt_df.to_parquet(cache_path, index=False)
         logger.info("✓ Saved to cache: %s", cache_path.name)
     except Exception:
         logger.exception("Error saving cache to %s", cache_path.name)
@@ -71,19 +71,19 @@ def fetch_gdelt_commodity_news(
             start_date=start_date, end_date=end_date, commodity=commodity
         )
 
-        df = client.query(query).to_dataframe()
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.set_index("date")
+        gdelt_df = client.query(query).to_dataframe()
+        gdelt_df["date"] = pd.to_datetime(gdelt_df["date"])
+        gdelt_df = gdelt_df.set_index("date")
 
-        logger.info("✓ Fetched %s news: %d days with data", commodity, len(df))
+        logger.info("✓ Fetched %s news: %d days with data", commodity, len(gdelt_df))
 
         if cache_path is not None:
-            _save_to_cache(df, cache_path)
+            _save_to_cache(gdelt_df, cache_path)
     except Exception:
         logger.exception("✗ Error fetching %d news from GDELT", commodity)
         return None
     else:
-        return df
+        return gdelt_df
 
 
 def fetch_gdelt_agriculture_news(
@@ -103,19 +103,19 @@ def fetch_gdelt_agriculture_news(
 
         query = agriculture_query(start_date=start_date, end_date=end_date)
 
-        df = client.query(query).to_dataframe()
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.set_index("date")
+        gdelt_df = client.query(query).to_dataframe()
+        gdelt_df["date"] = pd.to_datetime(gdelt_df["date"])
+        gdelt_df = gdelt_df.set_index("date")
 
-        logger.info("✓ Fetched agriculture news: %d days with data", len(df))
+        logger.info("✓ Fetched agriculture news: %d days with data", len(gdelt_df))
 
         if cache_path is not None:
-            _save_to_cache(df, cache_path)
+            _save_to_cache(gdelt_df, cache_path)
     except Exception:
         logger.exception("✗ Error fetching agriculture news from GDELT")
         return None
     else:
-        return df
+        return gdelt_df
 
 
 def fetch_gdelt_total_news(
@@ -135,20 +135,20 @@ def fetch_gdelt_total_news(
 
         query = total_news_query(start_date=start_date, end_date=end_date)
 
-        df = client.query(query).to_dataframe()
-        df["date"] = pd.to_datetime(df["date"])
-        df = df.set_index("date")
+        gdelt_df = client.query(query).to_dataframe()
+        gdelt_df["date"] = pd.to_datetime(gdelt_df["date"])
+        gdelt_df = gdelt_df.set_index("date")
 
-        logger.info("✓ Fetched total news volume: %d days with data", len(df))
+        logger.info("✓ Fetched total news volume: %d days with data", len(gdelt_df))
 
         if cache_path is not None:
-            _save_to_cache(df, cache_path)
+            _save_to_cache(gdelt_df, cache_path)
 
     except Exception:
         logger.exception("✗ Error fetching total news volume from GDELT")
         return None
     else:
-        return df
+        return gdelt_df
 
 
 def fetch_all_gdelt_data(

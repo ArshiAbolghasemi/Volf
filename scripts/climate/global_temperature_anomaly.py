@@ -4,15 +4,17 @@ from src.util.path import DATA_DIR
 
 
 def main() -> None:
-    df = pd.read_csv(DATA_DIR / "climate" / "global_temperature_anomaly.csv")
+    anomaly_df = pd.read_csv(DATA_DIR / "climate" / "global_temperature_anomaly.csv")
 
-    df["Date"] = pd.to_datetime(df["Year"].astype(str) + "-01-01")
-    df = df.set_index("Date")[["Anomaly"]]
+    anomaly_df["Date"] = pd.to_datetime(anomaly_df["Year"].astype(str) + "-01-01")
+    anomaly_df = anomaly_df.set_index("Date")[["Anomaly"]]
 
-    weekly_index = pd.date_range(start=df.index.min(), end=df.index.max(), freq="W-MON")
+    weekly_index = pd.date_range(
+        start=anomaly_df.index.min(), end=anomaly_df.index.max(), freq="W-MON"
+    )
 
     weekly_df = (
-        df.reindex(df.index.union(weekly_index))
+        anomaly_df.reindex(anomaly_df.index.union(weekly_index))
         .sort_index()
         .interpolate(method="time")
         .reindex(weekly_index)

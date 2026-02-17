@@ -17,21 +17,21 @@ def load_epu_daily(filepath: Path) -> pd.DataFrame | None:
         return None
 
     try:
-        df = pd.read_csv(filepath)
-        df["date"] = pd.to_datetime(df[["year", "month", "day"]], errors="coerce")
-        df = df.dropna(subset=["date"]).set_index("date").sort_index()
+        epu_df = pd.read_csv(filepath)
+        epu_df["date"] = pd.to_datetime(epu_df[["year", "month", "day"]], errors="coerce")
+        epu_df = epu_df.dropna(subset=["date"]).set_index("date").sort_index()
 
         logger.info(
             "Loaded EPU daily data: %s days from %s to %s",
-            len(df),
-            df.index.min(),
-            df.index.max(),
+            len(epu_df),
+            epu_df.index.min(),
+            epu_df.index.max(),
         )
     except Exception:
         logger.exception("Error loading EPU data")
         return None
     else:
-        return df
+        return epu_df
 
 
 def load_categorical_epu(filepath: Path) -> pd.DataFrame | None:
@@ -43,19 +43,23 @@ def load_categorical_epu(filepath: Path) -> pd.DataFrame | None:
         return None
 
     try:
-        df = pd.read_csv(filepath)
+        epu_df = pd.read_csv(filepath)
 
-        if len(df) > 0 and (df.iloc[-1].isna().all() or "Source:" in str(df.iloc[-1, 0])):
-            df = df.iloc[:-1]
+        if len(epu_df) > 0 and (
+            epu_df.iloc[-1].isna().all() or "Source:" in str(epu_df.iloc[-1, 0])
+        ):
+            epu_df = epu_df.iloc[:-1]
 
-        df["date"] = pd.to_datetime(df[["Year", "Month"]].assign(Day=1), errors="coerce")
-        df = (
-            df.dropna(subset=["date"])
+        epu_df["date"] = pd.to_datetime(
+            epu_df[["Year", "Month"]].assign(Day=1), errors="coerce"
+        )
+        epu_df = (
+            epu_df.dropna(subset=["date"])
             .set_index("date")
             .sort_index()
             .drop(["Year", "Month"], axis=1, errors="ignore")
         )
-        df.columns = df.columns.str.strip()
+        epu_df.columns = epu_df.columns.str.strip()
 
         column_mapping = {
             "1. Economic Policy Uncertainty": "epu_overall",
@@ -71,20 +75,20 @@ def load_categorical_epu(filepath: Path) -> pd.DataFrame | None:
             "9. Trade policy": "epu_trade",
             "10. Sovereign debt, currency crises": "epu_sovereign_debt",
         }
-        df = df.rename(columns=column_mapping)
+        epu_df = epu_df.rename(columns=column_mapping)
 
         logger.info(
             "Loaded categorical EPU: %s months from %s to %s",
-            len(df),
-            df.index.min(),
-            df.index.max(),
+            len(epu_df),
+            epu_df.index.min(),
+            epu_df.index.max(),
         )
-        logger.info("  Categories: %s", list(df.columns))
+        logger.info("  Categories: %s", list(epu_df.columns))
     except Exception:
         logger.exception("Error loading categorical EPU data")
         return None
     else:
-        return df
+        return epu_df
 
 
 def calculate_weekly_epu_index(epu_daily_data: pd.DataFrame | None) -> pd.DataFrame | None:

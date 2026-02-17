@@ -5,19 +5,21 @@ from src.util.path import DATA_DIR
 
 
 def main() -> None:
-    df = pd.read_csv(
+    djia_df = pd.read_csv(
         DATA_DIR / "macroeconomic" / "Dow Jones Industrial Average Historical Data.csv"
     )
 
-    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
+    djia_df["Date"] = pd.to_datetime(djia_df["Date"], format="%m/%d/%Y")
 
-    df["Price"] = df["Price"].astype(str).str.replace(",", "", regex=False).astype(float)
+    djia_df["Price"] = (
+        djia_df["Price"].astype(str).str.replace(",", "", regex=False).astype(float)
+    )
 
-    df = df.sort_values("Date").set_index("Date")
+    djia_df = djia_df.sort_values("Date").set_index("Date")
 
-    df["DJIA_Index"] = np.log(df["Price"])
+    djia_df["DJIA_Index"] = np.log(djia_df["Price"])
 
-    weekly = df["DJIA_Index"].resample("W-MON").last()
+    weekly = djia_df["DJIA_Index"].resample("W-MON").last()
 
     weekly = weekly.rename("DJIA_Index").reset_index()
     weekly["Date"] = weekly["Date"].dt.strftime("%Y-%m-%d")

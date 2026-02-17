@@ -39,13 +39,13 @@ def main() -> None:
     start_date = args.start_date
     end_date = args.end_date
 
-    df = build_dataset(start_date=start_date, end_date=end_date)
+    news_df = build_dataset(start_date=start_date, end_date=end_date)
     output_path = DATA_DIR / "news" / "news.csv"
     output_path.parent.mkdir(exist_ok=True)
-    df.to_csv(output_path, index=False)
+    news_df.to_csv(output_path, index=False)
 
-    logger.info("Wrote %d rows -> %s", len(df), "../data/news/news.csv")
-    logger.info("Columns: %s", list(df.columns))
+    logger.info("Wrote %d rows -> %s", len(news_df), "../data/news/news.csv")
+    logger.info("Columns: %s", list(news_df.columns))
 
 
 if __name__ == "__main__":

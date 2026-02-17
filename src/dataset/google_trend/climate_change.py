@@ -56,7 +56,7 @@ def _fetch_data(kw: str, geo: str, y1: int, m1: int, y2: int, m2: int) -> pd.Dat
         y2,
         m2,
     )
-    df = dailydata.get_daily_data(
+    trends_df = dailydata.get_daily_data(
         kw,
         start_year=y1,
         start_mon=m1,
@@ -67,14 +67,14 @@ def _fetch_data(kw: str, geo: str, y1: int, m1: int, y2: int, m2: int) -> pd.Dat
 
     logger.info(
         "Fetched rows=%d cols=%d for %04d-%02d .. %04d-%02d",
-        len(df),
-        df.shape[1],
+        len(trends_df),
+        trends_df.shape[1],
         y1,
         m1,
         y2,
         m2,
     )
-    return df
+    return trends_df
 
 
 def _read_cache(path: Path) -> pd.DataFrame:
@@ -82,9 +82,9 @@ def _read_cache(path: Path) -> pd.DataFrame:
     return pd.read_parquet(path, engine="pyarrow")
 
 
-def _write_cache(df: pd.DataFrame, path: Path) -> None:
+def _write_cache(trends_df: pd.DataFrame, path: Path) -> None:
     logger.info("Writing cache (parquet): %s", path)
-    df.to_parquet(path, engine="pyarrow")
+    trends_df.to_parquet(path, engine="pyarrow")
 
 
 def get_text_climate_anomaly_w_mon(
@@ -138,15 +138,15 @@ def get_text_climate_anomaly_w_mon(
         time.sleep(1.0)
 
     logger.info("Concatenating %d parts.", len(parts))
-    df = pd.concat(parts).sort_index()
+    trends_df = pd.concat(parts).sort_index()
 
-    mean = float(df[kw].mean())
-    std = float(df[kw].std())
-    df["Text_Climate_Anomaly"] = (df[kw] - mean) / std
+    mean = float(trends_df[kw].mean())
+    std = float(trends_df[kw].std())
+    trends_df["Text_Climate_Anomaly"] = (trends_df[kw] - mean) / std
 
     logger.info("Resampling to weekly (W-MON) mean.")
     weekly = (
-        df["Text_Climate_Anomaly"]
+        trends_df["Text_Climate_Anomaly"]
         .resample("W-MON")
         .mean()
         .rename("Text_Climate_Anomaly")

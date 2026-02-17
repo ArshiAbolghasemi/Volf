@@ -47,16 +47,18 @@ def build_dataset(*, start_date: str, end_date: str) -> pd.DataFrame:
         raise ValueError(msg)
     df_epu_cat = epu_cat_weekly.reset_index()
 
-    df = df_frbsf.merge(df_epu, on="Date", how="outer").merge(
+    merged_df = df_frbsf.merge(df_epu, on="Date", how="outer").merge(
         df_epu_cat, on="Date", how="outer"
     )
 
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    df = df.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
+    merged_df["Date"] = pd.to_datetime(merged_df["Date"], errors="coerce")
+    merged_df = merged_df.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
 
     start_dt = pd.to_datetime(start_date)
     end_dt = pd.to_datetime(end_date)
-    df = df[(df["Date"] >= start_dt) & (df["Date"] <= end_dt)].copy()
+    merged_df = merged_df[
+        (merged_df["Date"] >= start_dt) & (merged_df["Date"] <= end_dt)
+    ].copy()
 
-    logger.info("Built dataset: %d rows, %d columns", len(df), df.shape[1])
-    return cast("pd.DataFrame", df)
+    logger.info("Built dataset: %d rows, %d columns", len(merged_df), merged_df.shape[1])
+    return cast("pd.DataFrame", merged_df)
