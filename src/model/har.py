@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, replace
 from math import ceil
 from typing import TYPE_CHECKING, Any, Literal, cast
@@ -19,18 +20,16 @@ from src.variable_selection import (
 if TYPE_CHECKING:
     from statsmodels.regression.linear_model import RegressionResultsWrapper
 
-DEFAULT_RV_COL = "RV"
-DEFAULT_TARGET_COL = "RV_target"
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class HARFeatureConfig:
-    rv_col: str = DEFAULT_RV_COL
-    h1: int = 4
-    h2: int = 12
-    target_horizon: int = 0
+    target_col: str
+    core_columns: list[str]
+    target_horizon: int = 1
     extra_feature_cols: list[str] | None = None
-    target_col_name: str = DEFAULT_TARGET_COL
+    target_col_name: str = "RV_target"
 
 
 @dataclass
@@ -55,9 +54,8 @@ class HARModelConfig:
 
 @dataclass
 class HARGridConfig:
-    rv_col: str
     feature_sets: dict[str, list[str]]
-    base_feature_config: HARFeatureConfig | None = None
+    base_feature_config: HARFeatureConfig
 
 
 @dataclass
@@ -80,64 +78,67 @@ class HARExperimentResult:
     model_info: dict[str, Any]
 
 
-def _validate_feature_config(cfg: HARFeatureConfig) -> None:
-    if cfg.h1 < 1 or cfg.h2 < 1:
-        msg = "h1 and h2 must be >= 1."
+def _validate_feature_config(cfg: HARFeatureConfig, data: pd.DataFrame) -> None:
+    logger.debug(
+        (
+            "Validating HAR feature config: target_col=%s, core_columns=%s, "
+            "target_horizon=%s, extra_features=%s"
+        ),
+        cfg.target_col,
+        cfg.core_columns,
+        cfg.target_horizon,
+        cfg.extra_feature_cols,
+    )
+    if cfg.target_col not in data.columns:
+        msg = f"target_col '{cfg.target_col}' is not in dataframe columns."
         raise ValueError(msg)
+
+    if not cfg.core_columns:
+        msg = "core_columns must not be empty."
+        raise ValueError(msg)
+
+    missing_core = [col for col in cfg.core_columns if col not in data.columns]
+    if missing_core:
+        msg = f"core_columns missing from dataframe: {missing_core}"
+        raise ValueError(msg)
+
+    if cfg.extra_feature_cols:
+        missing_extra = [col for col in cfg.extra_feature_cols if col not in data.columns]
+        if missing_extra:
+            msg = f"extra_feature_cols missing from dataframe: {missing_extra}"
+            raise ValueError(msg)
+
     if cfg.target_horizon < 0:
         msg = "target_horizon must be >= 0."
         raise ValueError(msg)
-
-
-def _core_columns_from_horizons(h1: int, h2: int) -> list[str]:
-    cols = ["RV_lag1", f"RV_avg_{h1}", f"RV_avg_{h2}"]
-    # keep stable order, avoid duplicate if h1 == h2
-    out: list[str] = []
-    for col in cols:
-        if col not in out:
-            out.append(col)
-    return out
 
 
 def build_har_design_matrix(
     data: pd.DataFrame,
     config: HARFeatureConfig,
 ) -> tuple[pd.DataFrame, list[str], str]:
-    _validate_feature_config(config)
+    logger.info("Building HAR design matrix")
+    _validate_feature_config(config, data)
 
-    if config.rv_col not in data.columns:
-        msg = f"rv_col '{config.rv_col}' is not in dataframe columns."
-        raise ValueError(msg)
-
-    rv_lagged = data[config.rv_col].shift(1)
-
-    design = pd.DataFrame(index=data.index)
-    design["RV_lag1"] = rv_lagged
-    design[f"RV_avg_{config.h1}"] = rv_lagged.rolling(
-        window=config.h1,
-        min_periods=config.h1,
-    ).mean()
-    design[f"RV_avg_{config.h2}"] = rv_lagged.rolling(
-        window=config.h2,
-        min_periods=config.h2,
-    ).mean()
-
+    feature_cols = config.core_columns.copy()
     if config.extra_feature_cols:
-        missing = [col for col in config.extra_feature_cols if col not in data.columns]
-        if missing:
-            msg = f"extra_feature_cols missing from dataframe: {missing}"
-            raise ValueError(msg)
-        for col in config.extra_feature_cols:
-            design[col] = data[col]
+        feature_cols.extend(config.extra_feature_cols)
+
+    design = cast("pd.DataFrame", data[feature_cols].copy())
 
     target_col = config.target_col_name
     if config.target_horizon == 0:
-        design[target_col] = data[config.rv_col]
+        design[target_col] = data[config.target_col]
     else:
-        design[target_col] = data[config.rv_col].shift(-config.target_horizon)
+        design[target_col] = data[config.target_col].shift(-config.target_horizon)
 
-    core_columns = _core_columns_from_horizons(config.h1, config.h2)
-    return design, core_columns, target_col
+    logger.info(
+        "HAR design matrix ready: rows=%d, n_features=%d, target=%s",
+        len(design),
+        len(design.columns) - 1,
+        target_col,
+    )
+    return design, config.core_columns.copy(), target_col
 
 
 def get_xy_from_har_design(
@@ -154,6 +155,11 @@ def get_xy_from_har_design(
     clean = pd.concat([x, y.to_frame(name=target_col)], axis=1).dropna()
     x_clean = clean.drop(columns=[target_col])
     y_clean = cast("pd.Series", clean[target_col])
+    logger.info(
+        "Prepared X/y: n_rows=%d, n_features=%d",
+        len(x_clean),
+        len(x_clean.columns),
+    )
     return x_clean, y_clean
 
 
@@ -204,6 +210,12 @@ def split_train_val_test(
     y_val = y.iloc[train_end:val_end]
     y_test = y.iloc[val_end:]
 
+    logger.info(
+        "Split sizes -> train=%d, val=%d, test=%d",
+        len(y_train),
+        len(y_val),
+        len(y_test),
+    )
     return x_train, x_val, x_test, y_train, y_val, y_test
 
 
@@ -212,6 +224,7 @@ def _standardize_feature_splits(
     x_val: pd.DataFrame,
     x_test: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, StandardScaler]:
+    logger.info("Applying feature standardization using train split statistics")
     scaler = StandardScaler()
     scaler.fit(x_train)
 
@@ -246,22 +259,37 @@ def select_har_features(
 
     if config.method == "none":
         selected = x_train.columns.tolist()
+        logger.info("Feature selection method=none, selected=%d", len(selected))
         return selected, {"method": "none", "selected_features": selected}
 
     if config.method == "lasso":
+        logger.info("Running feature selection with LASSO")
         lasso_cfg = config.lasso or LassoSelectionConfig()
         lasso_cfg = replace(lasso_cfg, core_columns=core_columns)
         lasso_result = lasso_time_series_feature_selection(
-            x_train, y_train, config=lasso_cfg
+            x_train,
+            y_train,
+            config=lasso_cfg,
         )
         info = {"method": "lasso", **lasso_result.info}
+        logger.info(
+            "LASSO selected %d features (best_alpha=%s)",
+            len(lasso_result.selected_features),
+            info.get("best_alpha"),
+        )
         return lasso_result.selected_features, info
 
     if config.method == "bsr":
+        logger.info("Running feature selection with BSR")
         bsr_cfg = config.bsr or BSRSelectionConfig()
         bsr_cfg = replace(bsr_cfg, core_columns=tuple(core_columns))
         bsr_result = backward_stepwise_feature_selection(x_train, y_train, config=bsr_cfg)
         info = {"method": "bsr", **bsr_result.info}
+        logger.info(
+            "BSR selected %d features (successful_windows=%s)",
+            len(bsr_result.selected_features),
+            info.get("n_windows_successful"),
+        )
         return bsr_result.selected_features, info
 
     msg = f"unsupported feature selection method: {config.method}"
@@ -275,6 +303,12 @@ def fit_har_ols(
     *,
     add_constant: bool,
 ) -> RegressionResultsWrapper:
+    logger.info(
+        "Fitting HAR OLS model: n_rows=%d, n_features=%d, add_constant=%s",
+        len(y_train),
+        len(selected_features),
+        add_constant,
+    )
     x_fit = x_train[selected_features]
     if add_constant:
         x_fit = sm.add_constant(x_fit, has_constant="add")
@@ -304,6 +338,7 @@ def run_har_experiment_from_xy(
     core_columns: list[str],
     run_config: HARRunConfig | None = None,
 ) -> HARExperimentResult:
+    logger.info("Starting HAR experiment from X/y")
     cfg = run_config or HARRunConfig()
     split_cfg = cfg.split or HARSplitConfig()
     selection_cfg = cfg.selection or HARSelectionConfig()
@@ -321,6 +356,7 @@ def run_har_experiment_from_xy(
         core_columns=core_columns,
         config=selection_cfg,
     )
+    logger.info("Selected features: %s", selected_features)
 
     x_train_sel = cast("pd.DataFrame", x_train[selected_features])
     x_val_sel = cast("pd.DataFrame", x_val[selected_features])
@@ -350,6 +386,7 @@ def run_har_experiment_from_xy(
     )
 
     if model_cfg.refit_on_train_val:
+        logger.info("Refitting model on train+validation data")
         x_train_val = pd.concat([x_train_sel, x_val_sel], axis=0)
         y_train_val = pd.concat([y_train, y_val], axis=0)
         model_final = fit_har_ols(
@@ -374,6 +411,8 @@ def run_har_experiment_from_xy(
         "val": evaluate_statistical_metrics(y_val, y_pred_val),
         "test": evaluate_statistical_metrics(y_test, y_pred_test),
     }
+    logger.info("Validation metrics: %s", metrics["val"])
+    logger.info("Test metrics: %s", metrics["test"])
 
     coefficients = model_final.params.drop(labels=["const"], errors="ignore")
     coefficients.name = "coefficient"
@@ -391,6 +430,12 @@ def run_har_experiment_from_xy(
         "bic_final": float(model_final.bic),
         "rsquared_final": float(model_final.rsquared),
     }
+    logger.info(
+        "Model summary: aic=%.4f, bic=%.4f, rsquared=%.4f",
+        model_info["aic_final"],
+        model_info["bic_final"],
+        model_info["rsquared_final"],
+    )
 
     return HARExperimentResult(
         selected_features=selected_features,
@@ -411,6 +456,7 @@ def run_har_experiment_from_dataset(
     feature_config: HARFeatureConfig,
     run_config: HARRunConfig | None = None,
 ) -> HARExperimentResult:
+    logger.info("Starting HAR experiment from raw dataset")
     design, core_columns, target_col = build_har_design_matrix(data, feature_config)
     x, y = get_xy_from_har_design(design, target_col)
 
@@ -428,19 +474,24 @@ def run_har_feature_set_grid(
     *,
     run_config: HARRunConfig | None = None,
 ) -> dict[str, HARExperimentResult]:
-    base_cfg = grid_config.base_feature_config or HARFeatureConfig(
-        rv_col=grid_config.rv_col
+    logger.info(
+        "Running HAR feature-set grid: %d feature sets", len(grid_config.feature_sets)
     )
+    base_cfg = grid_config.base_feature_config
     results: dict[str, HARExperimentResult] = {}
 
     for model_name, extra_cols in grid_config.feature_sets.items():
-        feature_cfg = replace(
-            base_cfg, rv_col=grid_config.rv_col, extra_feature_cols=extra_cols
+        logger.info(
+            "Running feature set '%s' with %d additional features",
+            model_name,
+            len(extra_cols),
         )
+        feature_cfg = replace(base_cfg, extra_feature_cols=extra_cols)
         results[model_name] = run_har_experiment_from_dataset(
             data,
             feature_config=feature_cfg,
             run_config=run_config,
         )
+        logger.info("Completed feature set '%s'", model_name)
 
     return results
