@@ -34,7 +34,7 @@ class LassoSelectionConfig:
 def _build_lasso_pipeline(
     *,
     n_splits: int,
-    alphas: np.ndarray | None,
+    alphas: np.ndarray | int,
     max_iter: int,
     random_state: int | None,
     n_jobs: int | None,
@@ -144,9 +144,15 @@ def lasso_time_series_feature_selection(
     lasso: LassoCV = model.named_steps["lasso"]
     coefs = pd.Series(lasso.coef_, index=feature_cols, name="coefficient")
 
-    lasso_selected = coefs[coefs.abs() > cfg.coef_threshold].index.tolist()
+    lasso_selected: list[str] = [
+        feature_cols[i]
+        for i, coef in enumerate(coefs)
+        if abs(float(coef)) > cfg.coef_threshold
+    ]
 
-    selected_features = sorted(set(lasso_selected).union(cfg.always_keep_features or []))
+    selected_features: list[str] = sorted(
+        set(lasso_selected).union(cfg.always_keep_features or [])
+    )
     dropped_features = sorted(set(feature_cols) - set(selected_features))
 
     mse_path = lasso.mse_path_
