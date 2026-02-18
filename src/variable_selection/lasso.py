@@ -22,7 +22,7 @@ class LassoSelectionResult:
 
 @dataclass
 class LassoSelectionConfig:
-    always_keep_features: list[str] | None = None
+    core_columns: list[str] | None = None
     n_splits: int = 5
     alphas: np.ndarray | int = 100
     max_iter: int = 50_000
@@ -57,9 +57,9 @@ def _build_lasso_pipeline(
 
 def _validate_forced_features(
     feature_cols: list[str],
-    always_keep_features: list[str],
+    core_columns: list[str],
 ) -> None:
-    missing_forced = [f for f in always_keep_features if f not in feature_cols]
+    missing_forced = [f for f in core_columns if f not in feature_cols]
     if missing_forced:
         msg = f"forced features {missing_forced} is missed"
         raise ValueError(msg)
@@ -112,8 +112,8 @@ def lasso_time_series_feature_selection(
         msg = f"n_splits must be >= {MIN_SPLITS}."
         raise ValueError(msg)
 
-    if cfg.always_keep_features:
-        _validate_forced_features(feature_cols, cfg.always_keep_features)
+    if cfg.core_columns:
+        _validate_forced_features(feature_cols, cfg.core_columns)
 
     aligned = x.copy()
     aligned["__target__"] = y_series
@@ -151,7 +151,7 @@ def lasso_time_series_feature_selection(
     ]
 
     selected_features: list[str] = sorted(
-        set(lasso_selected).union(cfg.always_keep_features or [])
+        set(lasso_selected).union(cfg.core_columns or [])
     )
     dropped_features = sorted(set(feature_cols) - set(selected_features))
 
