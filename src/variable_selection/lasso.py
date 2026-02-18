@@ -150,9 +150,7 @@ def lasso_time_series_feature_selection(
         if abs(float(coef)) > cfg.coef_threshold
     ]
 
-    selected_features: list[str] = sorted(
-        set(lasso_selected).union(cfg.core_columns or [])
-    )
+    selected_features: list[str] = sorted(set(lasso_selected).union(cfg.core_columns or []))
     dropped_features = sorted(set(feature_cols) - set(selected_features))
 
     mse_path = lasso.mse_path_
