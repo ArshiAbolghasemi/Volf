@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, replace
-from math import ceil
 from typing import TYPE_CHECKING, Any, Literal, cast
 
+import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from sklearn.preprocessing import StandardScaler
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     from statsmodels.regression.linear_model import RegressionResultsWrapper
 
 logger = logging.getLogger(__name__)
+
+MIN_OBS = 2
 
 
 @dataclass
@@ -40,16 +42,24 @@ class HARSelectionConfig:
 
 
 @dataclass
-class HARSplitConfig:
-    val_size: float | int = 0.2
-    test_size: float | int = 0.2
+class HARWalkForwardConfig:
+    window_type: Literal["expanding", "rolling"] = "expanding"
+    initial_train_size: int = 104
+    test_size: int = 1
+    step: int = 1
+    rolling_window_size: int | None = None
 
 
 @dataclass
 class HARModelConfig:
     add_constant: bool = True
     standardize_features: bool = False
-    refit_on_train_val: bool = True
+    target_transform: Literal["none", "log"] = "log"
+    prediction_floor: float = 1e-10
+    log_transform_rv_features: bool = True
+    feature_floor: float = 1e-10
+    max_selected_features: int | None = 25
+    min_train_feature_ratio: float = 5.0
 
 
 @dataclass
@@ -60,7 +70,7 @@ class HARGridConfig:
 
 @dataclass
 class HARRunConfig:
-    split: HARSplitConfig | None = None
+    walk_forward: HARWalkForwardConfig | None = None
     selection: HARSelectionConfig | None = None
     model: HARModelConfig | None = None
 
@@ -68,8 +78,8 @@ class HARRunConfig:
 @dataclass
 class HARExperimentResult:
     selected_features: list[str]
-    y_true_val: pd.Series
-    y_pred_val: pd.Series
+    y_true_train: pd.Series
+    y_pred_train: pd.Series
     y_true_test: pd.Series
     y_pred_test: pd.Series
     metrics: dict[str, dict[str, Any]]
@@ -79,16 +89,6 @@ class HARExperimentResult:
 
 
 def _validate_feature_config(cfg: HARFeatureConfig, data: pd.DataFrame) -> None:
-    logger.debug(
-        (
-            "Validating HAR feature config: target_col=%s, core_columns=%s, "
-            "target_horizon=%s, extra_features=%s"
-        ),
-        cfg.target_col,
-        cfg.core_columns,
-        cfg.target_horizon,
-        cfg.extra_feature_cols,
-    )
     if cfg.target_col not in data.columns:
         msg = f"target_col '{cfg.target_col}' is not in dataframe columns."
         raise ValueError(msg)
@@ -141,6 +141,28 @@ def build_har_design_matrix(
     return design, config.core_columns.copy(), target_col
 
 
+def _is_rv_feature(col_name: str) -> bool:
+    name = col_name.lower()
+    return name == "rv" or name.endswith("_rv")
+
+
+def _log_transform_rv_features(
+    x: pd.DataFrame,
+    *,
+    floor: float,
+) -> tuple[pd.DataFrame, list[str]]:
+    x_out = x.copy()
+    transformed_cols: list[str] = []
+
+    for col in x_out.columns:
+        if _is_rv_feature(col):
+            arr = np.clip(x_out[col].to_numpy(dtype=float), floor, None)
+            x_out[col] = np.log(arr)
+            transformed_cols.append(col)
+
+    return x_out, transformed_cols
+
+
 def get_xy_from_har_design(
     design: pd.DataFrame,
     target_col: str,
@@ -155,95 +177,80 @@ def get_xy_from_har_design(
     clean = pd.concat([x, y.to_frame(name=target_col)], axis=1).dropna()
     x_clean = clean.drop(columns=[target_col])
     y_clean = cast("pd.Series", clean[target_col])
+
     logger.info(
-        "Prepared X/y: n_rows=%d, n_features=%d",
-        len(x_clean),
-        len(x_clean.columns),
+        "Prepared X/y: n_rows=%d, n_features=%d", len(x_clean), len(x_clean.columns)
     )
     return x_clean, y_clean
 
 
-def _resolve_size(size: float, n_obs: int, *, name: str) -> int:
-    if isinstance(size, float):
-        if not 0 < size < 1:
-            msg = f"{name} as float must be in (0, 1)."
-            raise ValueError(msg)
-        n_size = ceil(n_obs * size)
-    else:
-        n_size = int(size)
-
-    if n_size < 1:
-        msg = f"{name} must be >= 1 observation."
+def _build_walk_forward_windows(
+    n_obs: int,
+    cfg: HARWalkForwardConfig,
+) -> list[tuple[int, int, int, int]]:
+    if cfg.initial_train_size < MIN_OBS:
+        msg = f"initial_train_size must be >= {MIN_OBS}."
         raise ValueError(msg)
-    return n_size
-
-
-def split_train_val_test(
-    x: pd.DataFrame,
-    y: pd.Series,
-    split_config: HARSplitConfig,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
-    n_obs = len(x)
-    if n_obs != len(y):
-        msg = "x and y must have same length"
+    if cfg.test_size < 1:
+        msg = "test_size must be >= 1."
         raise ValueError(msg)
-
-    n_test = _resolve_size(split_config.test_size, n_obs, name="test_size")
-    n_val = _resolve_size(split_config.val_size, n_obs, name="val_size")
-
-    n_train = n_obs - n_val - n_test
-    if n_train < 1:
+    if cfg.step < 1:
+        msg = "step must be >= 1."
+        raise ValueError(msg)
+    if cfg.initial_train_size + cfg.test_size > n_obs:
         msg = (
-            f"Not enough observations for train split. n_obs={n_obs}, "
-            f"n_val={n_val}, n_test={n_test}"
+            f"Not enough observations ({n_obs}) for "
+            f"initial_train_size={cfg.initial_train_size} "
+            f"and test_size={cfg.test_size}."
         )
         raise ValueError(msg)
 
-    train_end = n_train
-    val_end = n_train + n_val
+    windows: list[tuple[int, int, int, int]] = []
+    test_start = cfg.initial_train_size
 
-    x_train = x.iloc[:train_end]
-    x_val = x.iloc[train_end:val_end]
-    x_test = x.iloc[val_end:]
+    while test_start + cfg.test_size <= n_obs:
+        if cfg.window_type == "expanding":
+            train_start = 0
+        else:
+            rolling_size = cfg.rolling_window_size or cfg.initial_train_size
+            if rolling_size < MIN_OBS:
+                msg = f"rolling_window_size must be >= {MIN_OBS}."
+                raise ValueError(msg)
+            train_start = max(0, test_start - rolling_size)
 
-    y_train = y.iloc[:train_end]
-    y_val = y.iloc[train_end:val_end]
-    y_test = y.iloc[val_end:]
+        train_end = test_start
+        test_end = test_start + cfg.test_size
 
-    logger.info(
-        "Split sizes -> train=%d, val=%d, test=%d",
-        len(y_train),
-        len(y_val),
-        len(y_test),
-    )
-    return x_train, x_val, x_test, y_train, y_val, y_test
+        if train_end - train_start >= MIN_OBS:
+            windows.append((train_start, train_end, test_start, test_end))
+
+        test_start += cfg.step
+
+    if not windows:
+        msg = "No walk-forward windows were generated."
+        raise ValueError(msg)
+
+    return windows
 
 
-def _standardize_feature_splits(
+def _standardize_train_test(
     x_train: pd.DataFrame,
-    x_val: pd.DataFrame,
     x_test: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, StandardScaler]:
-    logger.info("Applying feature standardization using train split statistics")
+) -> tuple[pd.DataFrame, pd.DataFrame, StandardScaler]:
     scaler = StandardScaler()
     scaler.fit(x_train)
 
-    x_train_scaled = pd.DataFrame(
+    train_scaled = pd.DataFrame(
         scaler.transform(x_train),
         index=x_train.index,
         columns=x_train.columns,
     )
-    x_val_scaled = pd.DataFrame(
-        scaler.transform(x_val),
-        index=x_val.index,
-        columns=x_val.columns,
-    )
-    x_test_scaled = pd.DataFrame(
+    test_scaled = pd.DataFrame(
         scaler.transform(x_test),
         index=x_test.index,
         columns=x_test.columns,
     )
-    return x_train_scaled, x_val_scaled, x_test_scaled, scaler
+    return train_scaled, test_scaled, scaler
 
 
 def select_har_features(
@@ -259,11 +266,9 @@ def select_har_features(
 
     if config.method == "none":
         selected = x_train.columns.tolist()
-        logger.info("Feature selection method=none, selected=%d", len(selected))
         return selected, {"method": "none", "selected_features": selected}
 
     if config.method == "lasso":
-        logger.info("Running feature selection with LASSO")
         lasso_cfg = config.lasso or LassoSelectionConfig()
         lasso_cfg = replace(lasso_cfg, core_columns=core_columns)
         lasso_result = lasso_time_series_feature_selection(
@@ -272,24 +277,13 @@ def select_har_features(
             config=lasso_cfg,
         )
         info = {"method": "lasso", **lasso_result.info}
-        logger.info(
-            "LASSO selected %d features (best_alpha=%s)",
-            len(lasso_result.selected_features),
-            info.get("best_alpha"),
-        )
         return lasso_result.selected_features, info
 
     if config.method == "bsr":
-        logger.info("Running feature selection with BSR")
         bsr_cfg = config.bsr or BSRSelectionConfig()
         bsr_cfg = replace(bsr_cfg, core_columns=tuple(core_columns))
         bsr_result = backward_stepwise_feature_selection(x_train, y_train, config=bsr_cfg)
         info = {"method": "bsr", **bsr_result.info}
-        logger.info(
-            "BSR selected %d features (successful_windows=%s)",
-            len(bsr_result.selected_features),
-            info.get("n_windows_successful"),
-        )
         return bsr_result.selected_features, info
 
     msg = f"unsupported feature selection method: {config.method}"
@@ -303,12 +297,6 @@ def fit_har_ols(
     *,
     add_constant: bool,
 ) -> RegressionResultsWrapper:
-    logger.info(
-        "Fitting HAR OLS model: n_rows=%d, n_features=%d, add_constant=%s",
-        len(y_train),
-        len(selected_features),
-        add_constant,
-    )
     x_fit = x_train[selected_features]
     if add_constant:
         x_fit = sm.add_constant(x_fit, has_constant="add")
@@ -332,120 +320,263 @@ def predict_har_ols(
     return pd.Series(pred, index=x.index, name="y_pred")
 
 
-def run_har_experiment_from_xy(
+def _enforce_feature_budget(
+    selected_features: list[str],
+    core_columns: list[str],
+    x_train: pd.DataFrame,
+    y_train: pd.Series,
+    model_cfg: HARModelConfig,
+) -> list[str]:
+    if not selected_features:
+        return selected_features
+
+    core_set = set(core_columns)
+    core_kept = [feat for feat in selected_features if feat in core_set]
+    non_core = [feat for feat in selected_features if feat not in core_set]
+
+    max_selected = model_cfg.max_selected_features
+    if max_selected is None:
+        max_by_cap = len(selected_features)
+    else:
+        max_by_cap = max(max_selected, len(core_kept))
+
+    max_by_ratio = max(
+        len(core_kept),
+        int(np.floor(len(y_train) / max(model_cfg.min_train_feature_ratio, 1.0))),
+    )
+    final_max = min(max_by_cap, max_by_ratio)
+    final_max = max(final_max, len(core_kept))
+
+    allowed_non_core = max(final_max - len(core_kept), 0)
+    if len(non_core) <= allowed_non_core:
+        return core_kept + non_core
+
+    corr_scores: list[tuple[str, float]] = []
+    y_np = y_train.to_numpy(dtype=float)
+    for feat in non_core:
+        x_np = x_train[feat].to_numpy(dtype=float)
+        if np.std(x_np) == 0.0 or np.std(y_np) == 0.0:
+            score = 0.0
+        else:
+            score = float(abs(np.corrcoef(x_np, y_np)[0, 1]))
+            if not np.isfinite(score):
+                score = 0.0
+        corr_scores.append((feat, score))
+
+    corr_scores.sort(key=lambda item: item[1], reverse=True)
+    kept_non_core = [feat for feat, _ in corr_scores[:allowed_non_core]]
+    return core_kept + kept_non_core
+
+
+def _transform_target(y: pd.Series, model_cfg: HARModelConfig) -> pd.Series:
+    if model_cfg.target_transform == "none":
+        return y
+    clipped = np.clip(y.to_numpy(dtype=float), model_cfg.prediction_floor, None)
+    return pd.Series(np.log(clipped), index=y.index, name=y.name)
+
+
+def _inverse_transform_prediction(
+    y_pred: pd.Series,
+    model_cfg: HARModelConfig,
+) -> pd.Series:
+    if model_cfg.target_transform == "none":
+        pred_np = np.clip(y_pred.to_numpy(dtype=float), model_cfg.prediction_floor, None)
+        return pd.Series(pred_np, index=y_pred.index, name=y_pred.name)
+
+    pred_np = np.exp(y_pred.to_numpy(dtype=float))
+    pred_np = np.clip(pred_np, model_cfg.prediction_floor, None)
+    return pd.Series(pred_np, index=y_pred.index, name=y_pred.name)
+
+
+def _aggregate_predictions(
+    y_true_parts: list[pd.Series],
+    y_pred_parts: list[pd.Series],
+) -> tuple[pd.Series, pd.Series]:
+    y_true_all = cast(
+        "pd.Series", pd.concat(y_true_parts).groupby(level=0).mean()
+    ).sort_index()
+    y_pred_all = cast(
+        "pd.Series", pd.concat(y_pred_parts).groupby(level=0).mean()
+    ).sort_index()
+
+    aligned = (
+        y_true_all.to_frame("y_true")
+        .join(y_pred_all.to_frame("y_pred"), how="inner")
+        .dropna()
+    )
+
+    return cast("pd.Series", aligned["y_true"]), cast("pd.Series", aligned["y_pred"])
+
+
+def run_har_experiment_from_xy(  # noqa: PLR0915
     x: pd.DataFrame,
     y: pd.Series,
     core_columns: list[str],
     run_config: HARRunConfig | None = None,
 ) -> HARExperimentResult:
-    logger.info("Starting HAR experiment from X/y")
+    logger.info("Starting HAR walk-forward experiment")
     cfg = run_config or HARRunConfig()
-    split_cfg = cfg.split or HARSplitConfig()
+    wf_cfg = cfg.walk_forward or HARWalkForwardConfig()
     selection_cfg = cfg.selection or HARSelectionConfig()
     model_cfg = cfg.model or HARModelConfig()
 
-    x_train, x_val, x_test, y_train, y_val, y_test = split_train_val_test(
-        x=x,
-        y=y,
-        split_config=split_cfg,
-    )
-
-    selected_features, selection_info = select_har_features(
-        x_train=x_train,
-        y_train=y_train,
-        core_columns=core_columns,
-        config=selection_cfg,
-    )
-    logger.info("Selected features: %s", selected_features)
-
-    x_train_sel = cast("pd.DataFrame", x_train[selected_features])
-    x_val_sel = cast("pd.DataFrame", x_val[selected_features])
-    x_test_sel = cast("pd.DataFrame", x_test[selected_features])
-
-    scaler_fitted = False
-    if model_cfg.standardize_features:
-        x_train_sel, x_val_sel, x_test_sel, _ = _standardize_feature_splits(
-            x_train_sel,
-            x_val_sel,
-            x_test_sel,
+    transformed_feature_columns: list[str] = []
+    if model_cfg.log_transform_rv_features:
+        x, transformed_feature_columns = _log_transform_rv_features(
+            x,
+            floor=model_cfg.feature_floor,
         )
-        scaler_fitted = True
+        logger.info(
+            "Log-transformed RV feature columns: n=%d",
+            len(transformed_feature_columns),
+        )
 
-    model_train = fit_har_ols(
-        x_train=x_train_sel,
-        y_train=y_train,
-        selected_features=selected_features,
-        add_constant=model_cfg.add_constant,
-    )
+    windows = _build_walk_forward_windows(len(x), wf_cfg)
+    logger.info("Generated %d windows (%s)", len(windows), wf_cfg.window_type)
 
-    y_pred_val = predict_har_ols(
-        fitted_model=model_train,
-        x=x_val_sel,
-        selected_features=selected_features,
-        add_constant=model_cfg.add_constant,
-    )
+    train_true_parts: list[pd.Series] = []
+    train_pred_parts: list[pd.Series] = []
+    test_true_parts: list[pd.Series] = []
+    test_pred_parts: list[pd.Series] = []
 
-    if model_cfg.refit_on_train_val:
-        logger.info("Refitting model on train+validation data")
-        x_train_val = pd.concat([x_train_sel, x_val_sel], axis=0)
-        y_train_val = pd.concat([y_train, y_val], axis=0)
-        model_final = fit_har_ols(
-            x_train=x_train_val,
-            y_train=y_train_val,
+    selected_union: list[str] = []
+    selection_counts: dict[str, int] = {}
+    last_coefficients = pd.Series(dtype=float, name="coefficient")
+    last_selection_info: dict[str, Any] = {}
+
+    window_rows: list[dict[str, Any]] = []
+
+    for window_id, (train_start, train_end, test_start, test_end) in enumerate(windows):
+        x_train = x.iloc[train_start:train_end]
+        y_train = y.iloc[train_start:train_end]
+        x_test = x.iloc[test_start:test_end]
+        y_test = y.iloc[test_start:test_end]
+
+        selected_features, selection_info = select_har_features(
+            x_train=x_train,
+            y_train=y_train,
+            core_columns=core_columns,
+            config=selection_cfg,
+        )
+        selected_features = _enforce_feature_budget(
+            selected_features=selected_features,
+            core_columns=core_columns,
+            x_train=x_train,
+            y_train=y_train,
+            model_cfg=model_cfg,
+        )
+
+        for feat in selected_features:
+            if feat not in selected_union:
+                selected_union.append(feat)
+            selection_counts[feat] = selection_counts.get(feat, 0) + 1
+
+        x_train_sel = cast("pd.DataFrame", x_train[selected_features])
+        x_test_sel = cast("pd.DataFrame", x_test[selected_features])
+
+        if model_cfg.standardize_features:
+            x_train_sel, x_test_sel, _ = _standardize_train_test(x_train_sel, x_test_sel)
+
+        y_train_model = _transform_target(y_train, model_cfg)
+        fitted = fit_har_ols(
+            x_train=x_train_sel,
+            y_train=y_train_model,
             selected_features=selected_features,
             add_constant=model_cfg.add_constant,
         )
-        final_train_n = len(y_train_val)
-    else:
-        model_final = model_train
-        final_train_n = len(y_train)
 
-    y_pred_test = predict_har_ols(
-        fitted_model=model_final,
-        x=x_test_sel,
-        selected_features=selected_features,
-        add_constant=model_cfg.add_constant,
-    )
+        y_pred_train = predict_har_ols(
+            fitted_model=fitted,
+            x=x_train_sel,
+            selected_features=selected_features,
+            add_constant=model_cfg.add_constant,
+        )
+        y_pred_train = _inverse_transform_prediction(y_pred_train, model_cfg)
+        y_pred_test = predict_har_ols(
+            fitted_model=fitted,
+            x=x_test_sel,
+            selected_features=selected_features,
+            add_constant=model_cfg.add_constant,
+        )
+        y_pred_test = _inverse_transform_prediction(y_pred_test, model_cfg)
+
+        train_true_parts.append(y_train)
+        train_pred_parts.append(y_pred_train)
+        test_true_parts.append(y_test)
+        test_pred_parts.append(y_pred_test)
+
+        train_metrics_w = evaluate_statistical_metrics(y_train, y_pred_train)
+        test_metrics_w = evaluate_statistical_metrics(y_test, y_pred_test)
+
+        window_rows.append(
+            {
+                "window_id": window_id,
+                "window_type": wf_cfg.window_type,
+                "train_start": train_start,
+                "train_end": train_end,
+                "test_start": test_start,
+                "test_end": test_end,
+                "n_train": len(y_train),
+                "n_test": len(y_test),
+                "n_selected": len(selected_features),
+                "train_mse": train_metrics_w["mse"],
+                "test_mse": test_metrics_w["mse"],
+            }
+        )
+
+        last_coefficients = fitted.params.drop(labels=["const"], errors="ignore")
+        last_coefficients.name = "coefficient"
+        last_selection_info = selection_info
+
+    y_true_train, y_pred_train = _aggregate_predictions(train_true_parts, train_pred_parts)
+    y_true_test, y_pred_test = _aggregate_predictions(test_true_parts, test_pred_parts)
 
     metrics = {
-        "val": evaluate_statistical_metrics(y_val, y_pred_val),
-        "test": evaluate_statistical_metrics(y_test, y_pred_test),
+        "train": evaluate_statistical_metrics(y_true_train, y_pred_train),
+        "test": evaluate_statistical_metrics(y_true_test, y_pred_test),
     }
-    logger.info("Validation metrics: %s", metrics["val"])
-    logger.info("Test metrics: %s", metrics["test"])
-
-    coefficients = model_final.params.drop(labels=["const"], errors="ignore")
-    coefficients.name = "coefficient"
 
     model_info = {
-        "n_train": len(y_train),
-        "n_val": len(y_val),
-        "n_test": len(y_test),
-        "n_train_final_fit": final_train_n,
-        "add_constant": model_cfg.add_constant,
-        "standardize_features": model_cfg.standardize_features,
-        "scaler_fitted": scaler_fitted,
-        "refit_on_train_val": model_cfg.refit_on_train_val,
-        "aic_final": float(model_final.aic),
-        "bic_final": float(model_final.bic),
-        "rsquared_final": float(model_final.rsquared),
+        "window_type": wf_cfg.window_type,
+        "initial_train_size": wf_cfg.initial_train_size,
+        "test_size": wf_cfg.test_size,
+        "step": wf_cfg.step,
+        "rolling_window_size": wf_cfg.rolling_window_size,
+        "n_windows": len(windows),
+        "model_add_constant": model_cfg.add_constant,
+        "model_standardize_features": model_cfg.standardize_features,
+        "model_target_transform": model_cfg.target_transform,
+        "model_prediction_floor": model_cfg.prediction_floor,
+        "model_log_transform_rv_features": model_cfg.log_transform_rv_features,
+        "model_feature_floor": model_cfg.feature_floor,
+        "transformed_feature_columns": transformed_feature_columns,
+        "model_max_selected_features": model_cfg.max_selected_features,
+        "model_min_train_feature_ratio": model_cfg.min_train_feature_ratio,
+        "window_report": pd.DataFrame(window_rows),
     }
-    logger.info(
-        "Model summary: aic=%.4f, bic=%.4f, rsquared=%.4f",
-        model_info["aic_final"],
-        model_info["bic_final"],
-        model_info["rsquared_final"],
-    )
+
+    selection_frequency = {
+        feat: count / len(windows) for feat, count in selection_counts.items()
+    }
+    selection_details = {
+        **last_selection_info,
+        "selection_frequency": selection_frequency,
+        "final_selected_union": selected_union,
+        "n_windows": len(windows),
+    }
+
+    logger.info("Train metrics: %s", metrics["train"])
+    logger.info("Test metrics: %s", metrics["test"])
 
     return HARExperimentResult(
-        selected_features=selected_features,
-        y_true_val=y_val,
-        y_pred_val=y_pred_val,
-        y_true_test=y_test,
+        selected_features=selected_union,
+        y_true_train=y_true_train,
+        y_pred_train=y_pred_train,
+        y_true_test=y_true_test,
         y_pred_test=y_pred_test,
         metrics=metrics,
-        coefficients=coefficients,
-        selection_info=selection_info,
+        coefficients=last_coefficients,
+        selection_info=selection_details,
         model_info=model_info,
     )
 
@@ -456,7 +587,15 @@ def run_har_experiment_from_dataset(
     feature_config: HARFeatureConfig,
     run_config: HARRunConfig | None = None,
 ) -> HARExperimentResult:
-    logger.info("Starting HAR experiment from raw dataset")
+    cfg = run_config or HARRunConfig()
+    wf_cfg = cfg.walk_forward or HARWalkForwardConfig()
+    selection_cfg = cfg.selection or HARSelectionConfig()
+    model_cfg = cfg.model or HARModelConfig()
+
+    logger.info(
+        "Starting HAR experiment from raw dataset with selection method %s",
+        selection_cfg.method,
+    )
     design, core_columns, target_col = build_har_design_matrix(data, feature_config)
     x, y = get_xy_from_har_design(design, target_col)
 
@@ -466,10 +605,6 @@ def run_har_experiment_from_dataset(
         core_columns=core_columns,
         run_config=run_config,
     )
-    cfg = run_config or HARRunConfig()
-    split_cfg = cfg.split or HARSplitConfig()
-    selection_cfg = cfg.selection or HARSelectionConfig()
-    model_cfg = cfg.model or HARModelConfig()
 
     result.model_info.update(
         {
@@ -478,8 +613,6 @@ def run_har_experiment_from_dataset(
             "target_horizon": feature_config.target_horizon,
             "core_columns": feature_config.core_columns,
             "extra_feature_cols": feature_config.extra_feature_cols or [],
-            "split_val_size": split_cfg.val_size,
-            "split_test_size": split_cfg.test_size,
             "selection_method": selection_cfg.method,
             "lasso_config": (
                 vars(selection_cfg.lasso) if selection_cfg.lasso is not None else None
@@ -487,9 +620,19 @@ def run_har_experiment_from_dataset(
             "bsr_config": (
                 vars(selection_cfg.bsr) if selection_cfg.bsr is not None else None
             ),
+            "walk_forward_window_type": wf_cfg.window_type,
+            "walk_forward_initial_train_size": wf_cfg.initial_train_size,
+            "walk_forward_test_size": wf_cfg.test_size,
+            "walk_forward_step": wf_cfg.step,
+            "walk_forward_rolling_window_size": wf_cfg.rolling_window_size,
             "model_add_constant": model_cfg.add_constant,
             "model_standardize_features": model_cfg.standardize_features,
-            "model_refit_on_train_val": model_cfg.refit_on_train_val,
+            "model_target_transform": model_cfg.target_transform,
+            "model_prediction_floor": model_cfg.prediction_floor,
+            "model_log_transform_rv_features": model_cfg.log_transform_rv_features,
+            "model_feature_floor": model_cfg.feature_floor,
+            "model_max_selected_features": model_cfg.max_selected_features,
+            "model_min_train_feature_ratio": model_cfg.min_train_feature_ratio,
         }
     )
     return result
@@ -519,6 +662,5 @@ def run_har_feature_set_grid(
             feature_config=feature_cfg,
             run_config=run_config,
         )
-        logger.info("Completed feature set '%s'", model_name)
 
     return results

@@ -8,10 +8,13 @@
   ],
   "target_horizon": 1,
   "run_configs": {
-    "ols": {
-      "split": {
-        "val_size": 0.2,
-        "test_size": 0.2
+    "ols_expanding": {
+      "walk_forward": {
+        "window_type": "expanding",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": null
       },
       "selection": {
         "method": "none"
@@ -19,20 +22,55 @@
       "model": {
         "add_constant": true,
         "standardize_features": false,
-        "refit_on_train_val": true
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
       }
     },
-    "lasso": {
-      "split": {
-        "val_size": 0.2,
-        "test_size": 0.2
+    "ols_rolling": {
+      "walk_forward": {
+        "window_type": "rolling",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 104
+      },
+      "selection": {
+        "method": "none"
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": false,
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
+      }
+    },
+    "lasso_expanding": {
+      "walk_forward": {
+        "window_type": "expanding",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": null
       },
       "selection": {
         "method": "lasso",
         "lasso": {
           "n_splits": 5,
           "alphas": 100,
-          "max_iter": 50000,
+          "max_iter": 200000,
+          "tol": 0.0001,
+          "eps": 0.001,
+          "retry_on_convergence_warning": true,
+          "retry_max_iter_multiplier": 5,
+          "retry_eps": 0.01,
           "coef_threshold": 1e-10,
           "random_state": 42,
           "n_jobs": -1
@@ -41,13 +79,56 @@
       "model": {
         "add_constant": true,
         "standardize_features": true,
-        "refit_on_train_val": true
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
       }
     },
-    "bsr": {
-      "split": {
-        "val_size": 0.2,
-        "test_size": 0.2
+    "lasso_rolling": {
+      "walk_forward": {
+        "window_type": "rolling",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 104
+      },
+      "selection": {
+        "method": "lasso",
+        "lasso": {
+          "n_splits": 5,
+          "alphas": 100,
+          "max_iter": 200000,
+          "tol": 0.0001,
+          "eps": 0.001,
+          "retry_on_convergence_warning": true,
+          "retry_max_iter_multiplier": 5,
+          "retry_eps": 0.01,
+          "coef_threshold": 1e-10,
+          "random_state": 42,
+          "n_jobs": -1
+        }
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": true,
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
+      }
+    },
+    "bsr_expanding": {
+      "walk_forward": {
+        "window_type": "expanding",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": null
       },
       "selection": {
         "method": "bsr",
@@ -65,8 +146,46 @@
       },
       "model": {
         "add_constant": true,
-        "standardize_features": true,
-        "refit_on_train_val": true
+        "standardize_features": false,
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
+      }
+    },
+    "bsr_rolling": {
+      "walk_forward": {
+        "window_type": "rolling",
+        "initial_train_size": 104,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 104
+      },
+      "selection": {
+        "method": "bsr",
+        "bsr": {
+          "alpha": 0.05,
+          "add_constant": true,
+          "hac_maxlags": null,
+          "window_type": "rolling",
+          "window_size": 104,
+          "step": 1,
+          "start_train_size": 52,
+          "min_features": 0,
+          "selection_threshold": 0.5
+        }
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": false,
+        "target_transform": "log",
+        "prediction_floor": 1e-10,
+        "max_selected_features": 25,
+        "min_train_feature_ratio": 5.0,
+        "log_transform_rv_features": true,
+        "feature_floor": 1e-10
       }
     }
   }

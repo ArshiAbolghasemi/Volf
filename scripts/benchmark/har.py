@@ -2,14 +2,19 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from src.benchmark import (
     WheatHARBenchmarkConfig,
     benchmark_results_to_frame,
     run_wheat_har_benchmark,
 )
-from src.model import HARModelConfig, HARRunConfig, HARSelectionConfig, HARSplitConfig
+from src.model import (
+    HARModelConfig,
+    HARRunConfig,
+    HARSelectionConfig,
+    HARWalkForwardConfig,
+)
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 
@@ -33,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=str,
-        default=str(DATA_DIR / "ag" / "har_benchmark_summary.csv"),
+        default="/data/benchmark/har.csv",
         help="Path to save benchmark summary CSV",
     )
     parser.add_argument(
@@ -63,9 +68,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def _build_run_config_from_dict(cfg: dict[str, Any]) -> HARRunConfig:
-    split_cfg = None
-    if isinstance(cfg.get("split"), dict):
-        split_cfg = HARSplitConfig(**cfg["split"])
+    walk_forward_cfg = None
+    if isinstance(cfg.get("walk_forward"), dict):
+        walk_forward_cfg = HARWalkForwardConfig(**cfg["walk_forward"])
 
     selection_cfg = None
     if isinstance(cfg.get("selection"), dict):
@@ -87,7 +92,11 @@ def _build_run_config_from_dict(cfg: dict[str, Any]) -> HARRunConfig:
     if isinstance(cfg.get("model"), dict):
         model_cfg = HARModelConfig(**cfg["model"])
 
-    return HARRunConfig(split=split_cfg, selection=selection_cfg, model=model_cfg)
+    return HARRunConfig(
+        walk_forward=walk_forward_cfg,
+        selection=selection_cfg,
+        model=model_cfg,
+    )
 
 
 def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
@@ -107,7 +116,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
-        run_configs=run_configs,
+        run_configs=cast("dict[str, HARRunConfig]", run_configs),
     )
 
 
@@ -145,9 +154,16 @@ def main() -> None:
     metric_cols = [
         "model_type",
         "feature_set",
+        "window_type",
+        "train_mse",
+        "train_mae",
+        "train_qlike",
+        "train_r2",
+        "train_r2log",
         "test_mse",
         "test_mae",
         "test_qlike",
+        "test_r2",
         "test_r2log",
     ]
     logger.info(
@@ -160,15 +176,24 @@ def main() -> None:
             "model_type",
             "feature_set",
             "selection_method",
+            "window_type",
+            "initial_train_size",
+            "window_test_size",
+            "window_step",
+            "rolling_window_size",
+            "n_windows",
             "target_col_raw",
             "target_horizon",
             "core_columns",
             "extra_feature_cols",
-            "split_val_size",
-            "split_test_size",
             "model_add_constant",
             "model_standardize_features",
-            "model_refit_on_train_val",
+            "model_target_transform",
+            "model_prediction_floor",
+            "model_log_transform_rv_features",
+            "model_feature_floor",
+            "model_max_selected_features",
+            "model_min_train_feature_ratio",
             "lasso_best_alpha",
             "bsr_alpha",
             "bsr_window_type",

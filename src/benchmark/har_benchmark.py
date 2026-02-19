@@ -9,9 +9,10 @@ import pandas as pd
 from src.model import (
     HARFeatureConfig,
     HARGridConfig,
+    HARModelConfig,
     HARRunConfig,
     HARSelectionConfig,
-    HARSplitConfig,
+    HARWalkForwardConfig,
     run_har_feature_set_grid,
 )
 from src.util.path import DATA_DIR
@@ -108,23 +109,56 @@ def build_wheat_feature_sets(
 
 def default_run_configs() -> dict[str, HARRunConfig]:
     return {
-        "ols": HARRunConfig(
-            split=HARSplitConfig(val_size=0.2, test_size=0.2),
+        "ols_expanding": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(window_type="expanding"),
             selection=HARSelectionConfig(method="none"),
+            model=HARModelConfig(standardize_features=False),
         ),
-        "lasso": HARRunConfig(
-            split=HARSplitConfig(val_size=0.2, test_size=0.2),
+        "ols_rolling": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(
+                window_type="rolling",
+                rolling_window_size=104,
+            ),
+            selection=HARSelectionConfig(method="none"),
+            model=HARModelConfig(standardize_features=False),
+        ),
+        "lasso_expanding": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(window_type="expanding"),
             selection=HARSelectionConfig(
                 method="lasso",
                 lasso=LassoSelectionConfig(n_splits=5),
             ),
+            model=HARModelConfig(standardize_features=True),
         ),
-        "bsr": HARRunConfig(
-            split=HARSplitConfig(val_size=0.2, test_size=0.2),
+        "lasso_rolling": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(
+                window_type="rolling",
+                rolling_window_size=104,
+            ),
+            selection=HARSelectionConfig(
+                method="lasso",
+                lasso=LassoSelectionConfig(n_splits=5),
+            ),
+            model=HARModelConfig(standardize_features=True),
+        ),
+        "bsr_expanding": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(window_type="expanding"),
             selection=HARSelectionConfig(
                 method="bsr",
                 bsr=BSRSelectionConfig(alpha=0.05),
             ),
+            model=HARModelConfig(standardize_features=False),
+        ),
+        "bsr_rolling": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(
+                window_type="rolling",
+                rolling_window_size=104,
+            ),
+            selection=HARSelectionConfig(
+                method="bsr",
+                bsr=BSRSelectionConfig(alpha=0.05),
+            ),
+            model=HARModelConfig(standardize_features=False),
         ),
     }
 
@@ -189,31 +223,42 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
                 "feature_set": feature_set_name,
                 "n_selected": len(result.selected_features),
                 "selected_features": ",".join(result.selected_features),
-                "val_mse": result.metrics["val"]["mse"],
-                "val_mae": result.metrics["val"]["mae"],
-                "val_qlike": result.metrics["val"]["qlike"],
-                "val_r2log": result.metrics["val"]["r2log"],
+                "train_mse": result.metrics["train"]["mse"],
+                "train_mae": result.metrics["train"]["mae"],
+                "train_qlike": result.metrics["train"]["qlike"],
+                "train_r2": result.metrics["train"]["r2"],
+                "train_r2log": result.metrics["train"]["r2log"],
                 "test_mse": result.metrics["test"]["mse"],
                 "test_mae": result.metrics["test"]["mae"],
                 "test_qlike": result.metrics["test"]["qlike"],
+                "test_r2": result.metrics["test"]["r2"],
                 "test_r2log": result.metrics["test"]["r2log"],
                 "target_col_raw": model_info.get("target_col_raw"),
                 "target_col_model": model_info.get("target_col_model"),
                 "target_horizon": model_info.get("target_horizon"),
                 "core_columns": ",".join(model_info.get("core_columns", [])),
                 "extra_feature_cols": ",".join(model_info.get("extra_feature_cols", [])),
-                "split_val_size": model_info.get("split_val_size"),
-                "split_test_size": model_info.get("split_test_size"),
+                "window_type": model_info.get("walk_forward_window_type"),
+                "initial_train_size": model_info.get("walk_forward_initial_train_size"),
+                "window_test_size": model_info.get("walk_forward_test_size"),
+                "window_step": model_info.get("walk_forward_step"),
+                "rolling_window_size": model_info.get("walk_forward_rolling_window_size"),
+                "n_windows": model_info.get("n_windows"),
                 "selection_method": model_info.get("selection_method"),
                 "model_add_constant": model_info.get("model_add_constant"),
                 "model_standardize_features": model_info.get("model_standardize_features"),
-                "model_refit_on_train_val": model_info.get("model_refit_on_train_val"),
-                "n_train": model_info.get("n_train"),
-                "n_val": model_info.get("n_val"),
-                "n_test": model_info.get("n_test"),
-                "aic_final": model_info.get("aic_final"),
-                "bic_final": model_info.get("bic_final"),
-                "rsquared_final": model_info.get("rsquared_final"),
+                "model_target_transform": model_info.get("model_target_transform"),
+                "model_prediction_floor": model_info.get("model_prediction_floor"),
+                "model_log_transform_rv_features": model_info.get(
+                    "model_log_transform_rv_features"
+                ),
+                "model_feature_floor": model_info.get("model_feature_floor"),
+                "model_max_selected_features": model_info.get(
+                    "model_max_selected_features"
+                ),
+                "model_min_train_feature_ratio": model_info.get(
+                    "model_min_train_feature_ratio"
+                ),
                 "lasso_best_alpha": selection_info.get("best_alpha"),
                 "bsr_alpha": selection_info.get("alpha"),
                 "bsr_window_type": selection_info.get("window_type"),

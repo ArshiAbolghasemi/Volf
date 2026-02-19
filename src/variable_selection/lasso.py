@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LassoCV
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.pipeline import Pipeline
@@ -26,26 +28,31 @@ class LassoSelectionConfig:
     n_splits: int = 5
     alphas: np.ndarray | int = 100
     max_iter: int = 50_000
+    tol: float = 1e-4
+    eps: float = 1e-3
+    retry_on_convergence_warning: bool = True
+    retry_max_iter_multiplier: int = 5
+    retry_eps: float = 1e-2
     coef_threshold: float = 1e-10
     random_state: int | None = 42
     n_jobs: int | None = -1
 
 
 def _build_lasso_pipeline(
+    cfg: LassoSelectionConfig,
     *,
-    n_splits: int,
-    alphas: np.ndarray | int,
-    max_iter: int,
-    random_state: int | None,
-    n_jobs: int | None,
+    max_iter: int | None = None,
+    eps: float | None = None,
 ) -> Pipeline:
-    cv = TimeSeriesSplit(n_splits=n_splits)
+    cv = TimeSeriesSplit(n_splits=cfg.n_splits)
     lasso = LassoCV(
-        alphas=alphas,  # type: ignore[arg-type]
+        alphas=cfg.alphas,  # type: ignore[arg-type]
         cv=cv,
-        max_iter=max_iter,
-        random_state=random_state,
-        n_jobs=n_jobs,
+        max_iter=max_iter if max_iter is not None else cfg.max_iter,
+        tol=cfg.tol,
+        eps=eps if eps is not None else cfg.eps,
+        random_state=cfg.random_state,
+        n_jobs=cfg.n_jobs,
     )
     return Pipeline(
         [
@@ -72,6 +79,41 @@ def _to_target_series(y: pd.Series | pd.DataFrame) -> pd.Series:
         msg = "y DataFrame must have exactly one column."
         raise ValueError(msg)
     return y.iloc[:, 0]
+
+
+def _fit_lasso_pipeline_with_retry(
+    x_clean: pd.DataFrame,
+    y_clean: pd.Series,
+    cfg: LassoSelectionConfig,
+) -> tuple[Pipeline, int, bool]:
+    model = _build_lasso_pipeline(
+        cfg=cfg,
+    )
+
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", ConvergenceWarning)
+        model.fit(x_clean, y_clean)
+    warning_count = sum(1 for w in captured if issubclass(w.category, ConvergenceWarning))
+
+    if warning_count == 0 or not cfg.retry_on_convergence_warning:
+        return model, warning_count, False
+
+    retry_max_iter = cfg.max_iter * cfg.retry_max_iter_multiplier
+    retry_eps = max(cfg.eps, cfg.retry_eps)
+
+    retry_model = _build_lasso_pipeline(
+        cfg=cfg,
+        max_iter=retry_max_iter,
+        eps=retry_eps,
+    )
+    with warnings.catch_warnings(record=True) as retry_captured:
+        warnings.simplefilter("always", ConvergenceWarning)
+        retry_model.fit(x_clean, y_clean)
+    retry_warning_count = sum(
+        1 for w in retry_captured if issubclass(w.category, ConvergenceWarning)
+    )
+
+    return retry_model, retry_warning_count, True
 
 
 def lasso_time_series_feature_selection(
@@ -132,14 +174,11 @@ def lasso_time_series_feature_selection(
     x_clean = clean_df[feature_cols]
     y_clean = clean_df["__target__"]
 
-    model = _build_lasso_pipeline(
-        n_splits=cfg.n_splits,
-        alphas=cfg.alphas,
-        max_iter=cfg.max_iter,
-        random_state=cfg.random_state,
-        n_jobs=cfg.n_jobs,
+    model, convergence_warning_count, retried = _fit_lasso_pipeline_with_retry(
+        x_clean=x_clean,
+        y_clean=y_clean,
+        cfg=cfg,
     )
-    model.fit(x_clean, y_clean)
 
     lasso: LassoCV = model.named_steps["lasso"]
     coefs = pd.Series(lasso.coef_, index=feature_cols, name="coefficient")
@@ -174,6 +213,10 @@ def lasso_time_series_feature_selection(
         "best_alpha": float(lasso.alpha_),
         "lasso_selected_features": lasso_selected,
         "dropped_features": dropped_features,
+        "convergence_warning_count": convergence_warning_count,
+        "retried_after_warning": retried,
+        "final_max_iter": int(lasso.max_iter),
+        "final_eps": float(lasso.eps),
         "cv_path": cv_path,
     }
 
