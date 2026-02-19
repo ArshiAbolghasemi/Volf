@@ -183,6 +183,25 @@ def r2log(
     return float(1.0 - (ss_res / ss_tot))
 
 
+def r2(
+    y_true: pd.Series | pd.DataFrame | np.ndarray | list[float],
+    y_pred: pd.Series | pd.DataFrame | np.ndarray | list[float],
+) -> float:
+    """Compute standard R-squared on the original scale."""
+    actual, forecast = _align_and_clean(y_true, y_pred)
+
+    actual_np = actual.to_numpy(dtype=float)
+    forecast_np = forecast.to_numpy(dtype=float)
+
+    ss_res = float(np.sum((actual_np - forecast_np) ** 2))
+    ss_tot = float(np.sum((actual_np - np.mean(actual_np)) ** 2))
+
+    if ss_tot <= 0.0:
+        return float("nan")
+
+    return float(1.0 - (ss_res / ss_tot))
+
+
 def evaluate_statistical_metrics(
     y_true: pd.Series | pd.DataFrame | np.ndarray | list[float],
     y_pred: pd.Series | pd.DataFrame | np.ndarray | list[float],
@@ -195,6 +214,7 @@ def evaluate_statistical_metrics(
         "mse": mse(actual, forecast),
         "mae": mae(actual, forecast),
         "qlike": qlike(actual, forecast, eps=eps),
+        "r2": r2(actual, forecast),
         "r2log": r2log(actual, forecast, eps=eps),
         "n_obs": len(actual),
     }

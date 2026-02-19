@@ -4,6 +4,7 @@ from .statistical import (
     mae,
     mse,
     qlike,
+    r2,
     r2log,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "mae",
     "mse",
     "qlike",
+    "r2",
     "r2log",
 ]
