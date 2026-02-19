@@ -21,7 +21,7 @@
       },
       "model": {
         "add_constant": true,
-        "standardize_features": false,
+        "standardize_features": true,
         "target_transform": "log",
         "prediction_floor": 1e-10,
         "max_selected_features": 25,
@@ -43,7 +43,7 @@
       },
       "model": {
         "add_constant": true,
-        "standardize_features": false,
+        "standardize_features": true,
         "target_transform": "log",
         "prediction_floor": 1e-10,
         "max_selected_features": 25,
