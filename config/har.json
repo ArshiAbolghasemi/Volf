@@ -1,0 +1,73 @@
+{
+  "csv_path": "data/ag/v3.csv",
+  "target_col": "wheat_weekly_rv",
+  "core_columns": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv"
+  ],
+  "target_horizon": 1,
+  "run_configs": {
+    "ols": {
+      "split": {
+        "val_size": 0.2,
+        "test_size": 0.2
+      },
+      "selection": {
+        "method": "none"
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": false,
+        "refit_on_train_val": true
+      }
+    },
+    "lasso": {
+      "split": {
+        "val_size": 0.2,
+        "test_size": 0.2
+      },
+      "selection": {
+        "method": "lasso",
+        "lasso": {
+          "n_splits": 5,
+          "alphas": 100,
+          "max_iter": 50000,
+          "coef_threshold": 1e-10,
+          "random_state": 42,
+          "n_jobs": -1
+        }
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": true,
+        "refit_on_train_val": true
+      }
+    },
+    "bsr": {
+      "split": {
+        "val_size": 0.2,
+        "test_size": 0.2
+      },
+      "selection": {
+        "method": "bsr",
+        "bsr": {
+          "alpha": 0.05,
+          "add_constant": true,
+          "hac_maxlags": null,
+          "window_type": "expanding",
+          "window_size": null,
+          "step": 1,
+          "start_train_size": 52,
+          "min_features": 0,
+          "selection_threshold": 0.5
+        }
+      },
+      "model": {
+        "add_constant": true,
+        "standardize_features": true,
+        "refit_on_train_val": true
+      }
+    }
+  }
+}

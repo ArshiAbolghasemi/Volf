@@ -460,12 +460,39 @@ def run_har_experiment_from_dataset(
     design, core_columns, target_col = build_har_design_matrix(data, feature_config)
     x, y = get_xy_from_har_design(design, target_col)
 
-    return run_har_experiment_from_xy(
+    result = run_har_experiment_from_xy(
         x=x,
         y=y,
         core_columns=core_columns,
         run_config=run_config,
     )
+    cfg = run_config or HARRunConfig()
+    split_cfg = cfg.split or HARSplitConfig()
+    selection_cfg = cfg.selection or HARSelectionConfig()
+    model_cfg = cfg.model or HARModelConfig()
+
+    result.model_info.update(
+        {
+            "target_col_raw": feature_config.target_col,
+            "target_col_model": target_col,
+            "target_horizon": feature_config.target_horizon,
+            "core_columns": feature_config.core_columns,
+            "extra_feature_cols": feature_config.extra_feature_cols or [],
+            "split_val_size": split_cfg.val_size,
+            "split_test_size": split_cfg.test_size,
+            "selection_method": selection_cfg.method,
+            "lasso_config": (
+                vars(selection_cfg.lasso) if selection_cfg.lasso is not None else None
+            ),
+            "bsr_config": (
+                vars(selection_cfg.bsr) if selection_cfg.bsr is not None else None
+            ),
+            "model_add_constant": model_cfg.add_constant,
+            "model_standardize_features": model_cfg.standardize_features,
+            "model_refit_on_train_val": model_cfg.refit_on_train_val,
+        }
+    )
+    return result
 
 
 def run_har_feature_set_grid(

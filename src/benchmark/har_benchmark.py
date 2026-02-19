@@ -19,7 +19,7 @@ from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_DATA_PATH = DATA_DIR / "ag" / "v3.csv"
+DEFAULT_DATA_PATH = DATA_DIR / "ag" / "v4.csv"
 DEFAULT_TARGET = "wheat_weekly_rv"
 DEFAULT_CORE_COLUMNS = ["wheat_weekly_rv", "wheat_monthly_rv", "wheat_seasonal_rv"]
 
@@ -27,10 +27,10 @@ CLIMATE_COLUMNS = [
     "ssta_elino",
     "ssta_lanina",
     "dry",
-    "normal",
     "wet",
     "SOI_index",
     "NAO_index",
+    "Text_Climate_Anomaly",
 ]
 
 NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly"]
@@ -182,10 +182,13 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
 
     for model_name, model_results in results.items():
         for feature_set_name, result in model_results.items():
+            model_info = result.model_info
+            selection_info = result.selection_info
             row = {
                 "model_type": model_name,
                 "feature_set": feature_set_name,
                 "n_selected": len(result.selected_features),
+                "selected_features": ",".join(result.selected_features),
                 "val_mse": result.metrics["val"]["mse"],
                 "val_mae": result.metrics["val"]["mae"],
                 "val_qlike": result.metrics["val"]["qlike"],
@@ -194,6 +197,28 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
                 "test_mae": result.metrics["test"]["mae"],
                 "test_qlike": result.metrics["test"]["qlike"],
                 "test_r2log": result.metrics["test"]["r2log"],
+                "target_col_raw": model_info.get("target_col_raw"),
+                "target_col_model": model_info.get("target_col_model"),
+                "target_horizon": model_info.get("target_horizon"),
+                "core_columns": ",".join(model_info.get("core_columns", [])),
+                "extra_feature_cols": ",".join(model_info.get("extra_feature_cols", [])),
+                "split_val_size": model_info.get("split_val_size"),
+                "split_test_size": model_info.get("split_test_size"),
+                "selection_method": model_info.get("selection_method"),
+                "model_add_constant": model_info.get("model_add_constant"),
+                "model_standardize_features": model_info.get("model_standardize_features"),
+                "model_refit_on_train_val": model_info.get("model_refit_on_train_val"),
+                "n_train": model_info.get("n_train"),
+                "n_val": model_info.get("n_val"),
+                "n_test": model_info.get("n_test"),
+                "aic_final": model_info.get("aic_final"),
+                "bic_final": model_info.get("bic_final"),
+                "rsquared_final": model_info.get("rsquared_final"),
+                "lasso_best_alpha": selection_info.get("best_alpha"),
+                "bsr_alpha": selection_info.get("alpha"),
+                "bsr_window_type": selection_info.get("window_type"),
+                "bsr_window_size": selection_info.get("window_size"),
+                "bsr_step": selection_info.get("step"),
             }
             rows.append(row)
 
