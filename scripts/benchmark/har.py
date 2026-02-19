@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run Wheat HAR benchmark on ag/v3.csv")
+    parser = argparse.ArgumentParser(description="Run Wheat HAR benchmark on ag/v4.csv")
     parser.add_argument(
         "--config",
         type=str,
@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=str,
-        default=str(DATA_DIR / "ag" / "v3.csv"),
+        default=str(DATA_DIR / "ag" / "v4.csv"),
         help="Path to benchmark input CSV",
     )
     parser.add_argument(
@@ -103,7 +103,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         }
 
     return WheatHARBenchmarkConfig(
-        csv_path=raw.get("csv_path", str(DATA_DIR / "ag" / "v3.csv")),
+        csv_path=raw.get("csv_path", str(DATA_DIR / "ag" / "v4.csv")),
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
