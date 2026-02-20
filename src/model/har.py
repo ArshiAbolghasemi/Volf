@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any, Literal, cast
 
@@ -8,6 +9,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from sklearn.preprocessing import StandardScaler
+from tqdm.auto import tqdm
 
 from src.metrics import evaluate_statistical_metrics
 from src.variable_selection import (
@@ -39,6 +41,7 @@ class HARSelectionConfig:
     method: Literal["lasso", "bsr", "none"] = "lasso"
     lasso: LassoSelectionConfig | None = None
     bsr: BSRSelectionConfig | None = None
+    refit_every_windows: int = 1
 
 
 @dataclass
@@ -48,6 +51,7 @@ class HARWalkForwardConfig:
     test_size: int = 1
     step: int = 1
     rolling_window_size: int | None = None
+    progress_bar: bool = True
 
 
 @dataclass
@@ -270,7 +274,11 @@ def select_har_features(
 
     if config.method == "lasso":
         lasso_cfg = config.lasso or LassoSelectionConfig()
-        lasso_cfg = replace(lasso_cfg, core_columns=core_columns)
+        lasso_cfg = replace(
+            lasso_cfg,
+            core_columns=core_columns,
+            progress_bar=False,
+        )
         lasso_result = lasso_time_series_feature_selection(
             x_train,
             y_train,
@@ -281,7 +289,14 @@ def select_har_features(
 
     if config.method == "bsr":
         bsr_cfg = config.bsr or BSRSelectionConfig()
-        bsr_cfg = replace(bsr_cfg, core_columns=tuple(core_columns))
+        # In HAR walk-forward, run BSR on the current train window only (no nested
+        # rolling/expanding inside selection) to avoid heavy nested windowing.
+        bsr_cfg = replace(
+            bsr_cfg,
+            core_columns=tuple(core_columns),
+            window_type="full",
+            progress_bar=False,
+        )
         bsr_result = backward_stepwise_feature_selection(x_train, y_train, config=bsr_cfg)
         info = {"method": "bsr", **bsr_result.info}
         return bsr_result.selected_features, info
@@ -408,7 +423,7 @@ def _aggregate_predictions(
     return cast("pd.Series", aligned["y_true"]), cast("pd.Series", aligned["y_pred"])
 
 
-def run_har_experiment_from_xy(  # noqa: PLR0915
+def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
     x: pd.DataFrame,
     y: pd.Series,
     core_columns: list[str],
@@ -433,6 +448,7 @@ def run_har_experiment_from_xy(  # noqa: PLR0915
 
     windows = _build_walk_forward_windows(len(x), wf_cfg)
     logger.info("Generated %d windows (%s)", len(windows), wf_cfg.window_type)
+    run_start = time.perf_counter()
 
     train_true_parts: list[pd.Series] = []
     train_pred_parts: list[pd.Series] = []
@@ -445,19 +461,68 @@ def run_har_experiment_from_xy(  # noqa: PLR0915
     last_selection_info: dict[str, Any] = {}
 
     window_rows: list[dict[str, Any]] = []
+    cached_selected_features: list[str] | None = None
+    cached_selection_info: dict[str, Any] | None = None
 
-    for window_id, (train_start, train_end, test_start, test_end) in enumerate(windows):
+    window_iterator = tqdm(
+        enumerate(windows),
+        total=len(windows),
+        desc=f"HAR walk-forward ({wf_cfg.window_type})",
+        disable=not wf_cfg.progress_bar,
+    )
+    for window_id, (train_start, train_end, test_start, test_end) in window_iterator:
+        if (not wf_cfg.progress_bar) and (
+            window_id % 50 == 0 or window_id == len(windows) - 1
+        ):
+            elapsed = time.perf_counter() - run_start
+            logger.info(
+                "Walk-forward progress: window %d/%d (%.1f%%), elapsed=%.1fs",
+                window_id + 1,
+                len(windows),
+                100.0 * (window_id + 1) / len(windows),
+                elapsed,
+            )
         x_train = x.iloc[train_start:train_end]
         y_train = y.iloc[train_start:train_end]
         x_test = x.iloc[test_start:test_end]
         y_test = y.iloc[test_start:test_end]
 
-        selected_features, selection_info = select_har_features(
-            x_train=x_train,
-            y_train=y_train,
-            core_columns=core_columns,
-            config=selection_cfg,
+        refit_every = max(selection_cfg.refit_every_windows, 1)
+        should_refit = selection_cfg.method != "none" and (
+            cached_selected_features is None or window_id % refit_every == 0
         )
+        if should_refit:
+            selected_features, selection_info = select_har_features(
+                x_train=x_train,
+                y_train=y_train,
+                core_columns=core_columns,
+                config=selection_cfg,
+            )
+            cached_selected_features = selected_features
+            cached_selection_info = selection_info
+        else:
+            selected_features = cached_selected_features or x_train.columns.tolist()
+            selection_info = cached_selection_info or {
+                "method": selection_cfg.method,
+                "reused_selection": True,
+            }
+
+        if wf_cfg.progress_bar:
+            postfix: dict[str, Any] = {
+                "method": selection_cfg.method,
+                "refit": "Y" if should_refit else "N",
+                "n_sel": len(selected_features),
+            }
+            if selection_cfg.method == "lasso":
+                best_alpha = selection_info.get("best_alpha")
+                if best_alpha is not None:
+                    postfix["alpha"] = f"{float(best_alpha):.2e}"
+            elif selection_cfg.method == "bsr":
+                dropped = selection_info.get("total_dropped_features")
+                if dropped is not None:
+                    postfix["drop"] = int(dropped)
+            window_iterator.set_postfix(postfix, refresh=False)
+
         selected_features = _enforce_feature_budget(
             selected_features=selected_features,
             core_columns=core_columns,
@@ -614,6 +679,7 @@ def run_har_experiment_from_dataset(
             "core_columns": feature_config.core_columns,
             "extra_feature_cols": feature_config.extra_feature_cols or [],
             "selection_method": selection_cfg.method,
+            "selection_refit_every_windows": selection_cfg.refit_every_windows,
             "lasso_config": (
                 vars(selection_cfg.lasso) if selection_cfg.lasso is not None else None
             ),
@@ -649,8 +715,16 @@ def run_har_feature_set_grid(
     )
     base_cfg = grid_config.base_feature_config
     results: dict[str, HARExperimentResult] = {}
+    cfg = run_config or HARRunConfig()
+    wf_cfg = cfg.walk_forward or HARWalkForwardConfig()
 
-    for model_name, extra_cols in grid_config.feature_sets.items():
+    feature_iterator = tqdm(
+        grid_config.feature_sets.items(),
+        total=len(grid_config.feature_sets),
+        desc="HAR feature sets",
+        disable=not wf_cfg.progress_bar,
+    )
+    for model_name, extra_cols in feature_iterator:
         logger.info(
             "Running feature set '%s' with %d additional features",
             model_name,

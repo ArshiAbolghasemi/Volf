@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,7 @@ from sklearn.linear_model import LassoCV
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from tqdm.auto import tqdm
 
 MIN_SPLITS = 2
 
@@ -36,6 +37,7 @@ class LassoSelectionConfig:
     coef_threshold: float = 1e-10
     random_state: int | None = 42
     n_jobs: int | None = -1
+    progress_bar: bool = False
 
 
 def _build_lasso_pipeline(
@@ -86,34 +88,44 @@ def _fit_lasso_pipeline_with_retry(
     y_clean: pd.Series,
     cfg: LassoSelectionConfig,
 ) -> tuple[Pipeline, int, bool]:
-    model = _build_lasso_pipeline(
-        cfg=cfg,
-    )
+    attempts = 2 if cfg.retry_on_convergence_warning else 1
+    warning_count = 0
+    retried = False
+    model: Pipeline | None = None
 
-    with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", ConvergenceWarning)
-        model.fit(x_clean, y_clean)
-    warning_count = sum(1 for w in captured if issubclass(w.category, ConvergenceWarning))
+    for attempt in tqdm(
+        range(attempts),
+        total=attempts,
+        desc="LASSO fit attempts",
+        disable=not cfg.progress_bar,
+    ):
+        if attempt == 0:
+            model = _build_lasso_pipeline(cfg=cfg)
+        else:
+            retried = True
+            retry_max_iter = cfg.max_iter * cfg.retry_max_iter_multiplier
+            retry_eps = max(cfg.eps, cfg.retry_eps)
+            model = _build_lasso_pipeline(
+                cfg=cfg,
+                max_iter=retry_max_iter,
+                eps=retry_eps,
+            )
 
-    if warning_count == 0 or not cfg.retry_on_convergence_warning:
-        return model, warning_count, False
+        with warnings.catch_warnings(record=True) as captured:
+            warnings.simplefilter("always", ConvergenceWarning)
+            model.fit(x_clean, y_clean)
+        warning_count = sum(
+            1 for w in captured if issubclass(w.category, ConvergenceWarning)
+        )
 
-    retry_max_iter = cfg.max_iter * cfg.retry_max_iter_multiplier
-    retry_eps = max(cfg.eps, cfg.retry_eps)
+        if warning_count == 0 or not cfg.retry_on_convergence_warning:
+            break
 
-    retry_model = _build_lasso_pipeline(
-        cfg=cfg,
-        max_iter=retry_max_iter,
-        eps=retry_eps,
-    )
-    with warnings.catch_warnings(record=True) as retry_captured:
-        warnings.simplefilter("always", ConvergenceWarning)
-        retry_model.fit(x_clean, y_clean)
-    retry_warning_count = sum(
-        1 for w in retry_captured if issubclass(w.category, ConvergenceWarning)
-    )
+    if model is None:
+        msg = "LASSO model was not initialized."
+        raise RuntimeError(msg)
 
-    return retry_model, retry_warning_count, True
+    return model, warning_count, retried
 
 
 def lasso_time_series_feature_selection(
@@ -175,8 +187,8 @@ def lasso_time_series_feature_selection(
     y_clean = clean_df["__target__"]
 
     model, convergence_warning_count, retried = _fit_lasso_pipeline_with_retry(
-        x_clean=x_clean,
-        y_clean=y_clean,
+        x_clean=cast("pd.DataFrame", x_clean),
+        y_clean=cast("pd.Series", y_clean),
         cfg=cfg,
     )
 

@@ -8,6 +8,7 @@ from typing import Any, cast
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from tqdm.auto import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class BSRSelectionConfig:
     start_train_size: int | None = None
     min_features: int = 0
     selection_threshold: float = 0.5
+    progress_bar: bool = False
 
 
 def _to_target_series(y: pd.Series | pd.DataFrame) -> pd.Series:
@@ -64,6 +66,12 @@ def _build_windows(
     step: int,
     window_size: int | None,
 ) -> list[tuple[int, int]]:
+    if window_type == "full":
+        if n_obs < MIN_SPLITS:
+            msg = f"n_obs must be >= {MIN_SPLITS}."
+            raise ValueError(msg)
+        return [(0, n_obs)]
+
     if step < 1:
         msg = "step must be >= 1."
         raise ValueError(msg)
@@ -85,7 +93,7 @@ def _build_windows(
                 raise ValueError(msg)
             train_start = max(0, train_end - window_size)
         else:
-            msg = "window_type must be either 'expanding' or 'rolling'."
+            msg = "window_type must be one of {'expanding', 'rolling', 'full'}."
             raise ValueError(msg)
 
         if train_end - train_start >= MIN_SPLITS:
@@ -239,7 +247,13 @@ def backward_stepwise_feature_selection(
     warnings: list[str] = []
     per_window_selected: list[list[str]] = []
 
-    for window_idx, (train_start, train_end) in enumerate(windows):
+    window_iterator = tqdm(
+        enumerate(windows),
+        total=len(windows),
+        desc=f"BSR windows ({cfg.window_type})",
+        disable=not cfg.progress_bar,
+    )
+    for window_idx, (train_start, train_end) in window_iterator:
         x_train = x_aligned.iloc[train_start:train_end]
         y_train = y_aligned.iloc[train_start:train_end]
 

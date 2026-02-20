@@ -1,6 +1,9 @@
 {
   "csv_path": "data/ag/v4.csv",
   "target_col": "wheat_weekly_rv",
+  "use_cache": true,
+  "cache_dir": ".cache/benchmark",
+  "cache_overwrite": false,
   "core_columns": [
     "wheat_weekly_rv",
     "wheat_monthly_rv",
@@ -17,7 +20,8 @@
         "rolling_window_size": null
       },
       "selection": {
-        "method": "none"
+        "method": "none",
+        "refit_every_windows": 1
       },
       "model": {
         "add_constant": true,
@@ -39,7 +43,8 @@
         "rolling_window_size": 104
       },
       "selection": {
-        "method": "none"
+        "method": "none",
+        "refit_every_windows": 1
       },
       "model": {
         "add_constant": true,
@@ -62,6 +67,7 @@
       },
       "selection": {
         "method": "lasso",
+        "refit_every_windows": 4,
         "lasso": {
           "n_splits": 5,
           "alphas": 100,
@@ -97,6 +103,7 @@
       },
       "selection": {
         "method": "lasso",
+        "refit_every_windows": 4,
         "lasso": {
           "n_splits": 5,
           "alphas": 100,
@@ -132,6 +139,7 @@
       },
       "selection": {
         "method": "bsr",
+        "refit_every_windows": 8,
         "bsr": {
           "alpha": 0.05,
           "add_constant": true,
@@ -165,6 +173,7 @@
       },
       "selection": {
         "method": "bsr",
+        "refit_every_windows": 8,
         "bsr": {
           "alpha": 0.05,
           "add_constant": true,

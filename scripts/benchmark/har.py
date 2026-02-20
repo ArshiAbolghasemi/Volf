@@ -1,4 +1,5 @@
 import argparse
+import errno
 import json
 import logging
 from pathlib import Path
@@ -38,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=str,
-        default="/data/benchmark/har.csv",
+        default=str(DATA_DIR / "benchmark" / "har.csv"),
         help="Path to save benchmark summary CSV",
     )
     parser.add_argument(
@@ -64,6 +65,31 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print hyperparameter table in logs",
     )
+    cache_group = parser.add_mutually_exclusive_group()
+    cache_group.add_argument(
+        "--use_cache",
+        dest="use_cache",
+        action="store_true",
+        help="Use cached benchmark outputs when available",
+    )
+    cache_group.add_argument(
+        "--no_cache",
+        dest="use_cache",
+        action="store_false",
+        help="Disable cache and retrain all runs",
+    )
+    parser.set_defaults(use_cache=True)
+    parser.add_argument(
+        "--cache_dir",
+        type=str,
+        default=".cache/benchmark",
+        help="Cache directory for benchmark artifacts",
+    )
+    parser.add_argument(
+        "--cache_overwrite",
+        action="store_true",
+        help="Overwrite existing cache entries and retrain",
+    )
     return parser.parse_args()
 
 
@@ -86,6 +112,7 @@ def _build_run_config_from_dict(cfg: dict[str, Any]) -> HARRunConfig:
             method=selection_raw.get("method", "none"),
             lasso=lasso_cfg,
             bsr=bsr_cfg,
+            refit_every_windows=int(selection_raw.get("refit_every_windows", 1)),
         )
 
     model_cfg = None
@@ -117,6 +144,9 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         core_columns=raw.get("core_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
         run_configs=cast("dict[str, HARRunConfig]", run_configs),
+        use_cache=bool(raw.get("use_cache", True)),
+        cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
+        cache_overwrite=bool(raw.get("cache_overwrite", False)),
     )
 
 
@@ -136,6 +166,9 @@ def main() -> None:
             csv_path=args.input,
             target_col=args.target_col,
             target_horizon=args.target_horizon,
+            use_cache=bool(args.use_cache),
+            cache_dir=args.cache_dir,
+            cache_overwrite=bool(args.cache_overwrite),
         )
         logger.info("Using default/CLI benchmark config")
 
@@ -145,7 +178,21 @@ def main() -> None:
     summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        fallback_path = DATA_DIR / "benchmark" / output_path.name
+        if exc.errno in {errno.EROFS, errno.EACCES, errno.ENOENT}:
+            logger.warning(
+                "Output path %s is not writable/available (%s). Falling back to %s",
+                output_path,
+                exc,
+                fallback_path,
+            )
+            output_path = fallback_path
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            raise
     summary.to_csv(output_path, index=False)
 
     logger.info("Benchmark summary saved to %s", output_path)
