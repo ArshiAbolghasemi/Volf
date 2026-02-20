@@ -18,7 +18,8 @@ The baseline HAR-style target equation used in training is:
 
 $$
 RV_t
-====
+
+=
 
 \beta_0
 +
@@ -56,7 +57,8 @@ $$
 Monthly average lag:
 $$
 RV_{t-1:t-4}
-============
+
+=
 
 \frac{1}{4}
 \sum_{i=1}^{4} RV_{t-i}
@@ -65,7 +67,8 @@ $$
 Seasonal average lag:
 $$
 RV_{t-1:t-12}
-=============
+
+=
 
 \frac{1}{12}
 \sum_{i=1}^{12} RV_{t-i}
@@ -75,7 +78,8 @@ Final HAR regression form:
 
 $$
 RV_t
-====
+
+=
 
 \beta_0
 +
@@ -168,7 +172,8 @@ $$
 Test set:
 $$
 \mathcal{I}_{\text{test}}^{(k)}
-===============================
+
+=
 
 {\tau_k, \dots, \tau_k + h - 1}
 $$
@@ -176,7 +181,8 @@ $$
 **Expanding train window**
 $$
 \mathcal{I}_{\text{train}}^{(k)}
-================================
+
+=
 
 {1, \dots, \tau_k - 1}
 $$
@@ -184,7 +190,8 @@ $$
 **Rolling train window** (length $w$)
 $$
 \mathcal{I}_{\text{train}}^{(k)}
-================================
+
+=
 
 {\max(1, \tau_k - w), \dots, \tau_k - 1}
 $$
@@ -266,7 +273,8 @@ $$
 Standardization (train-only):
 $$
 x_{t,j}^{(\text{std})}
-======================
+
+=
 
 \frac{x_{t,j} - \mu_j}{\sigma_j}
 $$
@@ -295,7 +303,8 @@ Let aligned sequences be ${y_t}_{t=1}^n$ and ${\hat{y}*t}*{t=1}^n$.
 
 $$
 \text{MSE}
-==========
+
+=
 
 \frac{1}{n}
 \sum_{t=1}^{n}
@@ -306,7 +315,8 @@ $$
 
 $$
 \text{MAE}
-==========
+
+=
 
 \frac{1}{n}
 \sum_{t=1}^{n}
@@ -317,7 +327,8 @@ $$
 
 $$
 \text{QLIKE}
-============
+
+=
 
 \frac{1}{n}
 \sum_{t=1}^{n}
@@ -346,7 +357,8 @@ $$
 
 $$
 R^2_{\log}
-==========
+
+=
 
 ## 1
 
@@ -366,6 +378,7 @@ $$
 where
 $$
 m
+
 =
 
 \frac{1}{n}
