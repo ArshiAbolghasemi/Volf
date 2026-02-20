@@ -17,14 +17,7 @@ This document explains the implemented HAR benchmark pipeline for agricultural r
 The baseline HAR-style target equation used in training is:
 
 $$
-RV_t
-
-=
-
-\beta_0
-+
-\beta_1 RV_{\text{weekly},t}
-+
+RV_t = \beta_0 + \beta_1 RV_{\text{weekly},t} +
 \beta_2 RV_{\text{monthly},t}
 +
 \beta_3 RV_{\text{seasonal},t}
@@ -175,7 +168,7 @@ $$
 
 =
 
-{\tau_k, \dots, \tau_k + h - 1}
+\{\tau_k, \dots, \tau_k + h - 1\}
 $$
 
 **Expanding train window**
@@ -184,7 +177,7 @@ $$
 
 =
 
-{1, \dots, \tau_k - 1}
+\{1, \dots, \tau_k - 1\}
 $$
 
 **Rolling train window** (length $w$)
@@ -193,7 +186,7 @@ $$
 
 =
 
-{\max(1, \tau_k - w), \dots, \tau_k - 1}
+\{\max(1, \tau_k - w), \dots, \tau_k - 1\}
 $$
 
 **Benchmark default**
@@ -234,7 +227,7 @@ Where:
 Iterative elimination procedure:
 
 1. Fit OLS on forced + candidate features
-2. Compute p-values ${p_j}$
+2. Compute p-values $p_j$
 3. Identify worst feature:
    $$
    j^\star = \arg\max_j p_j
@@ -297,7 +290,7 @@ $$
 
 ## 9) Metrics
 
-Let aligned sequences be ${y_t}_{t=1}^n$ and ${\hat{y}*t}*{t=1}^n$.
+Let aligned sequences be $\{y_t\}_{t=1}^n$ and $\{\hat{y}_t\}_{t=1}^n$.
 
 ### Mean Squared Error
 
@@ -343,13 +336,12 @@ $$
 
 $$
 R^2
-===
-
-## 1
-
-\frac{\sum_{t=1}^{n}(y_t - \hat{y}*t)^2}
-{\sum*{t=1}^{n}(y_t - \bar{y})^2},
-\quad
+=
+1
+-
+\frac{\sum_{t=1}^{n}(y_t - \hat{y}_t)^2}
+{\sum_{t=1}^{n}(y_t - \bar{y})^2},
+\qquad
 \bar{y} = \frac{1}{n}\sum_{t=1}^{n} y_t
 $$
 
@@ -360,15 +352,15 @@ R^2_{\log}
 
 =
 
-## 1
-
+1
+-
 \frac{
 \sum_{t=1}^{n}
 \left[
-\log(\max(y_t,\varepsilon)) - \log(\max(\hat{y}*t,\varepsilon))
+\log(\max(y_t,\varepsilon)) - \log(\max(\hat{y}_t,\varepsilon))
 \right]^2
 }{
-\sum*{t=1}^{n}
+\sum_{t=1}^{n}
 \left[
 \log(\max(y_t,\varepsilon)) - m
 \right]^2
@@ -378,7 +370,6 @@ $$
 where
 $$
 m
-
 =
 
 \frac{1}{n}
