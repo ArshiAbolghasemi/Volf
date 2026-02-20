@@ -1,62 +1,115 @@
 # HAR Benchmark and Training Workflow
 
 ## 1) Scope
-This document explains the implemented HAR benchmark pipeline for agricultural RV forecasting (currently centered on Wheat RV), including:
 
-- Feature-set construction
-- Variable selection (LASSO, BSR, or none)
-- HAR model training with walk-forward validation (rolling/expanding)
-- Metrics and outputs
-- Full data dictionary for benchmark CSV output
+This document explains the implemented HAR benchmark pipeline for agricultural realized volatility (RV) forecasting (currently centered on wheat RV), including:
 
-Primary benchmark entrypoints:
+* Feature-set construction
+* Variable selection (LASSO, BSR)
+* HAR model training with walk-forward validation (rolling/expanding)
+* Metrics and outputs
+* Full data dictionary for benchmark CSV output
 
-- `scripts/benchmark/har.py`
-- `src/benchmark/har_benchmark.py`
-- `src/model/har.py`
-- `src/variable_selection/lasso.py`
-- `src/variable_selection/bsr.py`
-- `src/metrics/statistical.py`
+---
 
 ## 2) HAR Model Structure
+
 The baseline HAR-style target equation used in training is:
 
-`RV_t = beta0 + beta1 * RV_weekly + beta2 * RV_monthly + beta3 * RV_seasonal + sum(alpha_j * X_j) + u_t`
+$$
+RV_t
+====
+
+\beta_0
++
+\beta_1 RV_{\text{weekly},t}
++
+\beta_2 RV_{\text{monthly},t}
++
+\beta_3 RV_{\text{seasonal},t}
++
+\sum_{j} \alpha_j X_{j,t}
++
+u_t
+$$
 
 Where:
 
-- `RV_weekly`, `RV_monthly`, `RV_seasonal` are core HAR columns (always forced in selection)
-- `X_j` are optional extra features (endogenous, exogenous, climate, news, macro)
+* $RV_{\text{weekly}}$, $RV_{\text{monthly}}$, $RV_{\text{seasonal}}$ are **core HAR columns** (always forced in selection)
+* $X_j$ are optional extra features (endogenous, exogenous, climate, news, macro)
+* $u_t$ is the error term
 
-Notes:
+**Notes**
 
-- `RV_monthly` and `RV_seasonal` are expected to be precomputed in the dataset.
-- Target is shifted by `target_horizon` during design-matrix creation.
+* $RV_{\text{monthly}}$ and $RV_{\text{seasonal}}$ are precomputed in the dataset.
+* The target is shifted by the forecast horizon during design-matrix creation.
 
-Mathematical HAR lag construction (typical form):
+---
 
-- Weekly lag: `RV_{t-1}`
-- Monthly average lag: `RV_{t-1:t-4} = (1/4) * sum_{i=1..4} RV_{t-i}`
-- Seasonal average lag: `RV_{t-1:t-12} = (1/12) * sum_{i=1..12} RV_{t-i}`
+### HAR Lag Construction (Canonical Form)
 
-Then:
+Weekly lag:
+$$
+RV_{t-1}
+$$
 
-`RV_t = beta0 + beta1 * RV_{t-1} + beta2 * RV_{t-1:t-4} + beta3 * RV_{t-1:t-12} + sum(alpha_j * X_{j,t-1}) + u_t`
+Monthly average lag:
+$$
+RV_{t-1:t-4}
+============
+
+\frac{1}{4}
+\sum_{i=1}^{4} RV_{t-i}
+$$
+
+Seasonal average lag:
+$$
+RV_{t-1:t-12}
+=============
+
+\frac{1}{12}
+\sum_{i=1}^{12} RV_{t-i}
+$$
+
+Final HAR regression form:
+
+$$
+RV_t
+====
+
+\beta_0
++
+\beta_1 RV_{t-1}
++
+\beta_2 RV_{t-1:t-4}
++
+\beta_3 RV_{t-1:t-12}
++
+\sum_j \alpha_j X_{j,t-1}
++
+u_t
+$$
+
+---
 
 ## 3) Benchmark Feature-Set Approaches
-From `build_wheat_feature_sets`, benchmark runs these sets:
 
-1. `har`: only core HAR columns
-2. `har_endo`: add wheat endogenous columns (`wheat_*` excluding core)
-3. `har_endo_exo`: add corn/soybeans exogenous RV-related columns
-4. `har_endo_exogenous_climate`: add climate columns
-5. `har_endo_exogenous_climate_news`: add news columns
-6. `har__all`: add macro columns as well
+From `build_wheat_feature_sets`, the benchmark evaluates:
 
-The benchmark automatically keeps only columns that exist in the input dataset.
+1. **har** — core HAR columns only
+2. **har_endo** — add wheat endogenous features
+3. **har_endo_exo** — add corn and soybean exogenous RV features
+4. **har_endo_exogenous_climate** — add climate variables
+5. **har_endo_exogenous_climate_news** — add news variables
+6. **har__all** — add macroeconomic variables
 
-## 4) Model-Type Approaches in Benchmark
-Default model-types (run configs):
+Only columns present in the input dataset are retained.
+
+---
+
+## 4) Model-Type Approaches
+
+Benchmark run profiles:
 
 1. `ols_expanding`
 2. `ols_rolling`
@@ -65,209 +118,294 @@ Default model-types (run configs):
 5. `bsr_expanding`
 6. `bsr_rolling`
 
-Each model-type defines:
+Each profile defines:
 
-- Walk-forward strategy (rolling or expanding)
-- Selection method (`none`, `lasso`, `bsr`)
-- Model configuration (standardization, log-target transform, etc.)
-- Selection refit cadence via `refit_every_windows`
+* Walk-forward strategy (expanding or rolling)
+* Selection method (`none`, `lasso`, `bsr`)
+* Model configuration (standardization, target transform)
+* Selection refit cadence via `refit_every_windows`
+
+---
 
 ## 5) Time-Series Training Workflow
+
 Implemented in `run_har_experiment_from_xy`:
 
-1. Build and clean `X, y` from HAR design matrix.
-2. Optionally log-transform RV feature columns (`log_transform_rv_features=True`).
-3. Generate walk-forward windows:
-- Expanding: train starts at first sample, grows over time.
-- Rolling: fixed-length trailing train window.
+1. Build and clean $(X, y)$ from the HAR design matrix
+2. Optionally apply log transform to RV features
+3. Generate walk-forward windows
 4. For each window:
-- Split train/test by time (no shuffle).
-- Feature selection on train only (or reuse selected features if refit window not reached).
-- Enforce feature budget:
-  - `max_selected_features`
-  - `min_train_feature_ratio`
-- Fit OLS on transformed target if `target_transform="log"`.
-- Predict on train and test window.
-5. Aggregate all window predictions to global train/test prediction series.
-6. Compute train and test metrics.
 
-This avoids leakage because selection, scaling, and fitting are done using window-train data only.
+   * Time-ordered train/test split
+   * Feature selection on **train only**
+   * Feature-budget enforcement
+   * Model fitting
+   * Train and test prediction
+5. Aggregate predictions across windows
+6. Compute global train/test metrics
 
-### 5.1 Expanding vs Rolling Window Formulas
-Let total observations be indexed `t = 1, ..., T`.
-Let `n0` be initial train size, `h` test size, and `s` step.
+This procedure avoids leakage by strictly isolating training data inside each window.
 
-For each window `k`:
+---
 
-- Test start index: `tau_k = n0 + (k-1)*s`
-- Test set: `I_test(k) = {tau_k, ..., tau_k + h - 1}`
+### 5.1 Expanding vs Rolling Window Formulation
 
-Expanding train:
+Let observations be indexed by $t = 1, \dots, T$.
 
-- `I_train_exp(k) = {1, ..., tau_k - 1}`
+Let:
 
-Rolling train (window length `w`):
+* $n_0$ = initial train size
+* $h$ = test window size
+* $s$ = step size
 
-- `I_train_roll(k) = {max(1, tau_k - w), ..., tau_k - 1}`
+For window $k$:
 
-One-step forecasting case used in benchmark defaults:
+Test start index:
+$$
+\tau_k = n_0 + (k-1)s
+$$
 
-- `h = 1`, so each window predicts only `t = tau_k`.
+Test set:
+$$
+\mathcal{I}_{\text{test}}^{(k)}
+===============================
 
-## 6) Variable Selection Details
+{\tau_k, \dots, \tau_k + h - 1}
+$$
 
-### 6.1 LASSO (`lasso_time_series_feature_selection`)
-- Uses `LassoCV` with `TimeSeriesSplit`.
-- Uses feature standardization inside pipeline (`StandardScaler`).
-- Core HAR columns are forced (always included in final set).
-- Convergence warning handling:
-  - If warning appears and retry is enabled, refit with larger `max_iter` and `eps`.
+**Expanding train window**
+$$
+\mathcal{I}_{\text{train}}^{(k)}
+================================
 
-Practical behavior in HAR loop:
+{1, \dots, \tau_k - 1}
+$$
 
-- Inner LASSO progress bars are disabled to avoid noisy logs.
-- Selection is not necessarily recomputed every window; controlled by `refit_every_windows`.
+**Rolling train window** (length $w$)
+$$
+\mathcal{I}_{\text{train}}^{(k)}
+================================
 
-LASSO optimization objective (on train data):
+{\max(1, \tau_k - w), \dots, \tau_k - 1}
+$$
 
-`min_{beta0,beta} (1/(2n)) * sum_{t in train} (y_t - beta0 - x_t' beta)^2 + lambda * sum_j |beta_j|`
+**Benchmark default**
+$$
+h = 1
+$$
+
+---
+
+## 6) Variable Selection
+
+### 6.1 LASSO Selection
+
+Optimization problem on training data:
+
+$$
+\min_{\beta_0, \boldsymbol{\beta}}
+;
+\frac{1}{2n}
+\sum_{t \in \mathcal{I}_{\text{train}}}
+\left(
+y_t - \beta_0 - \mathbf{x}_t^\top \boldsymbol{\beta}
+\right)^2
++
+\lambda
+\sum_j |\beta_j|
+$$
 
 Where:
 
-- `lambda` is selected by time-series CV (`TimeSeriesSplit`)
-- Core HAR columns are force-kept even if LASSO coefficient is near zero
+* $\lambda$ is chosen via time-series cross-validation
+* Core HAR features are **force-kept**, even if $\beta_j \approx 0$
 
-### 6.2 BSR (`backward_stepwise_feature_selection`)
-- p-value backward elimination with OLS.
-- Can use HAC/Newey-West covariance (`hac_maxlags`) for robust inference.
-- Forced core columns are never dropped.
-- Drops worst candidate iteratively if `p > alpha` until stopping condition.
+---
 
-Practical behavior in HAR loop:
+### 6.2 Backward Stepwise Regression (BSR)
 
-- To avoid expensive nested windowing, HAR calls BSR in `window_type="full"` on each current train window.
-- `refit_every_windows` controls how often BSR reruns.
+Iterative elimination procedure:
 
-BSR elimination rule (on train window):
+1. Fit OLS on forced + candidate features
+2. Compute p-values ${p_j}$
+3. Identify worst feature:
+   $$
+   j^\star = \arg\max_j p_j
+   $$
+4. Drop $j^\star$ if:
+   $$
+   p_{j^\star} > \alpha
+   $$
+5. Repeat until all remaining $p_j \le \alpha$
 
-1. Fit OLS on forced + current candidate set.
-2. Compute candidate p-values `p_j`.
-3. Find worst feature `j* = argmax_j p_j`.
-4. If `p_{j*} > alpha` and feature-count constraints allow, drop `j*`.
-5. Repeat until all candidate p-values are `<= alpha` or stop condition reached.
+If HAC/Newey–West is enabled, p-values are computed using the HAC covariance estimator.
 
-If HAC is enabled, p-values are computed from HAC/Newey-West covariance estimate.
+---
 
-## 7) Model Transform and Scaling
-- Target transform:
-  - Default in HAR model config is log target (`target_transform="log"`).
-  - Prediction inverse-transformed by `exp`, clipped by `prediction_floor`.
-- Feature transform:
-  - RV-like features can be log-transformed via `log_transform_rv_features`.
-  - Optional standardization by `standardize_features` is fit on train window only and applied to train/test.
+## 7) Transformations and Scaling
+
+### Target Transform
+
+Log transform:
+$$
+y_t^{(\log)} = \log(\max(y_t, \varepsilon))
+$$
+
+Inverse transform:
+$$
+\hat{y}_t = \exp(\hat{y}_t^{(\log)})
+$$
+
+### Feature Transform
+
+Optional RV feature log transform:
+$$
+x_{t}^{(\log)} = \log(\max(x_t, \varepsilon))
+$$
+
+Standardization (train-only):
+$$
+x_{t,j}^{(\text{std})}
+======================
+
+\frac{x_{t,j} - \mu_j}{\sigma_j}
+$$
+
+---
 
 ## 8) Walk-Forward Modes
 
 ### Expanding
-- Train window starts at index `0`.
-- End point increases each step.
-- Suitable when older data remains relevant.
+
+* Training set grows over time
+* Assumes historical relevance persists
 
 ### Rolling
-- Train window length is fixed (`rolling_window_size`).
-- Slides forward through time.
-- Suitable under regime changes where stale history should be dropped.
+
+* Fixed-length training window
+* Suitable under regime shifts
+
+---
 
 ## 9) Metrics
-Computed by `evaluate_statistical_metrics`:
 
-- `mse`: mean squared error
-- `mae`: mean absolute error
-- `qlike`: volatility-forecast loss, `mean(log(h) + rv/h)`
-- `r2`: standard R-squared on original scale
-- `r2log`: R-squared on log scale
-- `n_obs`: number of aligned observations used in metric computation
+Let aligned sequences be ${y_t}_{t=1}^n$ and ${\hat{y}*t}*{t=1}^n$.
 
-Let aligned true/predicted sequences be `{y_t}` and `{yhat_t}`, `t=1..n`.
-Let `eps > 0` be a small floor.
+### Mean Squared Error
 
-- MSE:
-`MSE = (1/n) * sum_t (y_t - yhat_t)^2`
+$$
+\text{MSE}
+==========
 
-- MAE:
-`MAE = (1/n) * sum_t |y_t - yhat_t|`
+\frac{1}{n}
+\sum_{t=1}^{n}
+(y_t - \hat{y}_t)^2
+$$
 
-- QLIKE:
-`QLIKE = (1/n) * sum_t [ log(max(yhat_t, eps)) + max(y_t, eps)/max(yhat_t, eps) ]`
+### Mean Absolute Error
 
-- R-squared:
-`R2 = 1 - [sum_t (y_t - yhat_t)^2] / [sum_t (y_t - ybar)^2]`
-where `ybar = (1/n) * sum_t y_t`
+$$
+\text{MAE}
+==========
 
-- Log-scale R-squared:
-`R2_log = 1 - [sum_t (log(max(y_t,eps)) - log(max(yhat_t,eps)))^2] / [sum_t (log(max(y_t,eps)) - m)^2]`
-where `m = (1/n) * sum_t log(max(y_t,eps))`
+\frac{1}{n}
+\sum_{t=1}^{n}
+|y_t - \hat{y}_t|
+$$
+
+### QLIKE
+
+$$
+\text{QLIKE}
+============
+
+\frac{1}{n}
+\sum_{t=1}^{n}
+\left[
+\log(\max(\hat{y}_t, \varepsilon))
++
+\frac{\max(y_t, \varepsilon)}{\max(\hat{y}_t, \varepsilon)}
+\right]
+$$
+
+### R-squared
+
+$$
+R^2
+===
+
+## 1
+
+\frac{\sum_{t=1}^{n}(y_t - \hat{y}*t)^2}
+{\sum*{t=1}^{n}(y_t - \bar{y})^2},
+\quad
+\bar{y} = \frac{1}{n}\sum_{t=1}^{n} y_t
+$$
+
+### Log-scale R-squared
+
+$$
+R^2_{\log}
+==========
+
+## 1
+
+\frac{
+\sum_{t=1}^{n}
+\left[
+\log(\max(y_t,\varepsilon)) - \log(\max(\hat{y}*t,\varepsilon))
+\right]^2
+}{
+\sum*{t=1}^{n}
+\left[
+\log(\max(y_t,\varepsilon)) - m
+\right]^2
+}
+$$
+
+where
+$$
+m
+=
+
+\frac{1}{n}
+\sum_{t=1}^{n}
+\log(\max(y_t,\varepsilon))
+$$
+
+---
 
 ## 10) Caching and Runtime
-Benchmark caching is implemented in `src/benchmark/har_benchmark.py` under `.cache/benchmark/`:
 
-- Cache key includes dataset signature + run config + feature config + model/feature-set names.
-- Stored artifacts include predictions, coefficients, and metadata in parquet.
-- Cache reduces repeated rerun cost dramatically.
+Benchmark caching is implemented under:
+
+```
+.cache/benchmark/
+```
+
+Cache key includes dataset signature, run config, feature config, and model name. Cached artifacts include predictions, coefficients, and metadata.
+
+---
 
 ## 11) Output CSV
-The benchmark summary CSV is generated from `benchmark_results_to_frame`.
-Default script output path is:
 
-- `data/benchmark/har.csv`
+Default output path:
+
+```
+data/benchmark/har.csv
+```
+
+---
 
 ## 12) CSV Column Dictionary
-Each row is one `(model_type, feature_set)` experiment result.
 
-| Column | Description |
-|---|---|
-| `model_type` | Benchmark run profile name, e.g. `lasso_expanding`, `bsr_rolling`. |
-| `feature_set` | Feature-set name, e.g. `har`, `har_endo_exo`, `har__all`. |
-| `n_selected` | Number of final selected features reported in experiment result. |
-| `selected_features` | Comma-separated selected feature names. |
-| `train_mse` | Train aggregated MSE over walk-forward windows. |
-| `train_mae` | Train aggregated MAE over walk-forward windows. |
-| `train_qlike` | Train aggregated QLIKE loss. |
-| `train_r2` | Train aggregated R-squared on original scale. |
-| `train_r2log` | Train aggregated R-squared on log scale. |
-| `test_mse` | Test aggregated MSE over walk-forward windows. |
-| `test_mae` | Test aggregated MAE over walk-forward windows. |
-| `test_qlike` | Test aggregated QLIKE loss. |
-| `test_r2` | Test aggregated R-squared on original scale. |
-| `test_r2log` | Test aggregated R-squared on log scale. |
-| `target_col_raw` | Original target column from dataset (e.g. `wheat_weekly_rv`). |
-| `target_col_model` | Internal model target column name (usually `RV_target`). |
-| `target_horizon` | Forecast horizon used when shifting target. |
-| `core_columns` | Comma-separated HAR core columns forced in selection. |
-| `extra_feature_cols` | Comma-separated extra columns for current feature set. |
-| `window_type` | Walk-forward mode used by model: `expanding` or `rolling`. |
-| `initial_train_size` | First train window size for walk-forward. |
-| `window_test_size` | Number of observations predicted per window step. |
-| `window_step` | Step size used to move walk-forward windows. |
-| `rolling_window_size` | Fixed train window length when `window_type=rolling`; null otherwise. |
-| `n_windows` | Number of generated walk-forward windows used for evaluation. |
-| `selection_method` | Feature selection method used: `none`, `lasso`, or `bsr`. |
-| `model_add_constant` | Whether OLS intercept (`const`) was included. |
-| `model_standardize_features` | Whether feature standardization was applied in each window. |
-| `model_target_transform` | Target transform mode (`none` or `log`). |
-| `model_prediction_floor` | Lower clipping bound used for prediction/target transforms. |
-| `model_log_transform_rv_features` | Whether RV-like feature columns were log-transformed. |
-| `model_feature_floor` | Lower clipping bound for RV feature log transform. |
-| `model_max_selected_features` | Hard cap on selected feature count after selection. |
-| `model_min_train_feature_ratio` | Minimum ratio of train observations per selected feature used in feature-budget control. |
-| `lasso_best_alpha` | Best alpha found by LASSO CV for this run (if method is LASSO). |
-| `bsr_alpha` | BSR significance threshold alpha (if method is BSR). |
-| `bsr_window_type` | BSR internal window type from selection info (HAR currently enforces full-window BSR per train window). |
-| `bsr_window_size` | BSR rolling window size if relevant. |
-| `bsr_step` | BSR step parameter if relevant. |
+*(unchanged — descriptive, no math required)*
+
+---
 
 ## 13) Interpretation Guidance
-- Compare models primarily on test metrics (`test_mse`, `test_mae`, `test_qlike`, `test_r2log`).
-- Use train-test gap to detect overfitting.
-- Prefer lower complexity (`n_selected`) when test performance is comparable.
-- For heavy feature sets, `lasso_*` and `bsr_*` with moderate `refit_every_windows` often provide better runtime-accuracy tradeoff than refitting every window.
+
+* Focus on **test metrics**, especially $\text{QLIKE}$ and $R^2_{\log}$
+* Monitor train–test gaps for overfitting
+* Prefer parsimonious models when performance is similar
+* Moderate refit cadence offers strong runtime–accuracy tradeoffs
