@@ -38,6 +38,29 @@ Where:
 * $RV_{\text{monthly}}$ and $RV_{\text{seasonal}}$ are precomputed in the dataset.
 * The target is shifted by the forecast horizon during design-matrix creation.
 
+### Target Horizon
+
+Let $h$ be `target_horizon`. The supervised target used at time $t$ is:
+
+$$
+y_t = RV_{t+h}
+$$
+
+So the model maps features at time $t$ to future realized volatility at $t+h$:
+
+$$
+f(\mathbf{x}_t) \rightarrow RV_{t+h}
+$$
+
+Examples:
+
+* $h=1$: one-step-ahead forecast, $y_t = RV_{t+1}$
+* $h=4$: four-step-ahead forecast, $y_t = RV_{t+4}$
+
+Data implication:
+
+* Last $h$ rows cannot be used as labeled training targets after shifting.
+
 ---
 
 ### HAR Lag Construction (Canonical Form)
@@ -118,7 +141,7 @@ Benchmark run profiles:
 Each profile defines:
 
 * Walk-forward strategy (expanding or rolling)
-* Selection method (`none`, `lasso`, `bsr`)
+* Selection method (`lasso`, `bsr`)
 * Model configuration (standardization, target transform)
 * Selection refit cadence via `refit_every_windows`
 
@@ -187,11 +210,6 @@ $$
 =
 
 \{\max(1, \tau_k - w), \dots, \tau_k - 1\}
-$$
-
-**Benchmark default**
-$$
-h = 1
 $$
 
 ---
@@ -379,37 +397,48 @@ $$
 
 ---
 
-## 10) Caching and Runtime
+## 10) Report Columns Description
 
-Benchmark caching is implemented under:
+Each row in `data/benchmark/har.csv` is one `(model_type, feature_set)` experiment.
 
-```
-.cache/benchmark/
-```
-
-Cache key includes dataset signature, run config, feature config, and model name. Cached artifacts include predictions, coefficients, and metadata.
-
----
-
-## 11) Output CSV
-
-Default output path:
-
-```
-data/benchmark/har.csv
-```
-
----
-
-## 12) CSV Column Dictionary
-
-*(unchanged — descriptive, no math required)*
-
----
-
-## 13) Interpretation Guidance
-
-* Focus on **test metrics**, especially $\text{QLIKE}$ and $R^2_{\log}$
-* Monitor train–test gaps for overfitting
-* Prefer parsimonious models when performance is similar
-* Moderate refit cadence offers strong runtime–accuracy tradeoffs
+| Column | Description |
+|---|---|
+| `model_type` | Run profile name (for example `lasso_expanding`, `bsr_rolling`). |
+| `feature_set` | Feature-set name (`har`, `har_endo`, `har_endo_exo`, etc.). |
+| `n_selected` | Number of selected features. |
+| `selected_features` | Comma-separated selected feature names. |
+| `train_mse` | Aggregated train MSE across walk-forward windows. |
+| `train_mae` | Aggregated train MAE across walk-forward windows. |
+| `train_qlike` | Aggregated train QLIKE. |
+| `train_r2` | Aggregated train $R^2$ on original scale. |
+| `train_r2log` | Aggregated train $R^2_{\log}$. |
+| `test_mse` | Aggregated test MSE across walk-forward windows. |
+| `test_mae` | Aggregated test MAE across walk-forward windows. |
+| `test_qlike` | Aggregated test QLIKE. |
+| `test_r2` | Aggregated test $R^2$ on original scale. |
+| `test_r2log` | Aggregated test $R^2_{\log}$. |
+| `target_col_raw` | Original target column from dataset. |
+| `target_col_model` | Internal model target column name (usually `RV_target`). |
+| `target_horizon` | Forecast horizon used for target shift. |
+| `core_columns` | Comma-separated forced HAR core columns. |
+| `extra_feature_cols` | Comma-separated extra feature columns used in that feature set. |
+| `window_type` | Walk-forward mode: `expanding` or `rolling`. |
+| `initial_train_size` | Initial number of train observations. |
+| `window_test_size` | Test block size per window. |
+| `window_step` | Step size between windows. |
+| `rolling_window_size` | Train window length if rolling; empty otherwise. |
+| `n_windows` | Number of generated walk-forward windows. |
+| `selection_method` | Feature selection method: `none`, `lasso`, or `bsr`. |
+| `model_add_constant` | Whether intercept (`const`) is included in OLS. |
+| `model_standardize_features` | Whether features were standardized window-by-window. |
+| `model_target_transform` | Target transform mode (`none` or `log`). |
+| `model_prediction_floor` | Minimum clipping value used for target/predictions. |
+| `model_log_transform_rv_features` | Whether RV-like features were log-transformed. |
+| `model_feature_floor` | Minimum clipping value for RV feature log transform. |
+| `model_max_selected_features` | Maximum allowed selected feature count (after budget rule). |
+| `model_min_train_feature_ratio` | Minimum train-observations-per-feature ratio used in budget rule. |
+| `lasso_best_alpha` | Best LASSO alpha (only for LASSO runs). |
+| `bsr_alpha` | BSR significance threshold alpha (only for BSR runs). |
+| `bsr_window_type` | BSR internal window setting recorded in selection info. |
+| `bsr_window_size` | BSR internal window size if applicable. |
+| `bsr_step` | BSR internal step if applicable. |
