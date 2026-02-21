@@ -47,6 +47,7 @@ class WheatHARBenchmarkConfig:
     target_col: str = DEFAULT_TARGET
     core_columns: list[str] | None = None
     target_horizon: int = 1
+    target_horizons: list[int] | None = None
     run_configs: dict[str, HARRunConfig] | None = None
     use_cache: bool = True
     cache_dir: str = ".cache/benchmark"
@@ -55,6 +56,18 @@ class WheatHARBenchmarkConfig:
 
 def _existing_columns(data: pd.DataFrame, columns: list[str]) -> list[str]:
     return [col for col in columns if col in data.columns]
+
+
+def _resolve_target_horizons(cfg: WheatHARBenchmarkConfig) -> list[int]:
+    horizons = cfg.target_horizons or [cfg.target_horizon]
+    unique_horizons = sorted({int(h) for h in horizons})
+    if not unique_horizons:
+        msg = "target_horizons cannot be empty."
+        raise ValueError(msg)
+    if any(h < 0 for h in unique_horizons):
+        msg = f"target_horizons must be >= 0. got={unique_horizons}"
+        raise ValueError(msg)
+    return unique_horizons
 
 
 def _build_wheat_endogenous_columns(
@@ -308,11 +321,96 @@ def _load_result_cache(cache_dir: Path, cache_key: str) -> HARExperimentResult |
     )
 
 
-def run_wheat_har_benchmark(
+def _run_wheat_har_benchmark_for_horizon(  # noqa: PLR0913
+    *,
+    data: pd.DataFrame,
+    cfg: WheatHARBenchmarkConfig,
+    core: list[str],
+    feature_sets: dict[str, list[str]],
+    model_run_configs: dict[str, HARRunConfig],
+    data_signature: str,
+    target_horizon: int,
+) -> dict[str, dict[str, Any]]:
+    cache_dir = Path(cfg.cache_dir) / f"target_horizon_{target_horizon}"
+    all_results: dict[str, dict[str, Any]] = {}
+
+    logger.info("Starting horizon=%d benchmark", target_horizon)
+    for model_name, run_cfg in model_run_configs.items():
+        logger.info(
+            "Running benchmark model type: %s (target_horizon=%d)",
+            model_name,
+            target_horizon,
+        )
+        model_results: dict[str, HARExperimentResult] = {}
+        base_feature_cfg = HARFeatureConfig(
+            target_col=cfg.target_col,
+            core_columns=core,
+            target_horizon=target_horizon,
+        )
+        for feature_set_name, extra_cols in feature_sets.items():
+            feature_cfg = replace(base_feature_cfg, extra_feature_cols=extra_cols)
+            cache_key = _cache_key(
+                model_name=model_name,
+                feature_set_name=feature_set_name,
+                feature_cfg=feature_cfg,
+                run_cfg=run_cfg,
+                data_signature=data_signature,
+            )
+
+            if cfg.use_cache and not cfg.cache_overwrite:
+                cached = _load_result_cache(cache_dir, cache_key)
+                if cached is not None:
+                    logger.info(
+                        "Cache hit for horizon=%d model=%s feature_set=%s at %s",
+                        target_horizon,
+                        model_name,
+                        feature_set_name,
+                        cache_dir / cache_key,
+                    )
+                    model_results[feature_set_name] = cached
+                    continue
+
+            logger.info(
+                "Cache miss for horizon=%d model=%s feature_set=%s; running training",
+                target_horizon,
+                model_name,
+                feature_set_name,
+            )
+            result = run_har_experiment_from_dataset(
+                data,
+                feature_config=feature_cfg,
+                run_config=run_cfg,
+            )
+            model_results[feature_set_name] = result
+
+            if cfg.use_cache:
+                _save_result_cache(
+                    cache_dir=cache_dir,
+                    cache_key=cache_key,
+                    result=result,
+                )
+                logger.info(
+                    "Saved cache for horizon=%d model=%s feature_set=%s at %s",
+                    target_horizon,
+                    model_name,
+                    feature_set_name,
+                    cache_dir / cache_key,
+                )
+
+        all_results[model_name] = model_results
+        logger.info(
+            "Completed benchmark model type: %s (target_horizon=%d)",
+            model_name,
+            target_horizon,
+        )
+    return all_results
+
+
+def run_wheat_har_benchmark_multi_horizon(
     *,
     config: WheatHARBenchmarkConfig | None = None,
     data: pd.DataFrame | None = None,
-) -> dict[str, dict[str, Any]]:
+) -> dict[int, dict[str, dict[str, Any]]]:
     cfg = config or WheatHARBenchmarkConfig()
     logger.info("Starting Wheat HAR benchmark")
     if data is None:
@@ -331,71 +429,48 @@ def run_wheat_har_benchmark(
 
     feature_sets = build_wheat_feature_sets(data, core_columns=core)
     data_signature = _dataset_signature(data)
-    cache_dir = Path(cfg.cache_dir)
-
     model_run_configs = cfg.run_configs or default_run_configs()
-    all_results: dict[str, dict[str, Any]] = {}
-
-    for model_name, run_cfg in model_run_configs.items():
-        logger.info("Running benchmark model type: %s", model_name)
-        model_results: dict[str, HARExperimentResult] = {}
-        base_feature_cfg = HARFeatureConfig(
-            target_col=cfg.target_col,
-            core_columns=core,
-            target_horizon=cfg.target_horizon,
+    results_by_horizon: dict[int, dict[str, dict[str, Any]]] = {}
+    for horizon in _resolve_target_horizons(cfg):
+        results_by_horizon[horizon] = _run_wheat_har_benchmark_for_horizon(
+            data=data,
+            cfg=cfg,
+            core=core,
+            feature_sets=feature_sets,
+            model_run_configs=model_run_configs,
+            data_signature=data_signature,
+            target_horizon=horizon,
         )
-        for feature_set_name, extra_cols in feature_sets.items():
-            feature_cfg = replace(base_feature_cfg, extra_feature_cols=extra_cols)
-            cache_key = _cache_key(
-                model_name=model_name,
-                feature_set_name=feature_set_name,
-                feature_cfg=feature_cfg,
-                run_cfg=run_cfg,
-                data_signature=data_signature,
-            )
 
-            if cfg.use_cache and not cfg.cache_overwrite:
-                cached = _load_result_cache(cache_dir, cache_key)
-                if cached is not None:
-                    logger.info(
-                        "Cache hit for model=%s feature_set=%s at %s",
-                        model_name,
-                        feature_set_name,
-                        cache_dir / cache_key,
-                    )
-                    model_results[feature_set_name] = cached
-                    continue
+    logger.info(
+        "Wheat HAR benchmark finished. horizons=%d",
+        len(results_by_horizon),
+    )
+    return results_by_horizon
 
-            logger.info(
-                "Cache miss for model=%s feature_set=%s; running training",
-                model_name,
-                feature_set_name,
-            )
-            result = run_har_experiment_from_dataset(
-                data,
-                feature_config=feature_cfg,
-                run_config=run_cfg,
-            )
-            model_results[feature_set_name] = result
 
-            if cfg.use_cache:
-                _save_result_cache(
-                    cache_dir=cache_dir,
-                    cache_key=cache_key,
-                    result=result,
-                )
-                logger.info(
-                    "Saved cache for model=%s feature_set=%s at %s",
-                    model_name,
-                    feature_set_name,
-                    cache_dir / cache_key,
-                )
+def run_wheat_har_benchmark(
+    *,
+    config: WheatHARBenchmarkConfig | None = None,
+    data: pd.DataFrame | None = None,
+) -> dict[str, dict[str, Any]]:
+    cfg = config or WheatHARBenchmarkConfig()
+    horizons = _resolve_target_horizons(cfg)
+    if len(horizons) > 1:
+        logger.warning(
+            "Multiple target horizons %s provided; run_wheat_har_benchmark uses "
+            "the first (%d). Use run_wheat_har_benchmark_multi_horizon for all.",
+            horizons,
+            horizons[0],
+        )
 
-        all_results[model_name] = model_results
-        logger.info("Completed benchmark model type: %s", model_name)
-
-    logger.info("Wheat HAR benchmark finished. model_types=%d", len(all_results))
-    return all_results
+    single_cfg = replace(
+        cfg,
+        target_horizon=horizons[0],
+        target_horizons=[horizons[0]],
+    )
+    results = run_wheat_har_benchmark_multi_horizon(config=single_cfg, data=data)
+    return results[horizons[0]]
 
 
 def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFrame:
@@ -462,3 +537,24 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
     summary = out.sort_values(["model_type", "test_mse", "test_mae"]).reset_index(drop=True)
     logger.info("Benchmark summary rows=%d", len(summary))
     return summary
+
+
+def benchmark_multi_horizon_results_to_frame(
+    results_by_horizon: dict[int, dict[str, dict[str, Any]]],
+) -> pd.DataFrame:
+    frames: list[pd.DataFrame] = []
+    for horizon, results in sorted(results_by_horizon.items()):
+        frame = benchmark_results_to_frame(results)
+        if frame.empty:
+            continue
+        frame = frame.copy()
+        if "target_horizon" not in frame.columns:
+            frame["target_horizon"] = horizon
+        frames.append(frame)
+
+    if not frames:
+        return pd.DataFrame()
+    out = pd.concat(frames, axis=0, ignore_index=True)
+    return out.sort_values(
+        ["target_horizon", "model_type", "test_mse", "test_mae"],
+    ).reset_index(drop=True)

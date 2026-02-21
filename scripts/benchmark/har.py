@@ -7,8 +7,10 @@ from typing import Any, cast
 
 from src.benchmark import (
     WheatHARBenchmarkConfig,
+    benchmark_multi_horizon_results_to_frame,
     benchmark_results_to_frame,
     run_wheat_har_benchmark,
+    run_wheat_har_benchmark_multi_horizon,
 )
 from src.model import (
     HARModelConfig,
@@ -53,6 +55,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=1,
         help="Forecast horizon (weeks)",
+    )
+    parser.add_argument(
+        "--target_horizons",
+        type=str,
+        default=None,
+        help="Comma-separated horizons (e.g. '1,4,8'). Overrides --target_horizon.",
     )
     parser.add_argument(
         "--log_level",
@@ -143,11 +151,22 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
+        target_horizons=(
+            [int(v) for v in raw["target_horizons"]]
+            if isinstance(raw.get("target_horizons"), list)
+            else None
+        ),
         run_configs=cast("dict[str, HARRunConfig]", run_configs),
         use_cache=bool(raw.get("use_cache", True)),
         cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
         cache_overwrite=bool(raw.get("cache_overwrite", False)),
     )
+
+
+def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
+    if value is None or not value.strip():
+        return None
+    return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
 def main() -> None:
@@ -172,10 +191,20 @@ def main() -> None:
         )
         logger.info("Using default/CLI benchmark config")
 
-    logger.info("Running benchmark with input=%s", cfg.csv_path)
-    results = run_wheat_har_benchmark(config=cfg)
+    cli_horizons = _parse_target_horizons_arg(args.target_horizons)
+    if cli_horizons is not None:
+        cfg.target_horizons = cli_horizons
+        cfg.target_horizon = cli_horizons[0]
+    elif cfg.target_horizons is None:
+        cfg.target_horizons = [cfg.target_horizon]
 
-    summary = benchmark_results_to_frame(results)
+    logger.info("Running benchmark with input=%s", cfg.csv_path)
+    if cfg.target_horizons and len(cfg.target_horizons) > 1:
+        results_by_horizon = run_wheat_har_benchmark_multi_horizon(config=cfg)
+        summary = benchmark_multi_horizon_results_to_frame(results_by_horizon)
+    else:
+        results = run_wheat_har_benchmark(config=cfg)
+        summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
     try:
@@ -193,10 +222,19 @@ def main() -> None:
             output_path.parent.mkdir(parents=True, exist_ok=True)
         else:
             raise
-    summary.to_csv(output_path, index=False)
-
-    logger.info("Benchmark summary saved to %s", output_path)
     logger.info("Benchmark rows=%d", len(summary))
+
+    output_name = output_path.name
+    horizons = cfg.target_horizons or [cfg.target_horizon]
+    for horizon in horizons:
+        horizon_df = summary[summary["target_horizon"] == horizon].copy()
+        if horizon_df.empty:
+            continue
+        horizon_dir = output_path.parent / f"target_horizon_{horizon}"
+        horizon_dir.mkdir(parents=True, exist_ok=True)
+        horizon_out = horizon_dir / output_name
+        horizon_df.to_csv(horizon_out, index=False)
+        logger.info("Saved horizon=%d summary to %s", horizon, horizon_out)
 
     metric_cols = [
         "model_type",
