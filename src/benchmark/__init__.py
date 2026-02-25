@@ -1,4 +1,5 @@
 from .har_benchmark import (
+    HARGridSearchConfig,
     WheatHARBenchmarkConfig,
     benchmark_multi_horizon_results_to_frame,
     benchmark_results_to_frame,
@@ -9,6 +10,7 @@ from .har_benchmark import (
 )
 
 __all__ = [
+    "HARGridSearchConfig",
     "WheatHARBenchmarkConfig",
     "benchmark_multi_horizon_results_to_frame",
     "benchmark_results_to_frame",

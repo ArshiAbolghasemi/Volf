@@ -62,8 +62,6 @@ class HARModelConfig:
     prediction_floor: float = 1e-10
     log_transform_rv_features: bool = True
     feature_floor: float = 1e-10
-    max_selected_features: int | None = 25
-    min_train_feature_ratio: float = 5.0
 
 
 @dataclass
@@ -335,54 +333,6 @@ def predict_har_ols(
     return pd.Series(pred, index=x.index, name="y_pred")
 
 
-def _enforce_feature_budget(
-    selected_features: list[str],
-    core_columns: list[str],
-    x_train: pd.DataFrame,
-    y_train: pd.Series,
-    model_cfg: HARModelConfig,
-) -> list[str]:
-    if not selected_features:
-        return selected_features
-
-    core_set = set(core_columns)
-    core_kept = [feat for feat in selected_features if feat in core_set]
-    non_core = [feat for feat in selected_features if feat not in core_set]
-
-    max_selected = model_cfg.max_selected_features
-    if max_selected is None:
-        max_by_cap = len(selected_features)
-    else:
-        max_by_cap = max(max_selected, len(core_kept))
-
-    max_by_ratio = max(
-        len(core_kept),
-        int(np.floor(len(y_train) / max(model_cfg.min_train_feature_ratio, 1.0))),
-    )
-    final_max = min(max_by_cap, max_by_ratio)
-    final_max = max(final_max, len(core_kept))
-
-    allowed_non_core = max(final_max - len(core_kept), 0)
-    if len(non_core) <= allowed_non_core:
-        return core_kept + non_core
-
-    corr_scores: list[tuple[str, float]] = []
-    y_np = y_train.to_numpy(dtype=float)
-    for feat in non_core:
-        x_np = x_train[feat].to_numpy(dtype=float)
-        if np.std(x_np) == 0.0 or np.std(y_np) == 0.0:
-            score = 0.0
-        else:
-            score = float(abs(np.corrcoef(x_np, y_np)[0, 1]))
-            if not np.isfinite(score):
-                score = 0.0
-        corr_scores.append((feat, score))
-
-    corr_scores.sort(key=lambda item: item[1], reverse=True)
-    kept_non_core = [feat for feat, _ in corr_scores[:allowed_non_core]]
-    return core_kept + kept_non_core
-
-
 def _transform_target(y: pd.Series, model_cfg: HARModelConfig) -> pd.Series:
     if model_cfg.target_transform == "none":
         return y
@@ -523,14 +473,6 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
                     postfix["drop"] = int(dropped)
             window_iterator.set_postfix(postfix, refresh=False)
 
-        selected_features = _enforce_feature_budget(
-            selected_features=selected_features,
-            core_columns=core_columns,
-            x_train=x_train,
-            y_train=y_train,
-            model_cfg=model_cfg,
-        )
-
         for feat in selected_features:
             if feat not in selected_union:
                 selected_union.append(feat)
@@ -615,8 +557,6 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
         "model_log_transform_rv_features": model_cfg.log_transform_rv_features,
         "model_feature_floor": model_cfg.feature_floor,
         "transformed_feature_columns": transformed_feature_columns,
-        "model_max_selected_features": model_cfg.max_selected_features,
-        "model_min_train_feature_ratio": model_cfg.min_train_feature_ratio,
         "window_report": pd.DataFrame(window_rows),
     }
 
@@ -697,8 +637,6 @@ def run_har_experiment_from_dataset(
             "model_prediction_floor": model_cfg.prediction_floor,
             "model_log_transform_rv_features": model_cfg.log_transform_rv_features,
             "model_feature_floor": model_cfg.feature_floor,
-            "model_max_selected_features": model_cfg.max_selected_features,
-            "model_min_train_feature_ratio": model_cfg.min_train_feature_ratio,
         }
     )
     return result

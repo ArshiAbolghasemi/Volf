@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import itertools
 import json
 import logging
 from dataclasses import asdict, dataclass, replace
@@ -39,6 +40,21 @@ CLIMATE_COLUMNS = [
 
 NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly"]
 MACRO_COLUMNS = ["DJIA_Index", "WTI_Index", "Broad_Dollar_index", "Stock_Uncertainty"]
+DEFAULT_INITIAL_TRAIN_SIZE = 260
+DEFAULT_TEST_SIZE = 4
+DEFAULT_STEP = 4
+DEFAULT_ROLLING_WINDOW_SIZE = 260
+
+
+@dataclass
+class HARGridSearchConfig:
+    enabled: bool = False
+    metric: str = "test_mse"
+    maximize_metric: bool = False
+    initial_train_sizes: list[int] | None = None
+    test_sizes: list[int] | None = None
+    steps: list[int] | None = None
+    max_candidates: int | None = 50
 
 
 @dataclass
@@ -49,6 +65,7 @@ class WheatHARBenchmarkConfig:
     target_horizon: int = 1
     target_horizons: list[int] | None = None
     run_configs: dict[str, HARRunConfig] | None = None
+    grid_search: HARGridSearchConfig | None = None
     use_cache: bool = True
     cache_dir: str = ".cache/benchmark"
     cache_overwrite: bool = False
@@ -84,7 +101,7 @@ def _build_exogenous_columns(data: pd.DataFrame) -> list[str]:
 
 
 def _build_news_columns(data: pd.DataFrame) -> list[str]:
-    epu_cols = sorted([col for col in data.columns if col.startswith("epu_")])
+    epu_cols = ["epu_index"]
     base = _existing_columns(data, NEWS_BASE_COLUMNS)
     return base + epu_cols
 
@@ -129,20 +146,33 @@ def build_wheat_feature_sets(
 def default_run_configs() -> dict[str, HARRunConfig]:
     return {
         "ols_expanding": HARRunConfig(
-            walk_forward=HARWalkForwardConfig(window_type="expanding"),
+            walk_forward=HARWalkForwardConfig(
+                window_type="expanding",
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+            ),
             selection=HARSelectionConfig(method="none"),
             model=HARModelConfig(standardize_features=False),
         ),
         "ols_rolling": HARRunConfig(
             walk_forward=HARWalkForwardConfig(
                 window_type="rolling",
-                rolling_window_size=104,
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+                rolling_window_size=DEFAULT_ROLLING_WINDOW_SIZE,
             ),
             selection=HARSelectionConfig(method="none"),
             model=HARModelConfig(standardize_features=False),
         ),
         "lasso_expanding": HARRunConfig(
-            walk_forward=HARWalkForwardConfig(window_type="expanding"),
+            walk_forward=HARWalkForwardConfig(
+                window_type="expanding",
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+            ),
             selection=HARSelectionConfig(
                 method="lasso",
                 lasso=LassoSelectionConfig(n_splits=5),
@@ -153,7 +183,10 @@ def default_run_configs() -> dict[str, HARRunConfig]:
         "lasso_rolling": HARRunConfig(
             walk_forward=HARWalkForwardConfig(
                 window_type="rolling",
-                rolling_window_size=104,
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+                rolling_window_size=DEFAULT_ROLLING_WINDOW_SIZE,
             ),
             selection=HARSelectionConfig(
                 method="lasso",
@@ -163,7 +196,12 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             model=HARModelConfig(standardize_features=True),
         ),
         "bsr_expanding": HARRunConfig(
-            walk_forward=HARWalkForwardConfig(window_type="expanding"),
+            walk_forward=HARWalkForwardConfig(
+                window_type="expanding",
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+            ),
             selection=HARSelectionConfig(
                 method="bsr",
                 bsr=BSRSelectionConfig(alpha=0.05),
@@ -174,7 +212,10 @@ def default_run_configs() -> dict[str, HARRunConfig]:
         "bsr_rolling": HARRunConfig(
             walk_forward=HARWalkForwardConfig(
                 window_type="rolling",
-                rolling_window_size=104,
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+                rolling_window_size=DEFAULT_ROLLING_WINDOW_SIZE,
             ),
             selection=HARSelectionConfig(
                 method="bsr",
@@ -184,6 +225,132 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             model=HARModelConfig(standardize_features=False),
         ),
     }
+
+
+def _grid_or_default(values: list[Any] | None, default: Any) -> list[Any]:
+    if not values:
+        return [default]
+    return list(values)
+
+
+def _build_run_config_candidates(
+    base_run_cfg: HARRunConfig,
+    grid_cfg: HARGridSearchConfig | None,
+) -> list[HARRunConfig]:
+    if grid_cfg is None or not grid_cfg.enabled:
+        return [base_run_cfg]
+
+    base_wf = base_run_cfg.walk_forward or HARWalkForwardConfig()
+    base_sel = base_run_cfg.selection or HARSelectionConfig()
+    base_model = base_run_cfg.model or HARModelConfig()
+
+    initial_train_sizes = _grid_or_default(
+        grid_cfg.initial_train_sizes,
+        base_wf.initial_train_size,
+    )
+    test_sizes = _grid_or_default(grid_cfg.test_sizes, base_wf.test_size)
+    steps = _grid_or_default(grid_cfg.steps, base_wf.step)
+    combos = itertools.product(initial_train_sizes, test_sizes, steps)
+
+    candidates: list[HARRunConfig] = []
+    for initial_train_size, test_size, step in combos:
+        wf = replace(
+            base_wf,
+            initial_train_size=int(initial_train_size),
+            test_size=int(test_size),
+            step=int(step),
+            rolling_window_size=(
+                int(initial_train_size)
+                if base_wf.window_type == "rolling"
+                else base_wf.rolling_window_size
+            ),
+        )
+        candidates.append(
+            HARRunConfig(walk_forward=wf, selection=base_sel, model=base_model)
+        )
+        if (
+            grid_cfg.max_candidates is not None
+            and len(candidates) >= grid_cfg.max_candidates
+        ):
+            break
+
+    return candidates or [base_run_cfg]
+
+
+def _resolve_metric_value(result: HARExperimentResult, metric_name: str) -> float:
+    if "_" not in metric_name:
+        msg = f"grid metric must be prefixed with split, e.g. 'test_mse'. got={metric_name}"
+        raise ValueError(msg)
+    split, metric = metric_name.split("_", 1)
+    split_metrics = result.metrics.get(split)
+    if not isinstance(split_metrics, dict):
+        msg = f"unknown split in metric '{metric_name}'"
+        raise TypeError(msg)
+    value = split_metrics.get(metric)
+    if value is None:
+        msg = f"metric '{metric_name}' not found in result metrics"
+        raise ValueError(msg)
+    return float(value)
+
+
+def _run_single_with_cache(  # noqa: PLR0913
+    *,
+    data: pd.DataFrame,
+    cache_dir: Path,
+    cfg: WheatHARBenchmarkConfig,
+    model_name: str,
+    feature_set_name: str,
+    feature_cfg: HARFeatureConfig,
+    run_cfg: HARRunConfig,
+    data_signature: str,
+    target_horizon: int,
+) -> HARExperimentResult:
+    cache_key = _cache_key(
+        model_name=model_name,
+        feature_set_name=feature_set_name,
+        feature_cfg=feature_cfg,
+        run_cfg=run_cfg,
+        data_signature=data_signature,
+    )
+
+    if cfg.use_cache and not cfg.cache_overwrite:
+        cached = _load_result_cache(cache_dir, cache_key)
+        if cached is not None:
+            logger.info(
+                "Cache hit for horizon=%d model=%s feature_set=%s at %s",
+                target_horizon,
+                model_name,
+                feature_set_name,
+                cache_dir / cache_key,
+            )
+            return cached
+
+    logger.info(
+        "Cache miss for horizon=%d model=%s feature_set=%s; running training",
+        target_horizon,
+        model_name,
+        feature_set_name,
+    )
+    result = run_har_experiment_from_dataset(
+        data,
+        feature_config=feature_cfg,
+        run_config=run_cfg,
+    )
+
+    if cfg.use_cache:
+        _save_result_cache(
+            cache_dir=cache_dir,
+            cache_key=cache_key,
+            result=result,
+        )
+        logger.info(
+            "Saved cache for horizon=%d model=%s feature_set=%s at %s",
+            target_horizon,
+            model_name,
+            feature_set_name,
+            cache_dir / cache_key,
+        )
+    return result
 
 
 def _dataset_signature(data: pd.DataFrame) -> str:
@@ -349,53 +516,114 @@ def _run_wheat_har_benchmark_for_horizon(  # noqa: PLR0913
         )
         for feature_set_name, extra_cols in feature_sets.items():
             feature_cfg = replace(base_feature_cfg, extra_feature_cols=extra_cols)
-            cache_key = _cache_key(
-                model_name=model_name,
-                feature_set_name=feature_set_name,
-                feature_cfg=feature_cfg,
-                run_cfg=run_cfg,
-                data_signature=data_signature,
-            )
+            candidates = _build_run_config_candidates(run_cfg, cfg.grid_search)
+            best_result: HARExperimentResult | None = None
+            best_score: float | None = None
+            best_idx = -1
+            metric_name = cfg.grid_search.metric if cfg.grid_search else "test_mse"
+            maximize = bool(cfg.grid_search.maximize_metric) if cfg.grid_search else False
 
-            if cfg.use_cache and not cfg.cache_overwrite:
-                cached = _load_result_cache(cache_dir, cache_key)
-                if cached is not None:
-                    logger.info(
-                        "Cache hit for horizon=%d model=%s feature_set=%s at %s",
-                        target_horizon,
-                        model_name,
-                        feature_set_name,
-                        cache_dir / cache_key,
-                    )
-                    model_results[feature_set_name] = cached
-                    continue
-
-            logger.info(
-                "Cache miss for horizon=%d model=%s feature_set=%s; running training",
-                target_horizon,
-                model_name,
-                feature_set_name,
-            )
-            result = run_har_experiment_from_dataset(
-                data,
-                feature_config=feature_cfg,
-                run_config=run_cfg,
-            )
-            model_results[feature_set_name] = result
-
-            if cfg.use_cache:
-                _save_result_cache(
-                    cache_dir=cache_dir,
-                    cache_key=cache_key,
-                    result=result,
-                )
+            if len(candidates) > 1:
                 logger.info(
-                    "Saved cache for horizon=%d model=%s feature_set=%s at %s",
+                    (
+                        "Grid search active for horizon=%d model=%s "
+                        "feature_set=%s candidates=%d metric=%s"
+                    ),
                     target_horizon,
                     model_name,
                     feature_set_name,
-                    cache_dir / cache_key,
+                    len(candidates),
+                    metric_name,
                 )
+
+            for idx, candidate_cfg in enumerate(candidates):
+                candidate_wf = candidate_cfg.walk_forward or HARWalkForwardConfig()
+                candidate_model = candidate_cfg.model or HARModelConfig()
+                logger.info(
+                    (
+                        "Grid candidate %d/%d for horizon=%d model=%s feature_set=%s: "
+                        "window_type=%s initial_train_size=%d test_size=%d step=%d "
+                        "rolling_window_size=%s std=%s target_transform=%s"
+                    ),
+                    idx + 1,
+                    len(candidates),
+                    target_horizon,
+                    model_name,
+                    feature_set_name,
+                    candidate_wf.window_type,
+                    candidate_wf.initial_train_size,
+                    candidate_wf.test_size,
+                    candidate_wf.step,
+                    str(candidate_wf.rolling_window_size),
+                    candidate_model.standardize_features,
+                    candidate_model.target_transform,
+                )
+                result = _run_single_with_cache(
+                    data=data,
+                    cache_dir=cache_dir,
+                    cfg=cfg,
+                    model_name=model_name,
+                    feature_set_name=feature_set_name,
+                    feature_cfg=feature_cfg,
+                    run_cfg=candidate_cfg,
+                    data_signature=data_signature,
+                    target_horizon=target_horizon,
+                )
+                score = _resolve_metric_value(result, metric_name)
+                logger.info(
+                    (
+                        "Grid candidate %d/%d score for horizon=%d model=%s "
+                        "feature_set=%s: %s=%.10f"
+                    ),
+                    idx + 1,
+                    len(candidates),
+                    target_horizon,
+                    model_name,
+                    feature_set_name,
+                    metric_name,
+                    score,
+                )
+                is_better = best_score is None or (
+                    score > best_score if maximize else score < best_score
+                )
+                if is_better:
+                    best_score = score
+                    best_result = result
+                    best_idx = idx
+                    logger.info(
+                        (
+                            "Grid best updated for horizon=%d model=%s feature_set=%s: "
+                            "candidate=%d %s=%.10f"
+                        ),
+                        target_horizon,
+                        model_name,
+                        feature_set_name,
+                        best_idx + 1,
+                        metric_name,
+                        best_score,
+                    )
+
+            if best_result is None:
+                msg = "grid search failed to produce any candidate result."
+                raise RuntimeError(msg)
+            best_result.model_info["grid_search_best_candidate_idx"] = best_idx
+            best_result.model_info["grid_search_n_candidates"] = len(candidates)
+            best_result.model_info["grid_search_metric"] = metric_name
+            best_result.model_info["grid_search_metric_value"] = best_score
+            logger.info(
+                (
+                    "Grid selected for horizon=%d model=%s feature_set=%s: "
+                    "candidate=%d/%d %s=%.10f"
+                ),
+                target_horizon,
+                model_name,
+                feature_set_name,
+                best_idx + 1,
+                len(candidates),
+                metric_name,
+                float(best_score),
+            )
+            model_results[feature_set_name] = best_result
 
         all_results[model_name] = model_results
         logger.info(
@@ -516,17 +744,17 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
                     "model_log_transform_rv_features"
                 ),
                 "model_feature_floor": model_info.get("model_feature_floor"),
-                "model_max_selected_features": model_info.get(
-                    "model_max_selected_features"
-                ),
-                "model_min_train_feature_ratio": model_info.get(
-                    "model_min_train_feature_ratio"
-                ),
                 "lasso_best_alpha": selection_info.get("best_alpha"),
                 "bsr_alpha": selection_info.get("alpha"),
                 "bsr_window_type": selection_info.get("window_type"),
                 "bsr_window_size": selection_info.get("window_size"),
                 "bsr_step": selection_info.get("step"),
+                "grid_search_best_candidate_idx": model_info.get(
+                    "grid_search_best_candidate_idx"
+                ),
+                "grid_search_n_candidates": model_info.get("grid_search_n_candidates"),
+                "grid_search_metric": model_info.get("grid_search_metric"),
+                "grid_search_metric_value": model_info.get("grid_search_metric_value"),
             }
             rows.append(row)
 

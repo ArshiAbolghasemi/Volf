@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from src.benchmark import (
+    HARGridSearchConfig,
     WheatHARBenchmarkConfig,
     benchmark_multi_horizon_results_to_frame,
     benchmark_results_to_frame,
@@ -156,7 +157,12 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(raw.get("target_horizons"), list)
             else None
         ),
-        run_configs=cast("dict[str, HARRunConfig]", run_configs),
+        run_configs=cast("dict[str, HARRunConfig] | None", run_configs),
+        grid_search=(
+            HARGridSearchConfig(**raw["grid_search"])
+            if isinstance(raw.get("grid_search"), dict)
+            else None
+        ),
         use_cache=bool(raw.get("use_cache", True)),
         cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
         cache_overwrite=bool(raw.get("cache_overwrite", False)),
@@ -277,13 +283,15 @@ def main() -> None:
             "model_prediction_floor",
             "model_log_transform_rv_features",
             "model_feature_floor",
-            "model_max_selected_features",
-            "model_min_train_feature_ratio",
             "lasso_best_alpha",
             "bsr_alpha",
             "bsr_window_type",
             "bsr_window_size",
             "bsr_step",
+            "grid_search_best_candidate_idx",
+            "grid_search_n_candidates",
+            "grid_search_metric",
+            "grid_search_metric_value",
         ]
         available_hp_cols = [col for col in hp_cols if col in summary.columns]
         logger.info(
