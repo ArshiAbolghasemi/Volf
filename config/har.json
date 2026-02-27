@@ -217,5 +217,6 @@
       8
     ],
     "max_candidates": 80
-  }
+  },
+  "parallel_jobs": 1
 }

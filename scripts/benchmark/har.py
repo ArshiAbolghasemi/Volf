@@ -99,6 +99,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite existing cache entries and retrain",
     )
+    parser.add_argument(
+        "--parallel_jobs",
+        type=int,
+        default=None,
+        help="Number of concurrent benchmark tasks",
+    )
     return parser.parse_args()
 
 
@@ -163,6 +169,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(raw.get("grid_search"), dict)
             else None
         ),
+        parallel_jobs=int(raw.get("parallel_jobs", 1)),
         use_cache=bool(raw.get("use_cache", True)),
         cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
         cache_overwrite=bool(raw.get("cache_overwrite", False)),
@@ -175,7 +182,7 @@ def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
     return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901, PLR0912, PLR0915
     args = parse_args()
 
     logging.basicConfig(
@@ -191,11 +198,16 @@ def main() -> None:
             csv_path=args.input,
             target_col=args.target_col,
             target_horizon=args.target_horizon,
+            parallel_jobs=(
+                int(args.parallel_jobs) if args.parallel_jobs is not None else 1
+            ),
             use_cache=bool(args.use_cache),
             cache_dir=args.cache_dir,
             cache_overwrite=bool(args.cache_overwrite),
         )
         logger.info("Using default/CLI benchmark config")
+    if args.config and args.parallel_jobs is not None:
+        cfg.parallel_jobs = int(args.parallel_jobs)
 
     cli_horizons = _parse_target_horizons_arg(args.target_horizons)
     if cli_horizons is not None:
