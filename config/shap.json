@@ -1,0 +1,24 @@
+{
+  "benchmark_config": "config/har.json",
+  "output_subdir": "shap",
+  "jobs": [
+    {
+      "name": "lasso_rolling_har_endo_h1",
+      "target_horizon": 1,
+      "model_type": "lasso_rolling",
+      "feature_set": "har_endo",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3
+    },
+    {
+      "name": "lasso_rolling_har_endo_climate_news_h1",
+      "target_horizon": 1,
+      "model_type": "lasso_rolling",
+      "feature_set": "har_endo_exogenous_climate_news",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3
+    }
+  ]
+}

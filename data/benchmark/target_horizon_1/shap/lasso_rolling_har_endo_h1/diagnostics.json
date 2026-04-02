@@ -1,0 +1,35 @@
+{
+  "n_windows":59,
+  "n_obs_shap":59,
+  "target_horizon":1,
+  "model_type":"lasso_rolling",
+  "feature_set":"har_endo",
+  "split":"test",
+  "selected_features_report":[
+    "wheat_weekly_rv",
+    "wheat_weekly_trd",
+    "wheat_weekly_lev",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rsk",
+    "wheat_seasonal_lev",
+    "wheat_weekly_rvg",
+    "wheat_monthly_rvg",
+    "wheat_weekly_rsk",
+    "wheat_weekly_jumps",
+    "wheat_seasonal_tru",
+    "wheat_monthly_tru",
+    "wheat_weekly_rku",
+    "wheat_weekly_rvb",
+    "wheat_seasonal_rv",
+    "wheat_weekly_tru",
+    "wheat_monthly_rvb",
+    "wheat_monthly_trd",
+    "wheat_monthly_rsk",
+    "wheat_monthly_rku"
+  ],
+  "transformed_feature_columns":[
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv"
+  ]
+}
