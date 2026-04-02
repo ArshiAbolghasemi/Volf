@@ -2,10 +2,7 @@
   "csv_path": "data/ag/v4.csv",
   "target_col": "wheat_weekly_rv",
   "target_horizons": [
-    4,
-    8,
-    12,
-    16
+        1
   ],
   "use_cache": true,
   "cache_dir": ".cache/benchmark",

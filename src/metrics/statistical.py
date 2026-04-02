@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import math
 from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from scipy.stats import norm
 
 EPS = 1e-12
 MIN_CW_OBS = 2
@@ -49,10 +49,6 @@ def _align_and_clean(
     y_pred_aligned = cast("pd.Series", merged["y_pred"])
 
     return y_true_aligned, y_pred_aligned
-
-
-def _normal_cdf(x: float) -> float:
-    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
 def clark_west_test(
@@ -116,8 +112,8 @@ def clark_west_test(
         p_two_sided = float("nan")
         reject = False
     else:
-        p_one_sided = float(1.0 - _normal_cdf(cw_stat))
-        p_two_sided = float(2.0 * (1.0 - _normal_cdf(abs(cw_stat))))
+        p_one_sided = float(1.0 - norm.cdf(cw_stat))
+        p_two_sided = float(2.0 * (1.0 - norm.cdf(abs(cw_stat))))
         reject = bool(p_one_sided < SIGNIFICANCE_5PCT)
 
     return {

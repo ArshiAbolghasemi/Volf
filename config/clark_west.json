@@ -1,0 +1,20 @@
+{
+  "benchmark_config": "config/har.json",
+  "hac_maxlags": null,
+  "pairs": [
+    {
+      "name": "lasso_rolling_har_vs_har_endo",
+      "target_horizon": 1,
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo"
+    },
+    {
+      "name": "lasso_rolling_climate_vs_climate_news",
+      "target_horizon": 1,
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exogenous_climate",
+      "augmented_feature_set": "har_endo_exogenous_climate_news"
+    }
+  ]
+}
