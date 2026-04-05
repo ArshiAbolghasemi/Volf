@@ -181,7 +181,7 @@ def main() -> None:
         data=data,
     )
 
-    output_root = DATA_DIR / "benchmark"
+    output_root = DATA_DIR / "benchmark" / benchmark_cfg.target_mode
     for job in shap_cfg.jobs:
         if job.model_type not in model_run_configs:
             msg = f"model_type '{job.model_type}' not found in benchmark run configs."

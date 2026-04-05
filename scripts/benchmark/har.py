@@ -188,6 +188,10 @@ def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
     return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
+def _target_mode_output_dir(mode: str) -> Path:
+    return DATA_DIR / "benchmark" / mode
+
+
 def main(  # noqa: C901, PLR0912, PLR0915
     *,
     default_config: str | None = None,
@@ -238,10 +242,14 @@ def main(  # noqa: C901, PLR0912, PLR0915
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
+    mode_output_root = _target_mode_output_dir(cfg.target_mode)
+    if output_path.parent == (DATA_DIR / "benchmark"):
+        output_path = mode_output_root / output_path.name
+
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
-        fallback_path = DATA_DIR / "benchmark" / output_path.name
+        fallback_path = mode_output_root / output_path.name
         if exc.errno in {errno.EROFS, errno.EACCES, errno.ENOENT}:
             logger.warning(
                 "Output path %s is not writable/available (%s). Falling back to %s",

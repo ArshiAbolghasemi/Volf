@@ -179,7 +179,7 @@ def main() -> None:
         logger.warning("Clark-West output is empty")
         return
 
-    root_parent = DATA_DIR / "benchmark"
+    root_parent = DATA_DIR / "benchmark" / benchmark_cfg.target_mode
 
     horizons = sorted({int(h) for h in cw_frame["target_horizon"].tolist()})
     for horizon in horizons:
