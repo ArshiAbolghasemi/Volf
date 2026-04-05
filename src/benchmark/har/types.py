@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from src.util.path import DATA_DIR
 
@@ -48,6 +48,7 @@ class WheatHARBenchmarkConfig:
     core_columns: list[str] | None = None
     target_horizon: int = 1
     target_horizons: list[int] | None = None
+    target_mode: Literal["point", "mean"] = "point"
     run_configs: dict[str, HARRunConfig] | None = None
     grid_search: HARGridSearchConfig | None = None
     parallel_jobs: int = 1
@@ -66,3 +67,13 @@ def resolve_target_horizons(cfg: WheatHARBenchmarkConfig) -> list[int]:
         msg = f"target_horizons must be >= 0. got={unique_horizons}"
         raise ValueError(msg)
     return unique_horizons
+
+
+def normalize_target_mode(value: str) -> Literal["point", "mean"]:
+    raw = value.strip().lower()
+    if raw in {"point", "mean"}:
+        return raw
+    if raw == "future_log_mean":
+        return "mean"
+    msg = f"Unknown target_mode '{value}'. expected one of: point, mean."
+    raise ValueError(msg)

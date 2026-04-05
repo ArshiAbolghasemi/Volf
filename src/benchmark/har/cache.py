@@ -29,7 +29,7 @@ def cache_key(
     data_signature_value: str,
 ) -> str:
     payload = {
-        "cache_version": "v1",
+        "cache_version": "v2",
         "model_name": model_name,
         "feature_set_name": feature_set_name,
         "feature_config": asdict(feature_cfg),

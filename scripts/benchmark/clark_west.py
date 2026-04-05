@@ -14,6 +14,7 @@ from src.benchmark import (
     run_clark_west_by_pairs,
     run_wheat_har_benchmark_multi_horizon,
 )
+from src.benchmark.har.types import normalize_target_mode
 from src.model import HARModelConfig, HARRunConfig, HARSelectionConfig, HARWalkForwardConfig
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
@@ -96,6 +97,7 @@ def _load_benchmark_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(raw.get("target_horizons"), list)
             else None
         ),
+        target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
         run_configs=cast("dict[str, HARRunConfig] | None", run_configs),
         grid_search=(
             HARGridSearchConfig(**raw["grid_search"])
@@ -126,6 +128,7 @@ def _load_clark_west_config(path: str) -> tuple[WheatHARBenchmarkConfig, ClarkWe
                 if isinstance(raw.get("target_horizons"), list)
                 else None
             ),
+            target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
             use_cache=bool(raw.get("use_cache", True)),
             cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
             cache_overwrite=bool(raw.get("cache_overwrite", False)),

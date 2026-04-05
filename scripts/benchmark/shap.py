@@ -21,7 +21,7 @@ from src.benchmark import (
     save_shap_job_outputs,
 )
 from src.benchmark.har.features import existing_columns
-from src.benchmark.har.types import DEFAULT_CORE_COLUMNS
+from src.benchmark.har.types import DEFAULT_CORE_COLUMNS, normalize_target_mode
 from src.model import (
     HARFeatureConfig,
     HARModelConfig,
@@ -109,6 +109,7 @@ def _load_benchmark_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(raw.get("target_horizons"), list)
             else None
         ),
+        target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
         run_configs=cast("dict[str, HARRunConfig] | None", run_configs),
         grid_search=(
             HARGridSearchConfig(**raw["grid_search"])
@@ -215,6 +216,7 @@ def main() -> None:
             target_col=benchmark_cfg.target_col,
             core_columns=core_columns,
             target_horizon=horizon,
+            target_mode=benchmark_cfg.target_mode,
             extra_feature_cols=feature_sets[job.feature_set],
         )
 

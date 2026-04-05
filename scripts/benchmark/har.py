@@ -13,6 +13,7 @@ from src.benchmark import (
     run_wheat_har_benchmark,
     run_wheat_har_benchmark_multi_horizon,
 )
+from src.benchmark.har.types import normalize_target_mode
 from src.model import (
     HARModelConfig,
     HARRunConfig,
@@ -25,12 +26,16 @@ from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 logger = logging.getLogger(__name__)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(
+    *,
+    default_config: str | None = None,
+    default_output: str = str(DATA_DIR / "benchmark" / "har.csv"),
+) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Wheat HAR benchmark on ag/v4.csv")
     parser.add_argument(
         "--config",
         type=str,
-        default=None,
+        default=default_config,
         help="Path to JSON config file for benchmark",
     )
     parser.add_argument(
@@ -42,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=str,
-        default=str(DATA_DIR / "benchmark" / "har.csv"),
+        default=default_output,
         help="Path to save benchmark summary CSV",
     )
     parser.add_argument(
@@ -163,6 +168,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(raw.get("target_horizons"), list)
             else None
         ),
+        target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
         run_configs=cast("dict[str, HARRunConfig] | None", run_configs),
         grid_search=(
             HARGridSearchConfig(**raw["grid_search"])
@@ -182,8 +188,15 @@ def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
     return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
-def main() -> None:  # noqa: C901, PLR0912, PLR0915
-    args = parse_args()
+def main(  # noqa: C901, PLR0912, PLR0915
+    *,
+    default_config: str | None = None,
+    default_output: str = str(DATA_DIR / "benchmark" / "har.csv"),
+) -> None:
+    args = parse_args(
+        default_config=default_config,
+        default_output=default_output,
+    )
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),

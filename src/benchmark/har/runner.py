@@ -175,6 +175,7 @@ def _run_benchmark_task(  # noqa: PLR0913
         target_col=cfg.target_col,
         core_columns=core,
         target_horizon=horizon,
+        target_mode=cfg.target_mode,
         extra_feature_cols=extra_cols,
     )
     candidates = _build_run_config_candidates(run_cfg, cfg.grid_search)

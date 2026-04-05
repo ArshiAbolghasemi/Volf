@@ -264,21 +264,64 @@ def run_har_experiment_from_dataset(
         "Starting HAR experiment from raw dataset with selection method %s",
         selection_cfg.method,
     )
-    design, core_columns, target_col = build_har_design_matrix(data, feature_config)
+    design, core_columns, target_col = build_har_design_matrix(
+        data,
+        feature_config,
+        target_transform=model_cfg.target_transform,
+    )
     x, y = get_xy_from_har_design(design, target_col)
+
+    effective_run_config = run_config
+    if feature_config.target_mode == "mean" and model_cfg.target_transform != "none":
+        effective_model_cfg = replace(
+            model_cfg,
+            target_transform="none",
+            # Mean+log targets live on log scale; avoid clipping log predictions.
+            prediction_floor=-1e12,
+        )
+        effective_run_config = replace(cfg, model=effective_model_cfg)
+    else:
+        effective_model_cfg = model_cfg
 
     result = run_har_experiment_from_xy(
         x=x,
         y=y,
         core_columns=core_columns,
-        run_config=run_config,
+        run_config=effective_run_config,
     )
+
+    mean_log_target = (
+        feature_config.target_mode == "mean" and model_cfg.target_transform == "log"
+    )
+    if mean_log_target:
+        result.y_true_train = inverse_transform_prediction(
+            result.y_true_train.rename("y_true"),
+            model_cfg,
+        ).rename("y_true")
+        result.y_pred_train = inverse_transform_prediction(
+            result.y_pred_train.rename("y_pred"),
+            model_cfg,
+        ).rename("y_pred")
+        result.y_true_test = inverse_transform_prediction(
+            result.y_true_test.rename("y_true"),
+            model_cfg,
+        ).rename("y_true")
+        result.y_pred_test = inverse_transform_prediction(
+            result.y_pred_test.rename("y_pred"),
+            model_cfg,
+        ).rename("y_pred")
+        result.metrics = {
+            "train": evaluate_statistical_metrics(result.y_true_train, result.y_pred_train),
+            "test": evaluate_statistical_metrics(result.y_true_test, result.y_pred_test),
+        }
 
     result.model_info.update(
         {
             "target_col_raw": feature_config.target_col,
             "target_col_model": target_col,
             "target_horizon": feature_config.target_horizon,
+            "target_mode": feature_config.target_mode,
+            "target_floor": feature_config.target_floor,
             "core_columns": feature_config.core_columns,
             "extra_feature_cols": feature_config.extra_feature_cols or [],
             "selection_method": selection_cfg.method,
@@ -297,6 +340,8 @@ def run_har_experiment_from_dataset(
             "model_add_constant": model_cfg.add_constant,
             "model_standardize_features": model_cfg.standardize_features,
             "model_target_transform": model_cfg.target_transform,
+            "model_target_transform_effective": effective_model_cfg.target_transform,
+            "mean_log_target_inverse_applied": mean_log_target,
             "model_prediction_floor": model_cfg.prediction_floor,
             "model_log_transform_rv_features": model_cfg.log_transform_rv_features,
             "model_feature_floor": model_cfg.feature_floor,

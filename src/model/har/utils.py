@@ -43,10 +43,19 @@ def _validate_feature_config(cfg: HARFeatureConfig, data: pd.DataFrame) -> None:
         msg = "target_horizon must be >= 0."
         raise ValueError(msg)
 
+    if cfg.target_mode not in {"point", "mean"}:
+        msg = f"unknown target_mode '{cfg.target_mode}'."
+        raise ValueError(msg)
+    if cfg.target_mode == "mean" and cfg.target_horizon < 1:
+        msg = "target_horizon must be >= 1 when target_mode='mean'."
+        raise ValueError(msg)
+
 
 def build_har_design_matrix(
     data: pd.DataFrame,
     config: HARFeatureConfig,
+    *,
+    target_transform: str = "none",
 ) -> tuple[pd.DataFrame, list[str], str]:
     _validate_feature_config(config, data)
 
@@ -57,10 +66,29 @@ def build_har_design_matrix(
     design = cast("pd.DataFrame", data[feature_cols].copy())
 
     target_col = config.target_col_name
-    if config.target_horizon == 0:
-        design[target_col] = data[config.target_col]
+    if config.target_mode == "point":
+        if config.target_horizon == 0:
+            design[target_col] = data[config.target_col]
+        else:
+            design[target_col] = data[config.target_col].shift(-config.target_horizon)
     else:
-        design[target_col] = data[config.target_col].shift(-config.target_horizon)
+        base_target = cast("pd.Series", data[config.target_col].astype(float).copy())
+        if target_transform == "log":
+            clipped_target = np.clip(
+                base_target.to_numpy(dtype=float),
+                config.target_floor,
+                None,
+            )
+            base_target = pd.Series(
+                np.log(clipped_target),
+                index=data.index,
+                name=config.target_col,
+            )
+
+        horizon = int(config.target_horizon)
+        design[target_col] = (
+            base_target.shift(-1).rolling(window=horizon, min_periods=horizon).mean()
+        ).shift(-(horizon - 1))
 
     return design, config.core_columns.copy(), target_col
 

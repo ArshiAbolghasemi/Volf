@@ -219,5 +219,5 @@
     "max_candidates": 80
   },
   "parallel_jobs": 1,
-  "target_mode": "point"
+  "target_mode": "mean"
 }

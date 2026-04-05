@@ -139,10 +139,25 @@ def run_linear_shap_for_job(  # noqa: PLR0915
     run_cfg: HARRunConfig,
     job: ShapJobConfig,
 ) -> ShapJobResult:
-    design, _, target_col = build_har_design_matrix(data, feature_cfg)
+    model_cfg = run_cfg.model or HARModelConfig()
+    design, _, target_col = build_har_design_matrix(
+        data,
+        feature_cfg,
+        target_transform=model_cfg.target_transform,
+    )
     x, y = get_xy_from_har_design(design, target_col)
 
-    model_cfg = run_cfg.model or HARModelConfig()
+    effective_model_cfg = model_cfg
+    if feature_cfg.target_mode == "mean" and model_cfg.target_transform != "none":
+        effective_model_cfg = replace(
+            model_cfg,
+            target_transform="none",
+            prediction_floor=-1e12,
+        )
+    mean_log_target = (
+        feature_cfg.target_mode == "mean" and model_cfg.target_transform == "log"
+    )
+
     selection_cfg = run_cfg.selection or HARSelectionConfig()
     wf_cfg = run_cfg.walk_forward or HARWalkForwardConfig(progress_bar=False)
 
@@ -151,10 +166,10 @@ def run_linear_shap_for_job(  # noqa: PLR0915
         date_series = data.loc[x.index, "Date"].astype(str)
 
     transformed_feature_columns: list[str] = []
-    if model_cfg.log_transform_rv_features:
+    if effective_model_cfg.log_transform_rv_features:
         x, transformed_feature_columns = log_transform_rv_features(
             x,
-            floor=model_cfg.feature_floor,
+            floor=effective_model_cfg.feature_floor,
         )
 
     windows = build_walk_forward_windows(len(x), wf_cfg)
@@ -193,7 +208,7 @@ def run_linear_shap_for_job(  # noqa: PLR0915
             else x_train[selected_features].copy()
         )
 
-        if model_cfg.standardize_features:
+        if effective_model_cfg.standardize_features:
             means = x_train_sel.mean()
             stds = x_train_sel.std(ddof=0).replace(0.0, 1.0)
             x_train_model = (x_train_sel - means) / stds
@@ -202,11 +217,11 @@ def run_linear_shap_for_job(  # noqa: PLR0915
             x_train_model = x_train_sel
             x_eval_model = x_eval_sel
 
-        y_train_model = transform_target(y_train, model_cfg)
+        y_train_model = transform_target(y_train, effective_model_cfg)
         model = _fit_linear(
             x_train=x_train_model,
             y_train=y_train_model,
-            add_constant=model_cfg.add_constant,
+            add_constant=effective_model_cfg.add_constant,
         )
 
         explainer = shap.LinearExplainer(model, x_train_model)
@@ -230,7 +245,10 @@ def run_linear_shap_for_job(  # noqa: PLR0915
             index=x_eval_model.index,
             name="pred_transformed",
         )
-        pred_raw = inverse_transform_prediction(pred_model_s.rename("y_pred"), model_cfg)
+        pred_raw = inverse_transform_prediction(
+            pred_model_s.rename("y_pred"),
+            model_cfg if mean_log_target else effective_model_cfg,
+        )
 
         shap_parts.append(shap_window)
         feature_parts.append(x_eval_model)

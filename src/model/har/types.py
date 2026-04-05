@@ -18,6 +18,8 @@ class HARFeatureConfig:
     target_horizon: int = 1
     extra_feature_cols: list[str] | None = None
     target_col_name: str = "RV_target"
+    target_mode: Literal["point", "mean"] = "point"
+    target_floor: float = 1e-10
 
 
 @dataclass
