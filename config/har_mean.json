@@ -17,48 +17,6 @@
   ],
   "target_horizon": 1,
   "run_configs": {
-    "ols_expanding": {
-      "walk_forward": {
-        "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": null
-      },
-      "selection": {
-        "method": "none",
-        "refit_every_windows": 1
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": true,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
-    "ols_rolling": {
-      "walk_forward": {
-        "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
-      },
-      "selection": {
-        "method": "none",
-        "refit_every_windows": 1
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": true,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
     "lasso_expanding": {
       "walk_forward": {
         "window_type": "expanding",
