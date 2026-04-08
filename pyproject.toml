@@ -5,27 +5,28 @@ authors = [
     {name = "Arshia Abolghasemi", email = "arshiabolghasemi@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 
 dependencies = [
-    "pandas==3.0.1",
-    "numpy==2.4.2",
-    "requests==2.32.5",
-    "dynaconf==3.2.12",
-    "tenacity==9.1.4",
+    "pandas==2.2.2",
+    "numpy==1.26.4",
+    "requests==2.32.3",
+    "dynaconf==3.2.5",
+    "tenacity==9.0.0",
     "pytrends==4.9.2",
-    "pyarrow==23.0.1",
-    "scikit-learn==1.8.0",
-    "statsmodels==0.14.6",
-    "matplotlib==3.10.8",
-    "tqdm==4.67.3",
-    "google-cloud-bigquery==3.40.1",
-    "google-cloud-bigquery-storage==2.36.1",
-    "shap==0.51.0",
+    "pyarrow==16.1.0",
+    "scikit-learn==1.5.1",
+    "scipy==1.13.1",
+    "statsmodels==0.14.2",
+    "matplotlib==3.8.4",
+    "tqdm==4.66.4",
+    "google-cloud-bigquery==3.25.0",
+    "google-cloud-bigquery-storage==2.25.0",
+    "shap==0.45.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff==0.14.1",
+    "ruff==0.5.6",
 ]
