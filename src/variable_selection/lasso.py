@@ -47,8 +47,16 @@ def _build_lasso_pipeline(
     eps: float | None = None,
 ) -> Pipeline:
     cv = TimeSeriesSplit(n_splits=cfg.n_splits)
+    if isinstance(cfg.alphas, int):
+        lasso_alphas: np.ndarray | None = None
+        lasso_n_alphas = int(cfg.alphas)
+    else:
+        lasso_alphas = cfg.alphas
+        lasso_n_alphas = 100
+
     lasso = LassoCV(
-        alphas=cfg.alphas,  # type: ignore[arg-type]
+        alphas=lasso_alphas,
+        n_alphas=lasso_n_alphas,
         cv=cv,
         max_iter=max_iter if max_iter is not None else cfg.max_iter,
         tol=cfg.tol,
