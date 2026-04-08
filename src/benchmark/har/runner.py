@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import itertools
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.model_selection import GridSearchCV
 
 from src.model import (
     HARExperimentResult,
@@ -37,16 +39,19 @@ def _grid_or_default(values: list[Any] | None, default: Any) -> list[Any]:
     return list(values)
 
 
-def _build_run_config_candidates(
+def _build_param_candidates(
     base_run_cfg: HARRunConfig,
     grid_cfg: HARGridSearchConfig | None,
-) -> list[HARRunConfig]:
-    if grid_cfg is None or not grid_cfg.enabled:
-        return [base_run_cfg]
-
+) -> list[dict[str, int]]:
     base_wf = base_run_cfg.walk_forward or HARWalkForwardConfig()
-    base_sel = base_run_cfg.selection or HARSelectionConfig()
-    base_model = base_run_cfg.model or HARModelConfig()
+    if grid_cfg is None or not grid_cfg.enabled:
+        return [
+            {
+                "initial_train_size": int(base_wf.initial_train_size),
+                "test_size": int(base_wf.test_size),
+                "step": int(base_wf.step),
+            }
+        ]
 
     initial_train_sizes = _grid_or_default(
         grid_cfg.initial_train_sizes,
@@ -55,31 +60,46 @@ def _build_run_config_candidates(
     test_sizes = _grid_or_default(grid_cfg.test_sizes, base_wf.test_size)
     steps = _grid_or_default(grid_cfg.steps, base_wf.step)
 
-    combos = itertools.product(initial_train_sizes, test_sizes, steps)
-
-    candidates: list[HARRunConfig] = []
-    for initial_train_size, test_size, step in combos:
-        wf = replace(
-            base_wf,
-            initial_train_size=int(initial_train_size),
-            test_size=int(test_size),
-            step=int(step),
-            rolling_window_size=(
-                int(initial_train_size)
-                if base_wf.window_type == "rolling"
-                else base_wf.rolling_window_size
-            ),
-        )
-        candidates.append(
-            HARRunConfig(walk_forward=wf, selection=base_sel, model=base_model)
-        )
+    candidates: list[dict[str, int]] = []
+    for initial_train_size in initial_train_sizes:
+        for test_size in test_sizes:
+            for step in steps:
+                candidates.append(  # noqa: PERF401
+                    {
+                        "initial_train_size": int(initial_train_size),
+                        "test_size": int(test_size),
+                        "step": int(step),
+                    }
+                )
         if (
             grid_cfg.max_candidates is not None
             and len(candidates) >= grid_cfg.max_candidates
         ):
             break
 
-    return candidates or [base_run_cfg]
+    return candidates
+
+
+def _run_cfg_from_candidate(
+    base_cfg: HARRunConfig,
+    candidate: dict[str, int],
+) -> HARRunConfig:
+    base_wf = base_cfg.walk_forward or HARWalkForwardConfig()
+    base_sel = base_cfg.selection or HARSelectionConfig()
+    base_model = base_cfg.model or HARModelConfig()
+    initial_train_size = int(candidate["initial_train_size"])
+    wf = replace(
+        base_wf,
+        initial_train_size=initial_train_size,
+        test_size=int(candidate["test_size"]),
+        step=int(candidate["step"]),
+        rolling_window_size=(
+            initial_train_size
+            if base_wf.window_type == "rolling"
+            else base_wf.rolling_window_size
+        ),
+    )
+    return HARRunConfig(walk_forward=wf, selection=base_sel, model=base_model)
 
 
 def _resolve_metric_value(result: HARExperimentResult, metric_name: str) -> float:
@@ -178,10 +198,7 @@ def _run_benchmark_task(  # noqa: PLR0913
         target_mode=cfg.target_mode,
         extra_feature_cols=extra_cols,
     )
-    candidates = _build_run_config_candidates(run_cfg, cfg.grid_search)
-    best_result: HARExperimentResult | None = None
-    best_score: float | None = None
-    best_idx = -1
+    candidates = _build_param_candidates(run_cfg, cfg.grid_search)
     metric_name = cfg.grid_search.metric if cfg.grid_search else "test_mse"
     maximize = bool(cfg.grid_search.maximize_metric) if cfg.grid_search else False
 
@@ -198,73 +215,74 @@ def _run_benchmark_task(  # noqa: PLR0913
             metric_name,
         )
 
-    for idx, candidate_cfg in enumerate(candidates):
-        candidate_wf = candidate_cfg.walk_forward or HARWalkForwardConfig()
-        candidate_model = candidate_cfg.model or HARModelConfig()
-        logger.info(
-            (
-                "Grid candidate %d/%d for horizon=%d model=%s feature_set=%s: "
-                "window_type=%s initial_train_size=%d test_size=%d step=%d "
-                "rolling_window_size=%s std=%s target_transform=%s"
-            ),
-            idx + 1,
-            len(candidates),
-            horizon,
-            model_name,
-            feature_set_name,
-            candidate_wf.window_type,
-            candidate_wf.initial_train_size,
-            candidate_wf.test_size,
-            candidate_wf.step,
-            str(candidate_wf.rolling_window_size),
-            candidate_model.standardize_features,
-            candidate_model.target_transform,
-        )
-        result = _run_single_with_cache(
-            data=data,
-            cache_dir=cache_dir,
-            cfg=cfg,
-            model_name=model_name,
-            feature_set_name=feature_set_name,
-            feature_cfg=feature_cfg,
-            run_cfg=candidate_cfg,
-            data_signature_value=data_signature_value,
-            target_horizon=horizon,
-        )
-        score = _resolve_metric_value(result, metric_name)
-        logger.info(
-            ("Grid candidate %d/%d score for horizon=%d model=%s feature_set=%s: %s=%.10f"),
-            idx + 1,
-            len(candidates),
-            horizon,
-            model_name,
-            feature_set_name,
-            metric_name,
-            score,
-        )
-        is_better = best_score is None or (
-            score > best_score if maximize else score < best_score
-        )
-        if is_better:
-            best_score = score
-            best_result = result
-            best_idx = idx
-            logger.info(
-                (
-                    "Grid best updated for horizon=%d model=%s feature_set=%s: "
-                    "candidate=%d %s=%.10f"
-                ),
-                horizon,
-                model_name,
-                feature_set_name,
-                best_idx + 1,
-                metric_name,
-                best_score,
-            )
+    class _HAREstimator(BaseEstimator):
+        def __init__(
+            self,
+            *,
+            initial_train_size: int,
+            test_size: int,
+            step: int,
+        ) -> None:
+            self.initial_train_size = initial_train_size
+            self.test_size = test_size
+            self.step = step
 
-    if best_result is None:
+        def fit(self, x_fit: pd.DataFrame, _y_fit: Any = None) -> _HAREstimator:
+            candidate_cfg = _run_cfg_from_candidate(
+                run_cfg,
+                {
+                    "initial_train_size": int(self.initial_train_size),
+                    "test_size": int(self.test_size),
+                    "step": int(self.step),
+                },
+            )
+            self.result_ = _run_single_with_cache(
+                data=x_fit,
+                cache_dir=cache_dir,
+                cfg=cfg,
+                model_name=model_name,
+                feature_set_name=feature_set_name,
+                feature_cfg=feature_cfg,
+                run_cfg=candidate_cfg,
+                data_signature_value=data_signature_value,
+                target_horizon=horizon,
+            )
+            self.metric_value_ = _resolve_metric_value(self.result_, metric_name)
+            return self
+
+    def _scorer(estimator: _HAREstimator, _x: pd.DataFrame, _y: Any) -> float:
+        metric_value = float(estimator.metric_value_)
+        return metric_value if maximize else -metric_value
+
+    param_grid = [
+        {
+            "initial_train_size": [candidate["initial_train_size"]],
+            "test_size": [candidate["test_size"]],
+            "step": [candidate["step"]],
+        }
+        for candidate in candidates
+    ]
+    cv_split = [(np.arange(len(data), dtype=int), np.arange(len(data), dtype=int))]
+    grid = GridSearchCV(
+        estimator=_HAREstimator(
+            initial_train_size=candidates[0]["initial_train_size"],
+            test_size=candidates[0]["test_size"],
+            step=candidates[0]["step"],
+        ),
+        param_grid=param_grid,
+        scoring=_scorer,
+        cv=cv_split,
+        n_jobs=1,
+        refit=True,
+    )
+    grid.fit(data, np.zeros(len(data), dtype=float))
+
+    if not hasattr(grid.best_estimator_, "result_"):
         msg = "grid search failed to produce any candidate result."
         raise RuntimeError(msg)
+    best_result = grid.best_estimator_.result_
+    best_score = float(grid.best_estimator_.metric_value_)
+    best_idx = int(grid.best_index_)
 
     best_result.model_info["grid_search_best_candidate_idx"] = best_idx
     best_result.model_info["grid_search_n_candidates"] = len(candidates)

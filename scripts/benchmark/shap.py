@@ -8,20 +8,25 @@ from typing import Any, cast
 
 import pandas as pd
 
-from src.benchmark import (
+from src.benchmark.har import (
     HARGridSearchConfig,
-    ShapConfig,
-    ShapJobConfig,
     WheatHARBenchmarkConfig,
     build_wheat_feature_sets,
     default_run_configs,
+    run_wheat_har_benchmark_multi_horizon,
+)
+from src.benchmark.har.shap import (
+    ShapConfig,
+    ShapJobConfig,
     resolve_run_config_for_shap_job,
     run_linear_shap_for_job,
-    run_wheat_har_benchmark_multi_horizon,
     save_shap_job_outputs,
 )
-from src.benchmark.har.features import existing_columns
-from src.benchmark.har.types import DEFAULT_CORE_COLUMNS, normalize_target_mode
+from src.benchmark.utils import (
+    DEFAULT_CORE_COLUMNS,
+    existing_columns,
+    normalize_target_mode,
+)
 from src.model import (
     HARFeatureConfig,
     HARModelConfig,

@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
-from src.benchmark import (
+from src.benchmark.har import (
     ClarkWestConfig,
     ClarkWestPairConfig,
     HARGridSearchConfig,
@@ -14,7 +14,7 @@ from src.benchmark import (
     run_clark_west_by_pairs,
     run_wheat_har_benchmark_multi_horizon,
 )
-from src.benchmark.har.types import normalize_target_mode
+from src.benchmark.utils import normalize_target_mode
 from src.model import HARModelConfig, HARRunConfig, HARSelectionConfig, HARWalkForwardConfig
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig

@@ -1,0 +1,69 @@
+{
+  "csv_path": "data/ag/v4.csv",
+  "target_col": "wheat_weekly_rv",
+  "target_horizons": [1, 4, 8, 12, 16],
+  "use_cache": true,
+  "cache_dir": ".cache/benchmark",
+  "cache_overwrite": false,
+  "target_mode": "point",
+  "core_columns": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv"
+  ],
+  "run_configs": {
+    "rf_expanding": {
+      "walk_forward": {
+        "window_type": "expanding",
+        "initial_train_size": 260,
+        "test_size": 4,
+        "step": 4
+      },
+      "model": {
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_split": 6,
+        "min_samples_leaf": 4,
+        "max_features": "sqrt",
+        "bootstrap": true,
+        "random_state": 42,
+        "n_jobs": -1,
+        "target_transform": "log",
+        "log_transform_rv_features": true
+      }
+    },
+    "rf_rolling": {
+      "walk_forward": {
+        "window_type": "rolling",
+        "initial_train_size": 260,
+        "test_size": 4,
+        "step": 4,
+        "rolling_window_size": 260
+      },
+      "model": {
+        "n_estimators": 100,
+        "max_depth": 6,
+        "min_samples_split": 6,
+        "min_samples_leaf": 4,
+        "max_features": "sqrt",
+        "bootstrap": true,
+        "random_state": 42,
+        "n_jobs": -1,
+        "target_transform": "log",
+        "log_transform_rv_features": true
+      }
+    }
+  },
+  "grid_search": {
+    "enabled": true,
+    "metric": "test_r2",
+    "maximize_metric": true,
+    "initial_train_sizes": [208, 260, 312],
+    "test_sizes": [2, 4, 8],
+    "steps": [2, 4, 8],
+    "max_depths": [4, 6, 8],
+    "min_samples_splits": [4, 8, 16],
+    "min_samples_leafs": [2, 4, 8],
+    "max_candidates": 60
+  }
+}

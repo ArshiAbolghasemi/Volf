@@ -12,6 +12,17 @@ from .har import (
     run_har_experiment_from_xy,
     run_har_feature_set_grid,
 )
+from .rf import (
+    RFExperimentResult,
+    RFFeatureConfig,
+    RFGridConfig,
+    RFModelConfig,
+    RFRunConfig,
+    RFWalkForwardConfig,
+    run_rf_experiment_from_dataset,
+    run_rf_experiment_from_xy,
+    run_rf_feature_set_grid,
+)
 
 __all__ = [
     "HARExperimentResult",
@@ -21,9 +32,18 @@ __all__ = [
     "HARRunConfig",
     "HARSelectionConfig",
     "HARWalkForwardConfig",
+    "RFExperimentResult",
+    "RFFeatureConfig",
+    "RFGridConfig",
+    "RFModelConfig",
+    "RFRunConfig",
+    "RFWalkForwardConfig",
     "build_har_design_matrix",
     "get_xy_from_har_design",
     "run_har_experiment_from_dataset",
     "run_har_experiment_from_xy",
     "run_har_feature_set_grid",
+    "run_rf_experiment_from_dataset",
+    "run_rf_experiment_from_xy",
+    "run_rf_feature_set_grid",
 ]

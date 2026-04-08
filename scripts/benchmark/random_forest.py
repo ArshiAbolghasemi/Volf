@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import errno
 import json
@@ -5,23 +7,17 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
-from src.benchmark.har import (
-    HARGridSearchConfig,
-    WheatHARBenchmarkConfig,
+from src.benchmark.rf import (
+    RFGridSearchConfig,
+    WheatRFBenchmarkConfig,
     benchmark_multi_horizon_results_to_frame,
     benchmark_results_to_frame,
-    run_wheat_har_benchmark,
-    run_wheat_har_benchmark_multi_horizon,
+    run_wheat_rf_benchmark,
+    run_wheat_rf_benchmark_multi_horizon,
 )
 from src.benchmark.utils import normalize_target_mode
-from src.model import (
-    HARModelConfig,
-    HARRunConfig,
-    HARSelectionConfig,
-    HARWalkForwardConfig,
-)
+from src.model import RFModelConfig, RFRunConfig, RFWalkForwardConfig
 from src.util.path import DATA_DIR
-from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +25,9 @@ logger = logging.getLogger(__name__)
 def parse_args(
     *,
     default_config: str | None = None,
-    default_output: str = str(DATA_DIR / "benchmark" / "har.csv"),
+    default_output: str = str(DATA_DIR / "benchmark" / "random_forest.csv"),
 ) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run Wheat HAR benchmark on ag/v4.csv")
+    parser = argparse.ArgumentParser(description="Run Wheat RF benchmark on ag/v4.csv")
     parser.add_argument(
         "--config",
         type=str,
@@ -74,11 +70,6 @@ def parse_args(
         default="INFO",
         help="Logging level (DEBUG, INFO, WARNING, ERROR)",
     )
-    parser.add_argument(
-        "--print_hyperparams",
-        action="store_true",
-        help="Print hyperparameter table in logs",
-    )
     cache_group = parser.add_mutually_exclusive_group()
     cache_group.add_argument(
         "--use_cache",
@@ -97,56 +88,39 @@ def parse_args(
         "--cache_dir",
         type=str,
         default=".cache/benchmark",
-        help="Cache directory for benchmark artifacts",
+        help="Cache directory for RF benchmark artifacts",
     )
     parser.add_argument(
         "--cache_overwrite",
         action="store_true",
         help="Overwrite existing cache entries and retrain",
     )
-    parser.add_argument(
-        "--parallel_jobs",
-        type=int,
-        default=None,
-        help="Number of concurrent benchmark tasks",
-    )
     return parser.parse_args()
 
 
-def _build_run_config_from_dict(cfg: dict[str, Any]) -> HARRunConfig:
+def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
+    if value is None or not value.strip():
+        return None
+    return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
+
+
+def _target_mode_output_dir(mode: str) -> Path:
+    return DATA_DIR / "benchmark" / "rf" / mode
+
+
+def _build_run_config_from_dict(cfg: dict[str, Any]) -> RFRunConfig:
     walk_forward_cfg = None
     if isinstance(cfg.get("walk_forward"), dict):
-        walk_forward_cfg = HARWalkForwardConfig(**cfg["walk_forward"])
-
-    selection_cfg = None
-    if isinstance(cfg.get("selection"), dict):
-        selection_raw = cfg["selection"]
-        lasso_cfg = None
-        bsr_cfg = None
-        if isinstance(selection_raw.get("lasso"), dict):
-            lasso_cfg = LassoSelectionConfig(**selection_raw["lasso"])
-        if isinstance(selection_raw.get("bsr"), dict):
-            bsr_cfg = BSRSelectionConfig(**selection_raw["bsr"])
-
-        selection_cfg = HARSelectionConfig(
-            method=selection_raw.get("method", "none"),
-            lasso=lasso_cfg,
-            bsr=bsr_cfg,
-            refit_every_windows=int(selection_raw.get("refit_every_windows", 1)),
-        )
+        walk_forward_cfg = RFWalkForwardConfig(**cfg["walk_forward"])
 
     model_cfg = None
     if isinstance(cfg.get("model"), dict):
-        model_cfg = HARModelConfig(**cfg["model"])
+        model_cfg = RFModelConfig(**cfg["model"])
 
-    return HARRunConfig(
-        walk_forward=walk_forward_cfg,
-        selection=selection_cfg,
-        model=model_cfg,
-    )
+    return RFRunConfig(walk_forward=walk_forward_cfg, model=model_cfg)
 
 
-def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
+def _load_config_from_json(path: str) -> WheatRFBenchmarkConfig:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
@@ -158,7 +132,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             if isinstance(cfg, dict)
         }
 
-    return WheatHARBenchmarkConfig(
+    return WheatRFBenchmarkConfig(
         csv_path=raw.get("csv_path", str(DATA_DIR / "ag" / "v4.csv")),
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
@@ -169,33 +143,22 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
             else None
         ),
         target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
-        run_configs=cast("dict[str, HARRunConfig] | None", run_configs),
+        run_configs=cast("dict[str, RFRunConfig] | None", run_configs),
         grid_search=(
-            HARGridSearchConfig(**raw["grid_search"])
+            RFGridSearchConfig(**raw["grid_search"])
             if isinstance(raw.get("grid_search"), dict)
             else None
         ),
-        parallel_jobs=int(raw.get("parallel_jobs", 1)),
         use_cache=bool(raw.get("use_cache", True)),
         cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
         cache_overwrite=bool(raw.get("cache_overwrite", False)),
     )
 
 
-def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
-    if value is None or not value.strip():
-        return None
-    return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
-
-
-def _target_mode_output_dir(mode: str) -> Path:
-    return DATA_DIR / "benchmark" / "har" / mode
-
-
-def main(  # noqa: C901, PLR0912, PLR0915
+def main(  # noqa: C901, PLR0912
     *,
     default_config: str | None = None,
-    default_output: str = str(DATA_DIR / "benchmark" / "har.csv"),
+    default_output: str = str(DATA_DIR / "benchmark" / "random_forest.csv"),
 ) -> None:
     args = parse_args(
         default_config=default_config,
@@ -209,22 +172,21 @@ def main(  # noqa: C901, PLR0912, PLR0915
 
     if args.config:
         cfg = _load_config_from_json(args.config)
-        logger.info("Loaded benchmark config from %s", args.config)
+        logger.info("Loaded RF benchmark config from %s", args.config)
     else:
-        cfg = WheatHARBenchmarkConfig(
+        cfg = WheatRFBenchmarkConfig(
             csv_path=args.input,
             target_col=args.target_col,
             target_horizon=args.target_horizon,
-            parallel_jobs=(
-                int(args.parallel_jobs) if args.parallel_jobs is not None else 1
-            ),
             use_cache=bool(args.use_cache),
             cache_dir=args.cache_dir,
             cache_overwrite=bool(args.cache_overwrite),
         )
-        logger.info("Using default/CLI benchmark config")
-    if args.config and args.parallel_jobs is not None:
-        cfg.parallel_jobs = int(args.parallel_jobs)
+        logger.info("Using default/CLI RF benchmark config")
+    if args.config:
+        cfg.use_cache = bool(args.use_cache)
+        cfg.cache_dir = args.cache_dir
+        cfg.cache_overwrite = bool(args.cache_overwrite)
 
     cli_horizons = _parse_target_horizons_arg(args.target_horizons)
     if cli_horizons is not None:
@@ -233,12 +195,11 @@ def main(  # noqa: C901, PLR0912, PLR0915
     elif cfg.target_horizons is None:
         cfg.target_horizons = [cfg.target_horizon]
 
-    logger.info("Running benchmark with input=%s", cfg.csv_path)
     if cfg.target_horizons and len(cfg.target_horizons) > 1:
-        results_by_horizon = run_wheat_har_benchmark_multi_horizon(config=cfg)
+        results_by_horizon = run_wheat_rf_benchmark_multi_horizon(config=cfg)
         summary = benchmark_multi_horizon_results_to_frame(results_by_horizon)
     else:
-        results = run_wheat_har_benchmark(config=cfg)
+        results = run_wheat_rf_benchmark(config=cfg)
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
@@ -261,7 +222,6 @@ def main(  # noqa: C901, PLR0912, PLR0915
             output_path.parent.mkdir(parents=True, exist_ok=True)
         else:
             raise
-    logger.info("Benchmark rows=%d", len(summary))
 
     output_name = output_path.name
     horizons = cfg.target_horizons or [cfg.target_horizon]
@@ -273,63 +233,21 @@ def main(  # noqa: C901, PLR0912, PLR0915
         horizon_dir.mkdir(parents=True, exist_ok=True)
         horizon_out = horizon_dir / output_name
         horizon_df.to_csv(horizon_out, index=False)
-        logger.info("Saved horizon=%d summary to %s", horizon, horizon_out)
+        logger.info("Saved horizon=%d RF summary to %s", horizon, horizon_out)
 
-    metric_cols = [
-        "model_type",
-        "feature_set",
-        "window_type",
-        "train_mse",
-        "train_mae",
-        "train_qlike",
-        "train_r2",
-        "train_r2log",
-        "test_mse",
-        "test_mae",
-        "test_qlike",
-        "test_r2",
-        "test_r2log",
-    ]
-    logger.info(
-        "Top results by test_mse:\\n%s",
-        summary[metric_cols].head(15).to_string(index=False),
-    )
-
-    if args.print_hyperparams:
-        hp_cols = [
-            "model_type",
-            "feature_set",
-            "selection_method",
-            "window_type",
-            "initial_train_size",
-            "window_test_size",
-            "window_step",
-            "rolling_window_size",
-            "n_windows",
-            "target_col_raw",
-            "target_horizon",
-            "core_columns",
-            "extra_feature_cols",
-            "model_add_constant",
-            "model_standardize_features",
-            "model_target_transform",
-            "model_prediction_floor",
-            "model_log_transform_rv_features",
-            "model_feature_floor",
-            "lasso_best_alpha",
-            "bsr_alpha",
-            "bsr_window_type",
-            "bsr_window_size",
-            "bsr_step",
-            "grid_search_best_candidate_idx",
-            "grid_search_n_candidates",
-            "grid_search_metric",
-            "grid_search_metric_value",
-        ]
-        available_hp_cols = [col for col in hp_cols if col in summary.columns]
         logger.info(
-            "Hyperparameter table:\\n%s",
-            summary[available_hp_cols].to_string(index=False),
+            "Top RF results by test_r2:\n%s",
+            summary[
+                [
+                    "target_horizon",
+                    "model_type",
+                    "feature_set",
+                    "window_type",
+                    "test_r2",
+                    "test_mse",
+                    "grid_search_metric_value",
+                ]
+            ].to_string(index=False),
         )
 
 
