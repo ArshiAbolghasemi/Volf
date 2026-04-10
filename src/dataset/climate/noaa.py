@@ -214,16 +214,49 @@ def fetch_all_data(startdate: str, enddate: str, workers: int) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def clean_and_aggregate(df: pd.DataFrame) -> pd.DataFrame:
+def clean_and_aggregate_daily_by_states(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    df["date"] = pd.to_datetime(df["date"]).dt.date
-    df["value"] = df["value"] / 10
+    working_df = df.copy()
 
-    return df.pivot_table(
+    working_df["date"] = pd.to_datetime(working_df["date"])
+    working_df["value"] = working_df["value"] / 10
+
+    return working_df.pivot_table(
         index=["date", "state"],
         columns="datatype",
         values="value",
         aggfunc="mean",
     ).reset_index()
+
+
+def aggregate_weekly(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    working_df = df.copy()
+    working_df["date"] = pd.to_datetime(working_df["date"])
+
+    agg_map = {
+        c: v
+        for c, v in {
+            "PRCP": "sum",
+            "TMAX": "mean",
+            "TMIN": "mean",
+            "TAVG": "mean",
+        }.items()
+        if c in working_df.columns
+    }
+
+    result = (
+        working_df.set_index("date")
+        .groupby("state")
+        .resample("W-MON", label="left", closed="left")
+        .agg(agg_map)
+        .reset_index()
+    )
+
+    result["date"] = result["date"].dt.strftime("%Y-%m-%d")
+
+    return result

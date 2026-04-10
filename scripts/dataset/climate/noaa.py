@@ -4,7 +4,8 @@ import logging
 import pandas as pd
 
 from src.dataset.climate.noaa import (
-    clean_and_aggregate,
+    aggregate_weekly,
+    clean_and_aggregate_daily_by_states,
     fetch_all_data,
     metrics,
 )
@@ -17,10 +18,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def save_result(df: pd.DataFrame) -> None:
-    output_path = DATA_DIR / "climate" / "noaa.csv"
+def save_result(daily_df: pd.DataFrame, weekly_df: pd.DataFrame) -> None:
+    output_path = DATA_DIR / "climate"
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(output_path, index=False)
+    daily_df.to_csv(output_path / "noaa_daily.csv", index=False)
+    weekly_df.to_csv(output_path / "noaa_weekly.csv", index=False)
     logger.info("Saved result at %s", output_path)
 
 
@@ -38,9 +40,10 @@ def main() -> None:
     startdate, enddate, workers = parse_args()
 
     raw_df = fetch_all_data(startdate, enddate, workers)
-    final_df = clean_and_aggregate(raw_df)
+    daily_df = clean_and_aggregate_daily_by_states(raw_df)
+    weekly_df = aggregate_weekly(daily_df)
 
-    save_result(final_df)
+    save_result(daily_df, weekly_df)
 
     logger.info("==== RUN SUMMARY ====")
     logger.info("API requests: %d", metrics["api_requests"])
