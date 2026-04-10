@@ -12,10 +12,23 @@ import requests
 from tenacity import before_sleep_log, retry, stop_after_attempt, wait_exponential
 from tqdm import tqdm
 
-TOKEN: str | None = os.getenv("NOAA_TOKEN")
-if not TOKEN:
-    msg = "NOAA_TOKEN is missing"
+
+def _load_tokens() -> list[str]:
+    tokens_env = os.getenv("NOAA_TOKENS", "").strip()
+    if tokens_env:
+        tokens = [token.strip() for token in tokens_env.split(",") if token.strip()]
+        if tokens:
+            return tokens
+
+    single = os.getenv("NOAA_TOKEN", "").strip()
+    if single:
+        return [single]
+
+    msg = "NOAA token is missing. Set NOAA_TOKENS (comma-separated) or NOAA_TOKEN."
     raise ValueError(msg)
+
+
+TOKENS = _load_tokens()
 
 BASE_URL: str | None = os.getenv("NOAA_BASE_URL")
 if not BASE_URL:
@@ -25,9 +38,8 @@ if not BASE_URL:
 PROXY: str | None = os.getenv("PROXY")
 PROXIES: dict[str, str] | None = {"http": PROXY, "https": PROXY} if PROXY else None
 
-HEADERS: dict[str, str] = {"token": TOKEN}
-
 DATATYPES: list[str] = ["PRCP", "TMAX", "TMIN", "TAVG"]
+HTTP_TOO_MANY_REQUESTS = 429
 
 STATE_FIPS: dict[str, str] = {
     "AL": "01",
@@ -89,13 +101,41 @@ logging.basicConfig(level=logging.DEBUG, format="%(asctime)s | %(levelname)s | %
 logger = logging.getLogger(__name__)
 
 session = requests.Session()
-session.headers.update(HEADERS)
+
+
+class TokenManager:
+    def __init__(self, tokens: list[str]) -> None:
+        self._tokens = tokens
+        self._idx = 0
+        self._lock = threading.Lock()
+
+    def current(self) -> str:
+        with self._lock:
+            return self._tokens[self._idx]
+
+    def rotate(self) -> bool:
+        with self._lock:
+            if len(self._tokens) <= 1:
+                return False
+            self._idx = (self._idx + 1) % len(self._tokens)
+            return True
+
+    def current_index(self) -> int:
+        with self._lock:
+            return self._idx
+
+    def count(self) -> int:
+        return len(self._tokens)
+
+
+token_manager = TokenManager(TOKENS)
 
 metrics: dict[str, int] = {
     "api_requests": 0,
     "success_api_requests": 0,
     "cache_hits": 0,
     "failures": 0,
+    "token_switches": 0,
 }
 
 metrics_lock = threading.Lock()
@@ -108,8 +148,12 @@ metrics_lock = threading.Lock()
 )
 def _request(url: str, params: dict[str, Any]) -> dict[str, Any]:
     try:
-        metrics["api_requests"] += 1
-        r = session.get(url, params=params, proxies=PROXIES, timeout=30)
+        with metrics_lock:
+            metrics["api_requests"] += 1
+
+        token = token_manager.current()
+        headers = {"token": token}
+        r = session.get(url, params=params, headers=headers, proxies=PROXIES, timeout=30)
         r.raise_for_status()
 
         with metrics_lock:
@@ -117,7 +161,28 @@ def _request(url: str, params: dict[str, Any]) -> dict[str, Any]:
 
         return r.json()
 
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as exc:
+        response = getattr(exc, "response", None)
+        if response is not None and response.status_code == HTTP_TOO_MANY_REQUESTS:
+            try:
+                payload = response.json()
+            except ValueError:
+                payload = {}
+            message = str(payload.get("message", "")).lower()
+            is_daily_limit = (
+                message
+                == "this token has reached its temporary request limit of 10000 per day."
+            )
+            if is_daily_limit and token_manager.rotate():
+                with metrics_lock:
+                    metrics["token_switches"] += 1
+
+                logger.warning(
+                    "NOAA token daily limit reached; switched token to index=%d/%d",
+                    token_manager.current_index() + 1,
+                    token_manager.count(),
+                )
+
         with metrics_lock:
             metrics["failures"] += 1
         raise

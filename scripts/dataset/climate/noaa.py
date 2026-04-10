@@ -78,6 +78,7 @@ def main() -> None:
     logger.info("Success: %d", metrics["success_api_requests"])
     logger.info("Cache hits: %d", metrics["cache_hits"])
     logger.info("Failures: %d", metrics["failures"])
+    logger.info("Token switches: %d", metrics.get("token_switches", 0))
 
 
 if __name__ == "__main__":
