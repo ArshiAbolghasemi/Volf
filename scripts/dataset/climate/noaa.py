@@ -28,7 +28,7 @@ def parse_args() -> tuple[str, str, int]:
     parser = argparse.ArgumentParser(description="Fetch NOAA GHCND climate data")
     parser.add_argument("--startdate", required=True)
     parser.add_argument("--enddate", required=True)
-    parser.add_argument("--workers", default=2)
+    parser.add_argument("--workers", type=int, default=2)
 
     args = parser.parse_args()
     return args.startdate, args.enddate, args.workers
