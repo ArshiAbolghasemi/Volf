@@ -44,6 +44,7 @@ def main() -> None:
 
     logger.info("==== RUN SUMMARY ====")
     logger.info("API requests: %d", metrics["api_requests"])
+    logger.info("Success: %d", metrics["success_api_requests"])
     logger.info("Cache hits: %d", metrics["cache_hits"])
     logger.info("Failures: %d", metrics["failures"])
 

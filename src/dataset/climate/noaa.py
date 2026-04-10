@@ -93,6 +93,7 @@ session.headers.update(HEADERS)
 
 metrics: dict[str, int] = {
     "api_requests": 0,
+    "success_api_requests": 0,
     "cache_hits": 0,
     "failures": 0,
 }
@@ -107,11 +108,12 @@ metrics_lock = threading.Lock()
 )
 def _request(url: str, params: dict[str, Any]) -> dict[str, Any]:
     try:
+        metrics["api_requests"] += 1
         r = session.get(url, params=params, proxies=PROXIES, timeout=30)
         r.raise_for_status()
 
         with metrics_lock:
-            metrics["api_requests"] += 1
+            metrics["success_api_requests"] += 1
 
         return r.json()
 
@@ -126,23 +128,24 @@ def cache_key(url: str, params: dict[str, Any]) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
 
-def cached_request(url: str, params: dict[str, Any]) -> dict[str, Any]:
+def cached_request(url: str, params: dict[str, Any]) -> pd.DataFrame:
     key = cache_key(url, params)
-    path = CACHE_DIR / f"{key}.json"
+    path = CACHE_DIR / f"{key}.parquet"
 
     if path.exists():
         with metrics_lock:
             metrics["cache_hits"] += 1
 
-        with path.open() as f:
-            return json.load(f)
+        return pd.read_parquet(path)
 
     data = _request(url, params)
 
-    with path.open("w") as f:
-        json.dump(data, f)
+    results = data.get("results", [])
+    result_df = pd.DataFrame(results)
 
-    return data
+    result_df.to_parquet(path, index=False)
+
+    return result_df
 
 
 def fetch_state_datatype(
@@ -169,17 +172,16 @@ def fetch_state_datatype(
     while True:
         params["offset"] = offset
 
-        data = cached_request(f"{BASE_URL}/data", params)
-        results = data.get("results", [])
+        result_df = cached_request(f"{BASE_URL}/data", params)
 
-        if not results:
+        if result_df.empty:
             break
 
-        for r in results:
-            r["state"] = state
+        result_df["state"] = state
 
-        rows.extend(results)
-        offset += len(results)
+        rows.extend(result_df.to_dict("records"))
+
+        offset += len(result_df)
 
     return rows
 
