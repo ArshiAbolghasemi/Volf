@@ -201,7 +201,7 @@ def extract_bulk_dataset(tar_path: Path) -> Path:
 
 
 def load_station_states() -> tuple[dict[str, str], Path]:
-    """Load station -> state mapping."""
+    """Load station -> US state mapping only."""
     path = RAW_DIR / "ghcnd-stations.txt"
 
     if not path.exists():
@@ -217,12 +217,24 @@ def load_station_states() -> tuple[dict[str, str], Path]:
     with path.open() as f:
         for line in f:
             station = line[0:11].strip()
+
+            # Only keep US stations
+            if not station.startswith("US"):
+                continue
+
             state = line[38:40].strip()
 
-            if state:
-                station_state[station] = state
+            # Skip if state missing
+            if not state:
+                continue
 
-    logger.info("Loaded station metadata: %d station->state mappings", len(station_state))
+            station_state[station] = state
+
+    logger.info(
+        "Loaded US station metadata: %d station->state mappings",
+        len(station_state),
+    )
+
     return station_state, path
 
 
