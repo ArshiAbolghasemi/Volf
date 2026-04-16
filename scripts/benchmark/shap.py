@@ -13,7 +13,6 @@ from src.benchmark.har import (
     WheatHARBenchmarkConfig,
     build_wheat_feature_sets,
     default_run_configs,
-    run_wheat_har_benchmark_multi_horizon,
 )
 from src.benchmark.har.shap import (
     ShapConfig,
@@ -33,6 +32,7 @@ from src.model import (
     HARRunConfig,
     HARSelectionConfig,
     HARWalkForwardConfig,
+    run_har_experiment_from_dataset,
 )
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
@@ -128,7 +128,14 @@ def _load_benchmark_config_from_json(path: str) -> WheatHARBenchmarkConfig:
     )
 
 
-def _load_shap_config(path: str) -> tuple[WheatHARBenchmarkConfig, ShapConfig]:
+def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path:
+    if raw_value is None or not str(raw_value).strip():
+        return DATA_DIR / "benchmark" / default_subpath
+    raw_path = Path(str(raw_value))
+    return raw_path if raw_path.is_absolute() else (DATA_DIR / "benchmark" / raw_path)
+
+
+def _load_shap_config(path: str) -> tuple[WheatHARBenchmarkConfig, ShapConfig, Path]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
@@ -148,7 +155,11 @@ def _load_shap_config(path: str) -> tuple[WheatHARBenchmarkConfig, ShapConfig]:
         jobs=[ShapJobConfig(**job) for job in jobs_raw],
         output_subdir=str(raw.get("output_subdir", "shap")),
     )
-    return benchmark_cfg, shap_cfg
+    output_root = _resolve_output_root(
+        cast("str | None", raw.get("output_root")),
+        default_subpath=f"har/{benchmark_cfg.target_mode}",
+    )
+    return benchmark_cfg, shap_cfg, output_root
 
 
 def main() -> None:
@@ -159,7 +170,7 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    benchmark_cfg, shap_cfg = _load_shap_config(args.config)
+    benchmark_cfg, shap_cfg, output_root = _load_shap_config(args.config)
 
     data = pd.read_csv(benchmark_cfg.csv_path)
     if "Date" in data.columns:
@@ -176,17 +187,43 @@ def main() -> None:
 
     feature_sets = build_wheat_feature_sets(data, core_columns=core_columns)
 
-    horizons = sorted({int(job.target_horizon) for job in shap_cfg.jobs})
-    benchmark_cfg.target_horizons = horizons
-    benchmark_cfg.target_horizon = horizons[0]
-
-    logger.info("Running benchmark once to resolve best configs and predictions")
-    results_by_horizon = run_wheat_har_benchmark_multi_horizon(
-        config=benchmark_cfg,
-        data=data,
+    required_jobs = {
+        (int(job.target_horizon), job.model_type, job.feature_set) for job in shap_cfg.jobs
+    }
+    logger.info(
+        "Running targeted HAR trainings for SHAP resolution: %d unique jobs",
+        len(required_jobs),
     )
+    resolved_model_info: dict[tuple[int, str, str], dict[str, Any]] = {}
+    for horizon, model_type, feature_set in sorted(required_jobs):
+        if model_type not in model_run_configs:
+            msg = f"model_type '{model_type}' not found in benchmark run configs."
+            raise ValueError(msg)
+        if feature_set not in feature_sets:
+            msg = f"feature_set '{feature_set}' not found in available feature sets."
+            raise ValueError(msg)
 
-    output_root = DATA_DIR / "benchmark" / benchmark_cfg.target_mode
+        run_cfg = model_run_configs[model_type]
+        feature_cfg = HARFeatureConfig(
+            target_col=benchmark_cfg.target_col,
+            core_columns=core_columns,
+            target_horizon=horizon,
+            target_mode=benchmark_cfg.target_mode,
+            extra_feature_cols=feature_sets[feature_set],
+        )
+        logger.info(
+            "Training for SHAP config resolution: horizon=%d model=%s feature_set=%s",
+            horizon,
+            model_type,
+            feature_set,
+        )
+        result = run_har_experiment_from_dataset(
+            data,
+            feature_config=feature_cfg,
+            run_config=run_cfg,
+        )
+        resolved_model_info[(horizon, model_type, feature_set)] = result.model_info
+
     for job in shap_cfg.jobs:
         if job.model_type not in model_run_configs:
             msg = f"model_type '{job.model_type}' not found in benchmark run configs."
@@ -196,25 +233,18 @@ def main() -> None:
             raise ValueError(msg)
 
         horizon = int(job.target_horizon)
-        horizon_results = results_by_horizon.get(horizon)
-        if horizon_results is None:
-            msg = f"No benchmark results available for horizon={horizon}."
-            raise ValueError(msg)
-
-        model_results = horizon_results.get(job.model_type)
-        if model_results is None or job.feature_set not in model_results:
+        key = (horizon, job.model_type, job.feature_set)
+        if key not in resolved_model_info:
             msg = (
                 f"Missing benchmark result for horizon={horizon}, "
                 f"model={job.model_type}, feature_set={job.feature_set}."
             )
             raise ValueError(msg)
-
-        result = model_results[job.feature_set]
         run_cfg = model_run_configs[job.model_type]
 
         resolved_run_cfg = resolve_run_config_for_shap_job(
             base_run_cfg=run_cfg,
-            model_info=result.model_info,
+            model_info=resolved_model_info[key],
         )
 
         feature_cfg = HARFeatureConfig(
