@@ -1,0 +1,41 @@
+{
+  "benchmark_config": "config/har.json",
+  "hac_maxlags": null,
+  "pairs": [
+    {
+      "name": "h1_lasso_rolling_har_vs_har_endo",
+      "target_horizon": 1,
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo"
+    },
+    {
+      "name": "h4_bsr_rolling_har_endo_vs_har_endo_exo",
+      "target_horizon": 4,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo",
+      "augmented_feature_set": "har_endo_exo"
+    },
+    {
+      "name": "h8_lasso_rolling_har_vs_har_endo",
+      "target_horizon": 8,
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo"
+    },
+    {
+      "name": "h12_bsr_rolling_har_endo_vs_har_endo_exo",
+      "target_horizon": 12,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo",
+      "augmented_feature_set": "har_endo_exo"
+    },
+    {
+      "name": "h16_lasso_rolling_har_endo_vs_har_endo_exo",
+      "target_horizon": 16,
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo",
+      "augmented_feature_set": "har_endo_exo"
+    }
+  ]
+}

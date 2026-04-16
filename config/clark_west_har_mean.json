@@ -1,0 +1,34 @@
+{
+  "benchmark_config": "config/har_mean.json",
+  "hac_maxlags": null,
+  "pairs": [
+    {
+      "name": "h4_bsr_rolling_climate_vs_climate_news",
+      "target_horizon": 4,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exogenous_climate",
+      "augmented_feature_set": "har_endo_exogenous_climate_news"
+    },
+    {
+      "name": "h8_bsr_rolling_exo_vs_climate",
+      "target_horizon": 8,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exogenous_climate"
+    },
+    {
+      "name": "h12_bsr_rolling_endo_vs_exo",
+      "target_horizon": 12,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo",
+      "augmented_feature_set": "har_endo_exo"
+    },
+    {
+      "name": "h16_bsr_rolling_exo_vs_climate",
+      "target_horizon": 16,
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exogenous_climate"
+    }
+  ]
+}
