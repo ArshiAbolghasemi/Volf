@@ -8,6 +8,7 @@ from typing import Any, cast
 
 import pandas as pd
 
+from src.benchmark.checkpoints import load_har_checkpoint_result
 from src.benchmark.har import (
     HARGridSearchConfig,
     WheatHARBenchmarkConfig,
@@ -32,7 +33,6 @@ from src.model import (
     HARRunConfig,
     HARSelectionConfig,
     HARWalkForwardConfig,
-    run_har_experiment_from_dataset,
 )
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
@@ -135,7 +135,9 @@ def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path
     return raw_path if raw_path.is_absolute() else (DATA_DIR / "benchmark" / raw_path)
 
 
-def _load_shap_config(path: str) -> tuple[WheatHARBenchmarkConfig, ShapConfig, Path]:
+def _load_shap_config(
+    path: str,
+) -> tuple[WheatHARBenchmarkConfig, ShapConfig, Path, Path]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
@@ -159,7 +161,11 @@ def _load_shap_config(path: str) -> tuple[WheatHARBenchmarkConfig, ShapConfig, P
         cast("str | None", raw.get("output_root")),
         default_subpath=f"har/{benchmark_cfg.target_mode}",
     )
-    return benchmark_cfg, shap_cfg, output_root
+    checkpoint_root = _resolve_output_root(
+        cast("str | None", raw.get("checkpoint_root")),
+        default_subpath=f"har/{benchmark_cfg.target_mode}",
+    )
+    return benchmark_cfg, shap_cfg, output_root, checkpoint_root
 
 
 def main() -> None:
@@ -170,7 +176,7 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    benchmark_cfg, shap_cfg, output_root = _load_shap_config(args.config)
+    benchmark_cfg, shap_cfg, output_root, checkpoint_root = _load_shap_config(args.config)
 
     data = pd.read_csv(benchmark_cfg.csv_path)
     if "Date" in data.columns:
@@ -191,7 +197,7 @@ def main() -> None:
         (int(job.target_horizon), job.model_type, job.feature_set) for job in shap_cfg.jobs
     }
     logger.info(
-        "Running targeted HAR trainings for SHAP resolution: %d unique jobs",
+        "Loading HAR checkpoints for SHAP resolution: %d unique jobs",
         len(required_jobs),
     )
     resolved_model_info: dict[tuple[int, str, str], dict[str, Any]] = {}
@@ -203,24 +209,18 @@ def main() -> None:
             msg = f"feature_set '{feature_set}' not found in available feature sets."
             raise ValueError(msg)
 
-        run_cfg = model_run_configs[model_type]
-        feature_cfg = HARFeatureConfig(
-            target_col=benchmark_cfg.target_col,
-            core_columns=core_columns,
-            target_horizon=horizon,
-            target_mode=benchmark_cfg.target_mode,
-            extra_feature_cols=feature_sets[feature_set],
-        )
         logger.info(
-            "Training for SHAP config resolution: horizon=%d model=%s feature_set=%s",
+            "Loading SHAP config resolution checkpoint: horizon=%d model=%s feature_set=%s",
             horizon,
             model_type,
             feature_set,
         )
-        result = run_har_experiment_from_dataset(
-            data,
-            feature_config=feature_cfg,
-            run_config=run_cfg,
+        result = load_har_checkpoint_result(
+            checkpoint_root=checkpoint_root,
+            target_horizon=horizon,
+            target_mode=benchmark_cfg.target_mode,
+            model_type=model_type,
+            feature_set=feature_set,
         )
         resolved_model_info[(horizon, model_type, feature_set)] = result.model_info
 

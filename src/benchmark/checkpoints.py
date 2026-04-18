@@ -8,6 +8,8 @@ from typing import Any
 
 import pandas as pd
 
+from src.model import HARExperimentResult
+
 
 def _safe_name(value: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", value.strip())
@@ -153,3 +155,104 @@ def save_best_result_checkpoints(
                     )
                 )
     return saved_dirs
+
+
+def checkpoint_bundle_dir(
+    *,
+    checkpoint_root: Path,
+    target_horizon: int,
+    target_mode: str,
+    model_type: str,
+    feature_set: str,
+) -> Path:
+    return (
+        checkpoint_root
+        / f"target_horizon_{target_horizon}"
+        / "checkpoints"
+        / f"target_mode_{_safe_name(target_mode)}"
+        / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
+    )
+
+
+def load_har_checkpoint_result(
+    *,
+    checkpoint_root: Path,
+    target_horizon: int,
+    target_mode: str,
+    model_type: str,
+    feature_set: str,
+) -> HARExperimentResult:
+    bundle_dir = checkpoint_bundle_dir(
+        checkpoint_root=checkpoint_root,
+        target_horizon=target_horizon,
+        target_mode=target_mode,
+        model_type=model_type,
+        feature_set=feature_set,
+    )
+    if not bundle_dir.exists():
+        msg = f"Checkpoint bundle not found: {bundle_dir}"
+        raise FileNotFoundError(msg)
+
+    required = {
+        "metrics": bundle_dir / "metrics.json",
+        "model_info": bundle_dir / "model_info.json",
+        "selected_features": bundle_dir / "selected_features.txt",
+        "train_predictions": bundle_dir / "train_predictions.csv",
+        "test_predictions": bundle_dir / "test_predictions.csv",
+    }
+    missing = [name for name, path in required.items() if not path.exists()]
+    if missing:
+        msg = (
+            f"Checkpoint bundle is incomplete ({', '.join(missing)} missing): {bundle_dir}"
+        )
+        raise FileNotFoundError(msg)
+
+    metrics = json.loads(required["metrics"].read_text(encoding="utf-8"))
+    model_info = json.loads(required["model_info"].read_text(encoding="utf-8"))
+
+    selected_features = [
+        line.strip()
+        for line in required["selected_features"].read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    train_pred = pd.read_csv(required["train_predictions"], index_col=0)
+    test_pred = pd.read_csv(required["test_predictions"], index_col=0)
+    y_true_train = train_pred["y_true"].copy()
+    y_true_train.name = "y_true"
+    y_pred_train = train_pred["y_pred"].copy()
+    y_pred_train.name = "y_pred"
+    y_true_test = test_pred["y_true"].copy()
+    y_true_test.name = "y_true"
+    y_pred_test = test_pred["y_pred"].copy()
+    y_pred_test.name = "y_pred"
+
+    coefficients_path = bundle_dir / "coefficients.csv"
+    if coefficients_path.exists():
+        coeff_frame = pd.read_csv(coefficients_path, index_col=0)
+        coefficients = coeff_frame["coefficient"].copy()
+    else:
+        coefficients = pd.Series(dtype=float)
+    coefficients.name = "coefficient"
+
+    selection_info_path = bundle_dir / "selection_info.json"
+    if selection_info_path.exists():
+        selection_info = json.loads(selection_info_path.read_text(encoding="utf-8"))
+    else:
+        selection_info = {}
+
+    window_report_path = bundle_dir / "window_report.csv"
+    if window_report_path.exists():
+        model_info["window_report"] = pd.read_csv(window_report_path)
+
+    return HARExperimentResult(
+        selected_features=selected_features,
+        y_true_train=y_true_train,
+        y_pred_train=y_pred_train,
+        y_true_test=y_true_test,
+        y_pred_test=y_pred_test,
+        metrics=metrics,
+        coefficients=coefficients,
+        selection_info=selection_info,
+        model_info=model_info,
+    )

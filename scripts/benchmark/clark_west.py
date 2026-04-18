@@ -6,27 +6,21 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
-import pandas as pd
-
+from src.benchmark.checkpoints import load_har_checkpoint_result
 from src.benchmark.har import (
     ClarkWestConfig,
     ClarkWestPairConfig,
     HARGridSearchConfig,
     WheatHARBenchmarkConfig,
-    build_wheat_feature_sets,
     default_run_configs,
     run_clark_west_by_pairs,
 )
-from src.benchmark.har.features import existing_columns
-from src.benchmark.har.types import DEFAULT_CORE_COLUMNS
 from src.benchmark.utils import normalize_target_mode
 from src.model import (
-    HARFeatureConfig,
     HARModelConfig,
     HARRunConfig,
     HARSelectionConfig,
     HARWalkForwardConfig,
-    run_har_experiment_from_dataset,
 )
 from src.util.path import DATA_DIR
 from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
@@ -132,7 +126,7 @@ def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path
 
 def _load_clark_west_config(
     path: str,
-) -> tuple[WheatHARBenchmarkConfig, ClarkWestConfig, Path]:
+) -> tuple[WheatHARBenchmarkConfig, ClarkWestConfig, Path, Path]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
@@ -178,24 +172,19 @@ def _load_clark_west_config(
         cast("str | None", raw.get("output_root")),
         default_subpath=f"har/{benchmark_cfg.target_mode}",
     )
-    return benchmark_cfg, cw_cfg, output_root
+    checkpoint_root = _resolve_output_root(
+        cast("str | None", raw.get("checkpoint_root")),
+        default_subpath=f"har/{benchmark_cfg.target_mode}",
+    )
+    return benchmark_cfg, cw_cfg, output_root, checkpoint_root
 
 
 def _collect_pair_results(
     *,
-    data: pd.DataFrame,
     benchmark_cfg: WheatHARBenchmarkConfig,
     cw_cfg: ClarkWestConfig,
+    checkpoint_root: Path,
 ) -> dict[int, dict[str, dict[str, Any]]]:
-    if "Date" in data.columns:
-        data = data.sort_values("Date").reset_index(drop=True)
-
-    core = benchmark_cfg.core_columns or existing_columns(data, DEFAULT_CORE_COLUMNS)
-    if not core:
-        msg = "No valid core columns found in benchmark data."
-        raise ValueError(msg)
-
-    feature_sets = build_wheat_feature_sets(data, core_columns=core)
     run_configs = benchmark_cfg.run_configs or default_run_configs()
 
     required_jobs: set[tuple[int, str, str]] = set()
@@ -208,7 +197,7 @@ def _collect_pair_results(
         )
 
     results_by_horizon: dict[int, dict[str, dict[str, Any]]] = {}
-    logger.info("Preparing %d targeted HAR trainings for Clark-West", len(required_jobs))
+    logger.info("Loading %d HAR checkpoint bundles for Clark-West", len(required_jobs))
 
     for horizon, model_type, feature_set in sorted(required_jobs):
         if model_type not in run_configs:
@@ -217,35 +206,18 @@ def _collect_pair_results(
                 f"available={sorted(run_configs)}"
             )
             raise ValueError(msg)
-        if feature_set not in feature_sets:
-            msg = (
-                f"feature_set='{feature_set}' not found in available feature sets. "
-                f"available={sorted(feature_sets)}"
-            )
-            raise ValueError(msg)
-
-        run_cfg = run_configs[model_type]
-        feature_cfg = HARFeatureConfig(
-            target_col=benchmark_cfg.target_col,
-            core_columns=core,
-            target_horizon=horizon,
-            target_mode=benchmark_cfg.target_mode,
-            extra_feature_cols=feature_sets[feature_set],
-        )
         logger.info(
-            (
-                "Training for CW pair input: horizon=%d model=%s feature_set=%s "
-                "extra_features=%d"
-            ),
+            "Loading CW input from checkpoint: horizon=%d model=%s feature_set=%s",
             horizon,
             model_type,
             feature_set,
-            len(feature_sets[feature_set]),
         )
-        result = run_har_experiment_from_dataset(
-            data,
-            feature_config=feature_cfg,
-            run_config=run_cfg,
+        result = load_har_checkpoint_result(
+            checkpoint_root=checkpoint_root,
+            target_horizon=horizon,
+            target_mode=benchmark_cfg.target_mode,
+            model_type=model_type,
+            feature_set=feature_set,
         )
         results_by_horizon.setdefault(horizon, {}).setdefault(model_type, {})[
             feature_set
@@ -262,14 +234,15 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    benchmark_cfg, cw_cfg, output_root = _load_clark_west_config(args.config)
+    benchmark_cfg, cw_cfg, output_root, checkpoint_root = _load_clark_west_config(
+        args.config
+    )
 
-    logger.info("Running targeted benchmark training only for requested Clark-West pairs")
-    data = pd.read_csv(benchmark_cfg.csv_path)
+    logger.info("Loading requested Clark-West inputs from saved checkpoints")
     results_by_horizon = _collect_pair_results(
-        data=data,
         benchmark_cfg=benchmark_cfg,
         cw_cfg=cw_cfg,
+        checkpoint_root=checkpoint_root,
     )
 
     logger.info(
