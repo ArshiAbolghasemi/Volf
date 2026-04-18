@@ -17,15 +17,15 @@ from src.model import (
     HARSelectionConfig,
     HARWalkForwardConfig,
 )
-from src.model.har.selection import select_har_features
-from src.model.har.utils import (
-    build_har_design_matrix,
+from src.model.common.preprocessing import (
+    build_forecasting_design_matrix,
     build_walk_forward_windows,
-    get_xy_from_har_design,
     inverse_transform_prediction,
     log_transform_rv_features,
+    split_design_matrix_xy,
     transform_target,
 )
+from src.model.har.selection import select_har_features
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -140,12 +140,12 @@ def run_linear_shap_for_job(  # noqa: PLR0915
     job: ShapJobConfig,
 ) -> ShapJobResult:
     model_cfg = run_cfg.model or HARModelConfig()
-    design, _, target_col = build_har_design_matrix(
+    design, _, target_col = build_forecasting_design_matrix(
         data,
         feature_cfg,
         target_transform=model_cfg.target_transform,
     )
-    x, y = get_xy_from_har_design(design, target_col)
+    x, y = split_design_matrix_xy(design, target_col)
 
     effective_model_cfg = model_cfg
     if feature_cfg.target_mode == "mean" and model_cfg.target_transform != "none":

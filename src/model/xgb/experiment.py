@@ -6,8 +6,8 @@ from dataclasses import replace
 from typing import Any, cast
 
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
 from tqdm.auto import tqdm
+from xgboost import XGBRegressor
 
 from src.metrics import evaluate_statistical_metrics
 from src.model.common.preprocessing import (
@@ -22,30 +22,32 @@ from src.model.common.preprocessing import (
 )
 
 from .types import (
-    RFExperimentResult,
-    RFFeatureConfig,
-    RFGridConfig,
-    RFModelConfig,
-    RFRunConfig,
-    RFWalkForwardConfig,
+    XGBExperimentResult,
+    XGBFeatureConfig,
+    XGBGridConfig,
+    XGBModelConfig,
+    XGBRunConfig,
+    XGBWalkForwardConfig,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def _fit_random_forest(
+def _fit_xgboost(
     x_train: pd.DataFrame,
     y_train: pd.Series,
-    model_cfg: RFModelConfig,
-) -> RandomForestRegressor:
-    model = RandomForestRegressor(
+    model_cfg: XGBModelConfig,
+) -> XGBRegressor:
+    model = XGBRegressor(
         n_estimators=model_cfg.n_estimators,
-        criterion=model_cfg.criterion,
         max_depth=model_cfg.max_depth,
-        min_samples_split=model_cfg.min_samples_split,
-        min_samples_leaf=model_cfg.min_samples_leaf,
-        max_features=model_cfg.max_features,  # type: ignore[arg-type]
-        bootstrap=model_cfg.bootstrap,
+        learning_rate=model_cfg.learning_rate,
+        subsample=model_cfg.subsample,
+        colsample_bytree=model_cfg.colsample_bytree,
+        min_child_weight=model_cfg.min_child_weight,
+        reg_alpha=model_cfg.reg_alpha,
+        reg_lambda=model_cfg.reg_lambda,
+        objective=model_cfg.objective,
         random_state=model_cfg.random_state,
         n_jobs=model_cfg.n_jobs,
     )
@@ -53,15 +55,15 @@ def _fit_random_forest(
     return model
 
 
-def run_rf_experiment_from_xy(
+def run_xgb_experiment_from_xy(
     x: pd.DataFrame,
     y: pd.Series,
-    run_config: RFRunConfig | None = None,
-) -> RFExperimentResult:
-    logger.info("Starting Random Forest walk-forward experiment")
-    cfg = run_config or RFRunConfig()
-    wf_cfg = cfg.walk_forward or RFWalkForwardConfig()
-    model_cfg = cfg.model or RFModelConfig()
+    run_config: XGBRunConfig | None = None,
+) -> XGBExperimentResult:
+    logger.info("Starting XGBoost walk-forward experiment")
+    cfg = run_config or XGBRunConfig()
+    wf_cfg = cfg.walk_forward or XGBWalkForwardConfig()
+    model_cfg = cfg.model or XGBModelConfig()
 
     transformed_feature_columns: list[str] = []
     if model_cfg.log_transform_rv_features:
@@ -70,12 +72,12 @@ def run_rf_experiment_from_xy(
             floor=model_cfg.feature_floor,
         )
         logger.info(
-            "Log-transformed RV feature columns for RF: n=%d",
+            "Log-transformed RV feature columns for XGBoost: n=%d",
             len(transformed_feature_columns),
         )
 
     windows = build_walk_forward_windows(len(x), cfg=cast("Any", wf_cfg))
-    logger.info("Generated %d RF windows (%s)", len(windows), wf_cfg.window_type)
+    logger.info("Generated %d XGBoost windows (%s)", len(windows), wf_cfg.window_type)
     run_start = time.perf_counter()
 
     selected_features = x.columns.tolist()
@@ -89,7 +91,7 @@ def run_rf_experiment_from_xy(
     window_iterator = tqdm(
         enumerate(windows),
         total=len(windows),
-        desc=f"RF walk-forward ({wf_cfg.window_type})",
+        desc=f"XGBoost walk-forward ({wf_cfg.window_type})",
         disable=not wf_cfg.progress_bar,
     )
     for window_id, (train_start, train_end, test_start, test_end) in window_iterator:
@@ -98,7 +100,7 @@ def run_rf_experiment_from_xy(
         ):
             elapsed = time.perf_counter() - run_start
             logger.info(
-                "RF walk-forward progress: window %d/%d (%.1f%%), elapsed=%.1fs",
+                "XGBoost walk-forward progress: window %d/%d (%.1f%%), elapsed=%.1fs",
                 window_id + 1,
                 len(windows),
                 100.0 * (window_id + 1) / len(windows),
@@ -114,7 +116,7 @@ def run_rf_experiment_from_xy(
             x_train, x_test, _ = standardize_train_test(x_train, x_test)
 
         y_train_model = transform_target(y_train, cast("Any", model_cfg))
-        fitted = _fit_random_forest(x_train, y_train_model, model_cfg)
+        fitted = _fit_xgboost(x_train, y_train_model, model_cfg)
 
         y_pred_train = pd.Series(
             fitted.predict(x_train), index=x_train.index, name="y_pred"
@@ -169,15 +171,17 @@ def run_rf_experiment_from_xy(
         "step": wf_cfg.step,
         "rolling_window_size": wf_cfg.rolling_window_size,
         "n_windows": len(windows),
-        "rf_n_estimators": model_cfg.n_estimators,
-        "rf_criterion": model_cfg.criterion,
-        "rf_max_depth": model_cfg.max_depth,
-        "rf_min_samples_split": model_cfg.min_samples_split,
-        "rf_min_samples_leaf": model_cfg.min_samples_leaf,
-        "rf_max_features": model_cfg.max_features,
-        "rf_bootstrap": model_cfg.bootstrap,
-        "rf_random_state": model_cfg.random_state,
-        "rf_n_jobs": model_cfg.n_jobs,
+        "xgb_n_estimators": model_cfg.n_estimators,
+        "xgb_max_depth": model_cfg.max_depth,
+        "xgb_learning_rate": model_cfg.learning_rate,
+        "xgb_subsample": model_cfg.subsample,
+        "xgb_colsample_bytree": model_cfg.colsample_bytree,
+        "xgb_min_child_weight": model_cfg.min_child_weight,
+        "xgb_reg_alpha": model_cfg.reg_alpha,
+        "xgb_reg_lambda": model_cfg.reg_lambda,
+        "xgb_objective": model_cfg.objective,
+        "xgb_random_state": model_cfg.random_state,
+        "xgb_n_jobs": model_cfg.n_jobs,
         "model_standardize_features": model_cfg.standardize_features,
         "model_target_transform": model_cfg.target_transform,
         "model_prediction_floor": model_cfg.prediction_floor,
@@ -187,10 +191,10 @@ def run_rf_experiment_from_xy(
         "window_report": pd.DataFrame(window_rows),
     }
 
-    logger.info("RF train metrics: %s", metrics["train"])
-    logger.info("RF test metrics: %s", metrics["test"])
+    logger.info("XGBoost train metrics: %s", metrics["train"])
+    logger.info("XGBoost test metrics: %s", metrics["test"])
 
-    return RFExperimentResult(
+    return XGBExperimentResult(
         selected_features=selected_features,
         y_true_train=y_true_train,
         y_pred_train=y_pred_train,
@@ -202,18 +206,19 @@ def run_rf_experiment_from_xy(
     )
 
 
-def run_rf_experiment_from_dataset(
+def run_xgb_experiment_from_dataset(
     data: pd.DataFrame,
     *,
-    feature_config: RFFeatureConfig,
-    run_config: RFRunConfig | None = None,
-) -> RFExperimentResult:
-    cfg = run_config or RFRunConfig()
-    wf_cfg = cfg.walk_forward or RFWalkForwardConfig()
-    model_cfg = cfg.model or RFModelConfig()
+    feature_config: XGBFeatureConfig,
+    run_config: XGBRunConfig | None = None,
+) -> XGBExperimentResult:
+    cfg = run_config or XGBRunConfig()
+    wf_cfg = cfg.walk_forward or XGBWalkForwardConfig()
+    model_cfg = cfg.model or XGBModelConfig()
 
     logger.info(
-        "Starting RF experiment from raw dataset: window_type=%s target_mode=%s horizon=%d",
+        "Starting XGBoost experiment from raw dataset: "
+        "window_type=%s target_mode=%s horizon=%d",
         wf_cfg.window_type,
         feature_config.target_mode,
         feature_config.target_horizon,
@@ -236,7 +241,7 @@ def run_rf_experiment_from_dataset(
     else:
         effective_model_cfg = model_cfg
 
-    result = run_rf_experiment_from_xy(
+    result = run_xgb_experiment_from_xy(
         x=x,
         y=y,
         run_config=effective_run_config,
@@ -288,34 +293,34 @@ def run_rf_experiment_from_dataset(
     return result
 
 
-def run_rf_feature_set_grid(
+def run_xgb_feature_set_grid(
     data: pd.DataFrame,
-    grid_config: RFGridConfig,
+    grid_config: XGBGridConfig,
     *,
-    run_config: RFRunConfig | None = None,
-) -> dict[str, RFExperimentResult]:
+    run_config: XGBRunConfig | None = None,
+) -> dict[str, XGBExperimentResult]:
     logger.info(
-        "Running RF feature-set grid: %d feature sets", len(grid_config.feature_sets)
+        "Running XGBoost feature-set grid: %d feature sets", len(grid_config.feature_sets)
     )
     base_cfg = grid_config.base_feature_config
-    results: dict[str, RFExperimentResult] = {}
-    cfg = run_config or RFRunConfig()
-    wf_cfg = cfg.walk_forward or RFWalkForwardConfig()
+    results: dict[str, XGBExperimentResult] = {}
+    cfg = run_config or XGBRunConfig()
+    wf_cfg = cfg.walk_forward or XGBWalkForwardConfig()
 
     feature_iterator = tqdm(
         grid_config.feature_sets.items(),
         total=len(grid_config.feature_sets),
-        desc="RF feature sets",
+        desc="XGBoost feature sets",
         disable=not wf_cfg.progress_bar,
     )
     for model_name, extra_cols in feature_iterator:
         logger.info(
-            "Running RF feature set '%s' with %d additional features",
+            "Running XGBoost feature set '%s' with %d additional features",
             model_name,
             len(extra_cols),
         )
         feature_cfg = replace(base_cfg, extra_feature_cols=extra_cols)
-        results[model_name] = run_rf_experiment_from_dataset(
+        results[model_name] = run_xgb_experiment_from_dataset(
             data,
             feature_config=feature_cfg,
             run_config=run_config,

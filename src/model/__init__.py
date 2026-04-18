@@ -1,3 +1,13 @@
+from .common import (
+    aggregate_predictions,
+    build_forecasting_design_matrix,
+    build_walk_forward_windows,
+    inverse_transform_prediction,
+    log_transform_rv_features,
+    split_design_matrix_xy,
+    standardize_train_test,
+    transform_target,
+)
 from .har import (
     HARExperimentResult,
     HARFeatureConfig,
@@ -23,6 +33,17 @@ from .rf import (
     run_rf_experiment_from_xy,
     run_rf_feature_set_grid,
 )
+from .xgb import (
+    XGBExperimentResult,
+    XGBFeatureConfig,
+    XGBGridConfig,
+    XGBModelConfig,
+    XGBRunConfig,
+    XGBWalkForwardConfig,
+    run_xgb_experiment_from_dataset,
+    run_xgb_experiment_from_xy,
+    run_xgb_feature_set_grid,
+)
 
 __all__ = [
     "HARExperimentResult",
@@ -38,12 +59,29 @@ __all__ = [
     "RFModelConfig",
     "RFRunConfig",
     "RFWalkForwardConfig",
+    "XGBExperimentResult",
+    "XGBFeatureConfig",
+    "XGBGridConfig",
+    "XGBModelConfig",
+    "XGBRunConfig",
+    "XGBWalkForwardConfig",
+    "aggregate_predictions",
+    "build_forecasting_design_matrix",
     "build_har_design_matrix",
+    "build_walk_forward_windows",
     "get_xy_from_har_design",
+    "inverse_transform_prediction",
+    "log_transform_rv_features",
     "run_har_experiment_from_dataset",
     "run_har_experiment_from_xy",
     "run_har_feature_set_grid",
     "run_rf_experiment_from_dataset",
     "run_rf_experiment_from_xy",
     "run_rf_feature_set_grid",
+    "run_xgb_experiment_from_dataset",
+    "run_xgb_experiment_from_xy",
+    "run_xgb_feature_set_grid",
+    "split_design_matrix_xy",
+    "standardize_train_test",
+    "transform_target",
 ]

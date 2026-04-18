@@ -1,3 +1,14 @@
+from src.model.common import (
+    aggregate_predictions,
+    build_forecasting_design_matrix,
+    build_walk_forward_windows,
+    inverse_transform_prediction,
+    log_transform_rv_features,
+    split_design_matrix_xy,
+    standardize_train_test,
+    transform_target,
+)
+
 from .experiment import (
     run_har_experiment_from_dataset,
     run_har_experiment_from_xy,
@@ -14,16 +25,10 @@ from .types import (
     HARWalkForwardConfig,
 )
 from .utils import (
-    aggregate_predictions,
     build_har_design_matrix,
-    build_walk_forward_windows,
     fit_har_ols,
     get_xy_from_har_design,
-    inverse_transform_prediction,
-    log_transform_rv_features,
     predict_har_ols,
-    standardize_train_test,
-    transform_target,
 )
 
 __all__ = [
@@ -35,6 +40,7 @@ __all__ = [
     "HARSelectionConfig",
     "HARWalkForwardConfig",
     "aggregate_predictions",
+    "build_forecasting_design_matrix",
     "build_har_design_matrix",
     "build_walk_forward_windows",
     "fit_har_ols",
@@ -46,6 +52,7 @@ __all__ = [
     "run_har_experiment_from_xy",
     "run_har_feature_set_grid",
     "select_har_features",
+    "split_design_matrix_xy",
     "standardize_train_test",
     "transform_target",
 ]

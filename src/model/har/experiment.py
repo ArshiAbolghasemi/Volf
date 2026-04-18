@@ -9,6 +9,16 @@ import pandas as pd
 from tqdm.auto import tqdm
 
 from src.metrics import evaluate_statistical_metrics
+from src.model.common.preprocessing import (
+    aggregate_predictions,
+    build_forecasting_design_matrix,
+    build_walk_forward_windows,
+    inverse_transform_prediction,
+    log_transform_rv_features,
+    split_design_matrix_xy,
+    standardize_train_test,
+    transform_target,
+)
 
 from .selection import select_har_features
 from .types import (
@@ -20,18 +30,7 @@ from .types import (
     HARSelectionConfig,
     HARWalkForwardConfig,
 )
-from .utils import (
-    aggregate_predictions,
-    build_har_design_matrix,
-    build_walk_forward_windows,
-    fit_har_ols,
-    get_xy_from_har_design,
-    inverse_transform_prediction,
-    log_transform_rv_features,
-    predict_har_ols,
-    standardize_train_test,
-    transform_target,
-)
+from .utils import fit_har_ols, predict_har_ols
 
 logger = logging.getLogger(__name__)
 
@@ -264,12 +263,12 @@ def run_har_experiment_from_dataset(
         "Starting HAR experiment from raw dataset with selection method %s",
         selection_cfg.method,
     )
-    design, core_columns, target_col = build_har_design_matrix(
+    design, core_columns, target_col = build_forecasting_design_matrix(
         data,
         feature_config,
         target_transform=model_cfg.target_transform,
     )
-    x, y = get_xy_from_har_design(design, target_col)
+    x, y = split_design_matrix_xy(design, target_col)
 
     effective_run_config = run_config
     if feature_config.target_mode == "mean" and model_cfg.target_transform != "none":
