@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
+from src.benchmark.checkpoints import save_best_result_checkpoints
 from src.benchmark.har import (
     HARGridSearchConfig,
     WheatHARBenchmarkConfig,
@@ -239,6 +240,8 @@ def main(  # noqa: C901, PLR0912, PLR0915
         summary = benchmark_multi_horizon_results_to_frame(results_by_horizon)
     else:
         results = run_wheat_har_benchmark(config=cfg)
+        horizon = (cfg.target_horizons or [cfg.target_horizon])[0]
+        results_by_horizon = {horizon: results}
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
@@ -264,6 +267,14 @@ def main(  # noqa: C901, PLR0912, PLR0915
     logger.info("Benchmark rows=%d", len(summary))
 
     output_name = output_path.name
+    checkpoint_dirs = save_best_result_checkpoints(
+        checkpoint_root=output_path.parent,
+        model_family="har",
+        target_mode=cfg.target_mode,
+        results_by_horizon=results_by_horizon,
+    )
+    logger.info("Saved %d HAR best-result checkpoints", len(checkpoint_dirs))
+
     horizons = cfg.target_horizons or [cfg.target_horizon]
     for horizon in horizons:
         horizon_df = summary[summary["target_horizon"] == horizon].copy()

@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
+from src.benchmark.checkpoints import save_best_result_checkpoints
 from src.benchmark.utils import normalize_target_mode
 from src.benchmark.xgb import (
     WheatXGBBenchmarkConfig,
@@ -155,7 +156,7 @@ def _load_config_from_json(path: str) -> WheatXGBBenchmarkConfig:
     )
 
 
-def main(  # noqa: C901, PLR0912
+def main(  # noqa: C901, PLR0912, PLR0915
     *,
     default_config: str | None = None,
     default_output: str = str(DATA_DIR / "benchmark" / "xgboost.csv"),
@@ -200,6 +201,8 @@ def main(  # noqa: C901, PLR0912
         summary = benchmark_multi_horizon_results_to_frame(results_by_horizon)
     else:
         results = run_wheat_xgb_benchmark(config=cfg)
+        horizon = (cfg.target_horizons or [cfg.target_horizon])[0]
+        results_by_horizon = {horizon: results}
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
@@ -224,6 +227,14 @@ def main(  # noqa: C901, PLR0912
             raise
 
     output_name = output_path.name
+    checkpoint_dirs = save_best_result_checkpoints(
+        checkpoint_root=output_path.parent,
+        model_family="xgb",
+        target_mode=cfg.target_mode,
+        results_by_horizon=results_by_horizon,
+    )
+    logger.info("Saved %d XGBoost best-result checkpoints", len(checkpoint_dirs))
+
     horizons = cfg.target_horizons or [cfg.target_horizon]
     for horizon in horizons:
         horizon_df = summary[summary["target_horizon"] == horizon].copy()
