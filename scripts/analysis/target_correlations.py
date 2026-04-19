@@ -78,10 +78,7 @@ def _validate_horizons(horizons: list[int], target_mode: str) -> None:
 
     min_horizon = 1 if target_mode == "mean" else 0
     if any(horizon < min_horizon for horizon in horizons):
-        msg = (
-            f"--horizons values must be >= {min_horizon} "
-            f"for target_mode='{target_mode}'."
-        )
+        msg = f"--horizons values must be >= {min_horizon} for target_mode='{target_mode}'."
         raise ValueError(msg)
 
 
