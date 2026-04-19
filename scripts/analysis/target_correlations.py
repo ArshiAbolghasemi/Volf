@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Compute feature correlations with a mean RV target and plot "
+            "Compute feature correlations with a forecast target and plot "
             "top correlated features."
         )
     )
@@ -37,10 +37,17 @@ def parse_args() -> argparse.Namespace:
         help="Base RV target column.",
     )
     parser.add_argument(
+        "--target-mode",
+        type=str,
+        choices=["point", "mean"],
+        default="mean",
+        help="Target construction mode (point or mean).",
+    )
+    parser.add_argument(
         "--horizons",
         type=str,
         default="4,8,12,16",
-        help="Comma-separated mean target horizons (e.g. '4,8,12,16').",
+        help="Comma-separated target horizons (e.g. '1,4,8').",
     )
     parser.add_argument(
         "--top-n",
@@ -53,7 +60,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["none", "log"],
         default="none",
-        help="Apply transform before mean-target construction.",
+        help="Apply transform before target construction.",
     )
     parser.add_argument(
         "--output-dir",
@@ -62,6 +69,26 @@ def parse_args() -> argparse.Namespace:
         help="Directory for outputs (CSV + PNG).",
     )
     return parser.parse_args()
+
+
+def _validate_horizons(horizons: list[int], target_mode: str) -> None:
+    if not horizons:
+        msg = "--horizons must contain at least one integer."
+        raise ValueError(msg)
+
+    min_horizon = 1 if target_mode == "mean" else 0
+    if any(horizon < min_horizon for horizon in horizons):
+        msg = (
+            f"--horizons values must be >= {min_horizon} "
+            f"for target_mode='{target_mode}'."
+        )
+        raise ValueError(msg)
+
+
+def _target_label(target_mode: str, horizon: int) -> str:
+    if target_mode == "mean":
+        return f"mean target (h={horizon})"
+    return f"point target (h={horizon})"
 
 
 def main() -> None:
@@ -77,15 +104,10 @@ def main() -> None:
 
     horizon_tokens = [token.strip() for token in args.horizons.split(",")]
     horizons = sorted({int(token) for token in horizon_tokens if token})
-    if not horizons:
-        msg = "--horizons must contain at least one integer."
-        raise ValueError(msg)
-    if any(horizon < 1 for horizon in horizons):
-        msg = "--horizons values must be >= 1 for target_mode='mean'."
-        raise ValueError(msg)
+    _validate_horizons(horizons, args.target_mode)
 
     input_path = Path(args.input)
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.output_dir) / args.target_mode
     output_dir.mkdir(parents=True, exist_ok=True)
 
     data = pd.read_csv(input_path)
@@ -106,7 +128,7 @@ def main() -> None:
             target_col=args.target_col,
             core_columns=[args.target_col],
             target_horizon=horizon,
-            target_mode="mean",
+            target_mode=args.target_mode,
             extra_feature_cols=numeric_features,
         )
 
@@ -132,7 +154,8 @@ def main() -> None:
         top_df = corr_df.head(top_n).copy().sort_values("corr", ascending=True)
 
         csv_path = output_dir / (
-            f"mean_target_corr_{args.target_col}_h{horizon}_{args.target_transform}.csv"
+            "target_corr_"
+            f"{args.target_mode}_{args.target_col}_h{horizon}_{args.target_transform}.csv"
         )
         corr_df.to_csv(csv_path, index=True)
 
@@ -142,13 +165,16 @@ def main() -> None:
         plt.axvline(0.0, color="black", linewidth=1)
         plt.xlabel("Correlation with target")
         plt.ylabel("Feature")
-        target_formula = r"$y_t=\frac{1}{h}\sum_{i=1}^{h}\log(\mathrm{RV}_{t+i})$"
-        title = f"Top {top_n} features vs {target_formula} (h={horizon})"
+        title = (
+            f"Top {top_n} features vs {_target_label(args.target_mode, horizon)} "
+            f"({args.target_transform})"
+        )
         plt.title(title)
         plt.tight_layout()
 
         plot_path = output_dir / (
-            f"mean_target_corr_top{top_n}_{args.target_col}_h{horizon}_{args.target_transform}.png"
+            "target_corr_top"
+            f"{top_n}_{args.target_mode}_{args.target_col}_h{horizon}_{args.target_transform}.png"
         )
         plt.savefig(plot_path, dpi=180)
         plt.close()
