@@ -53,9 +53,13 @@ def build_wheat_feature_sets(
         "har": [],
         "har_endo": endo,
         "har_endo_exo": endo + exo,
-        "har_endo_exogenous_climate": endo + exo + climate,
-        "har_endo_exogenous_climate_news": endo + exo + climate + news,
-        "har__all": endo + exo + climate + news + macro,
+        "har_endo_exo_news": endo + exo + news,
+        "har_endo_exo_macro": endo + exo + macro,
+        "har_endo_exo_climate": endo + exo + climate,
+        "har_endo_exo_climate_news": endo + exo + climate + news,
+        "har_endo_exo_climate_macro": endo + exo + climate + macro,
+        "har_endo_exo_news_macro": endo + exo + news + macro,
+        "har_endo_exo_climate_news_macro": endo + exo + climate + news + macro,
     }
 
     cleaned: dict[str, list[str]] = {}
