@@ -110,8 +110,6 @@ def _merge_spi_1m(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
     # NOAA weekly dates are week-start Mondays, so we prioritize week_date if present.
     if "week_date" in spi_df.columns:
         spi_df["merge_date"] = pd.to_datetime(spi_df["week_date"], errors="coerce")
-    elif "date" in spi_df.columns:
-        spi_df["merge_date"] = pd.to_datetime(spi_df["date"], errors="coerce")
     else:
         msg = "SPI input must have either 'week_date' or 'date' column."
         raise ValueError(msg)
