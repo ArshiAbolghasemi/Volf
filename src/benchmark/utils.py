@@ -14,7 +14,6 @@ CLIMATE_COLUMNS = [
     "wet",
     "SOI_index",
     "NAO_index",
-    "Text_Climate_Anomaly",
 ]
 
 NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly"]
