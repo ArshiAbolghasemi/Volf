@@ -12,7 +12,7 @@ from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
 
-METRIC_COLUMNS = ("TMAX", "TMIN", "TAVG")
+METRIC_COLUMNS = ("TMAX", "TMIN")
 Q3_LOW = 0.75
 Q3_HIGH = 0.90
 LEFT_Q4_HIGH = 0.10
@@ -114,7 +114,7 @@ def _merge_spi_1m(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
         msg = "SPI input must have either 'week_date' or 'date' column."
         raise ValueError(msg)
 
-    spi_weekly = spi_df[["state", "merge_date", "SPI_1m"]].copy()
+    spi_weekly = cast("pd.DataFrame", spi_df[["state", "merge_date", "SPI_1m"]].copy())
     spi_weekly = spi_weekly.dropna(subset=["merge_date"]).drop_duplicates(
         subset=["state", "merge_date"], keep="last"
     )
@@ -134,7 +134,7 @@ def _merge_spi_1m(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
     return out.drop(columns=["merge_date"])
 
 
-def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:  # noqa: PLR0915
+def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:
     required = {"state", "date", *METRIC_COLUMNS}
     missing = sorted(required - set(df.columns))
     if missing:
@@ -195,32 +195,6 @@ def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:  # noqa: P
         z_sigma = out[z_std_col].to_numpy(dtype=float)
         valid_sigma = np.isfinite(z_sigma) & (z_sigma > 0.0)
 
-        q3_low = np.full(len(out), np.nan, dtype=float)
-        q3_high = np.full(len(out), np.nan, dtype=float)
-        q3_low[valid_sigma] = norm.ppf(
-            Q3_LOW,
-            loc=z_mu[valid_sigma],
-            scale=z_sigma[valid_sigma],
-        )
-        q3_high[valid_sigma] = norm.ppf(
-            Q3_HIGH,
-            loc=z_mu[valid_sigma],
-            scale=z_sigma[valid_sigma],
-        )
-        out[q3_low_col] = q3_low
-        out[q3_high_col] = q3_high
-
-        in_q3 = (
-            valid_sigma
-            & np.isfinite(z_values)
-            & (z_values >= q3_low)
-            & (z_values <= q3_high)
-        )
-        in_q4 = valid_sigma & np.isfinite(z_values) & (z_values > q3_high)
-
-        out[f"{metric}_q3_value"] = np.where(in_q3, z_values, 0.0)
-        out[f"{metric}_q4_value"] = np.where(in_q4, z_values, 0.0)
-
         if metric == "TMIN":
             left_q4_high = np.full(len(out), np.nan, dtype=float)
             left_q3_high = np.full(len(out), np.nan, dtype=float)
@@ -245,6 +219,32 @@ def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:  # noqa: P
 
             out["TMIN_left_q3_value"] = np.where(in_left_q3, z_values, 0.0)
             out["TMIN_left_q4_value"] = np.where(in_left_q4, z_values, 0.0)
+        elif metric == "TMAX":
+            q3_low = np.full(len(out), np.nan, dtype=float)
+            q3_high = np.full(len(out), np.nan, dtype=float)
+            q3_low[valid_sigma] = norm.ppf(
+                Q3_LOW,
+                loc=z_mu[valid_sigma],
+                scale=z_sigma[valid_sigma],
+            )
+            q3_high[valid_sigma] = norm.ppf(
+                Q3_HIGH,
+                loc=z_mu[valid_sigma],
+                scale=z_sigma[valid_sigma],
+            )
+            out[q3_low_col] = q3_low
+            out[q3_high_col] = q3_high
+
+            in_q3 = (
+                valid_sigma
+                & np.isfinite(z_values)
+                & (z_values >= q3_low)
+                & (z_values <= q3_high)
+            )
+            in_q4 = valid_sigma & np.isfinite(z_values) & (z_values > q3_high)
+
+            out["TMAX_q3_value"] = np.where(in_q3, z_values, 0.0)
+            out["TMAX_q4_value"] = np.where(in_q4, z_values, 0.0)
 
     return out
 
@@ -266,8 +266,15 @@ def construct_crop_frameworks(zscore_df: pd.DataFrame) -> dict[str, pd.DataFrame
     frameworks: dict[str, pd.DataFrame] = {}
     for crop in CROPS:
         out = zscore_df.copy()
+
         seasonal_flags = out["week_of_year"].apply(
             lambda week, crop=crop: crop_season_flag(int(week), crop)
+        )
+        out["is_planting_week"] = seasonal_flags.map(
+            lambda values: values["is_planting_week"]
+        )
+        out["is_harvesting_week"] = seasonal_flags.map(
+            lambda values: values["is_harvesting_week"]
         )
 
         for col in value_cols:
@@ -307,7 +314,7 @@ def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
     long_df["production"] = pd.to_numeric(long_df["production"], errors="coerce")
 
     long_df["state"] = long_df["state"].astype(str).str.strip()
-    long_df = long_df[long_df["state"] != "United States"].copy()
+    long_df = cast("pd.DataFrame", long_df[long_df["state"] != "United States"].copy())
     long_df = long_df.dropna(subset=["year", "production"])
     long_df = long_df[long_df["production"] > 0].copy()
     long_df["total_production_year"] = long_df.groupby("year")["production"].transform(
@@ -315,7 +322,9 @@ def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
     )
     long_df["state_weight"] = long_df["production"] / long_df["total_production_year"]
 
-    return long_df[["state", "year", "state_weight"]].drop_duplicates()
+    return cast(
+        "pd.DataFrame", long_df[["state", "year", "state_weight"]]
+    ).drop_duplicates()
 
 
 def build_weighted_commodity_frame(
@@ -366,7 +375,7 @@ def build_weighted_commodity_frame(
     weighted_totals.index.name = "date"
     weighted_df = weighted_totals.reset_index()
     weight_sums = merged.groupby("date", sort=True)["state_weight"].sum()
-    weighted_df["total_state_weight"] = weighted_df["date"].map(weight_sums)
+    weighted_df["total_state_weight"] = weighted_df["date"].map(weight_sums.to_dict())
     return weighted_df.sort_values("date").reset_index(drop=True)
 
 
@@ -397,14 +406,20 @@ def add_monthly_seasonal_features(
             continue
         # Use only past information: weekly t uses averages from previous weeks.
         shifted = out[col].shift(1)
-        aggregated[f"{col}_monthly"] = shifted.rolling(
-            window=monthly_weeks,
-            min_periods=monthly_weeks,
-        ).mean()
-        aggregated[f"{col}_seasonal"] = shifted.rolling(
-            window=seasonal_weeks,
-            min_periods=seasonal_weeks,
-        ).mean()
+        aggregated[f"{col}_monthly"] = cast(
+            "pd.Series",
+            shifted.rolling(
+                window=monthly_weeks,
+                min_periods=monthly_weeks,
+            ).mean(),
+        )
+        aggregated[f"{col}_seasonal"] = cast(
+            "pd.Series",
+            shifted.rolling(
+                window=seasonal_weeks,
+                min_periods=seasonal_weeks,
+            ).mean(),
+        )
 
     return pd.concat([out, pd.DataFrame(aggregated, index=out.index)], axis=1)
 
