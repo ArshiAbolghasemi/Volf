@@ -220,8 +220,6 @@ def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:  # noqa: P
 
         out[f"{metric}_q3_value"] = np.where(in_q3, z_values, 0.0)
         out[f"{metric}_q4_value"] = np.where(in_q4, z_values, 0.0)
-        out[f"{metric}_q3_flag"] = in_q3.astype(int)
-        out[f"{metric}_q4_flag"] = in_q4.astype(int)
 
         if metric == "TMIN":
             left_q4_high = np.full(len(out), np.nan, dtype=float)
@@ -247,8 +245,6 @@ def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:  # noqa: P
 
             out["TMIN_left_q3_value"] = np.where(in_left_q3, z_values, 0.0)
             out["TMIN_left_q4_value"] = np.where(in_left_q4, z_values, 0.0)
-            out["TMIN_left_q3_flag"] = in_left_q3.astype(int)
-            out["TMIN_left_q4_flag"] = in_left_q4.astype(int)
 
     return out
 
