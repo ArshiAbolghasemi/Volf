@@ -38,7 +38,6 @@ if not BASE_URL:
 PROXY: str | None = os.getenv("PROXY")
 PROXIES: dict[str, str] | None = {"http": PROXY, "https": PROXY} if PROXY else None
 
-DATATYPES: list[str] = ["PRCP", "TMAX", "TMIN", "TAVG"]
 HTTP_TOO_MANY_REQUESTS = 429
 
 STATE_FIPS: dict[str, str] = {
@@ -251,11 +250,13 @@ def fetch_state_datatype(
     return rows
 
 
-def fetch_all_data(startdate: str, enddate: str, workers: int) -> pd.DataFrame:
+def fetch_all_data(
+    datatypes: list[str], startdate: str, enddate: str, workers: int
+) -> pd.DataFrame:
     tasks = [
         (state, fips, datatype)
         for state, fips in STATE_FIPS.items()
-        for datatype in DATATYPES
+        for datatype in datatypes
     ]
 
     rows: list[dict[str, Any]] = []
