@@ -405,6 +405,8 @@ def add_monthly_seasonal_features(
 
     aggregated: dict[str, pd.Series] = {}
     for col in numeric_cols:
+        if col == "SPI_1m":
+            continue
         # Use only past information: weekly t uses averages from previous weeks.
         shifted = out[col].shift(1)
         aggregated[f"{col}_monthly"] = shifted.rolling(
