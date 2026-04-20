@@ -269,12 +269,6 @@ def construct_crop_frameworks(zscore_df: pd.DataFrame) -> dict[str, pd.DataFrame
         seasonal_flags = out["week_of_year"].apply(
             lambda week, crop=crop: crop_season_flag(int(week), crop)
         )
-        out["is_planting_week"] = seasonal_flags.map(
-            lambda values: int(values["is_planting_week"])
-        )
-        out["is_harvesting_week"] = seasonal_flags.map(
-            lambda values: int(values["is_harvesting_week"])
-        )
 
         for col in value_cols:
             out[f"{col}_in_planting"] = out[col] * out["is_planting_week"]
@@ -439,7 +433,7 @@ def run_pipeline(
         production_weights = _load_production_weights(crop, resolved_production_dir)
         weighted_df = build_weighted_commodity_frame(framework, production_weights)
         weighted_df = add_monthly_seasonal_features(weighted_df)
-        output_path = resolved_output_dir / f"noaa_weekly_weighted_{crop}.csv"
+        output_path = resolved_output_dir / f"cliamte_weekly_weighted_{crop}.csv"
         weighted_df.to_csv(output_path, index=False)
         logger.info(
             "Saved %s weighted dataset to %s (rows=%d, cols=%d)",

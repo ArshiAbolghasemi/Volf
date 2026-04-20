@@ -55,7 +55,7 @@ def in_ranges(week: int, ranges: list[tuple]) -> bool:
     return any(start <= week <= end for start, end in ranges)
 
 
-def crop_season_flag(week_of_year: int, commodity: str) -> dict[str, bool]:
+def crop_season_flag(week_of_year: int, commodity: str) -> dict[str, int]:
     commodity = commodity.lower()
 
     if commodity not in CROP_CALENDAR:
@@ -68,7 +68,7 @@ def crop_season_flag(week_of_year: int, commodity: str) -> dict[str, bool]:
     is_harvesting = in_ranges(week_of_year, calendar["harvesting"])
 
     return {
-        "is_planting_week": bool(is_planting),
-        "is_harvesting_week": bool(is_harvesting),
-        "is_active_season": bool(is_planting or is_harvesting),
+        "is_planting_week": int(is_planting),
+        "is_harvesting_week": int(is_harvesting),
+        "is_active_season": int(is_planting or is_harvesting),
     }
