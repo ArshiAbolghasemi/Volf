@@ -382,6 +382,43 @@ def build_weighted_commodity_frame(
     return weighted_df.sort_values("date").reset_index(drop=True)
 
 
+def add_monthly_seasonal_features(
+    weighted_df: pd.DataFrame,
+    monthly_weeks: int = 4,
+    seasonal_weeks: int = 13,
+) -> pd.DataFrame:
+    if "date" not in weighted_df.columns:
+        msg = "Weighted dataframe must contain a 'date' column."
+        raise ValueError(msg)
+
+    out = weighted_df.sort_values("date").reset_index(drop=True).copy()
+    numeric_cols = [
+        col
+        for col in out.columns
+        if (
+            pd.api.types.is_numeric_dtype(out[col])
+            and col != "total_state_weight"
+            and not col.endswith("_monthly")
+            and not col.endswith("_seasonal")
+        )
+    ]
+
+    aggregated: dict[str, pd.Series] = {}
+    for col in numeric_cols:
+        # Use only past information: weekly t uses averages from previous weeks.
+        shifted = out[col].shift(1)
+        aggregated[f"{col}_monthly"] = shifted.rolling(
+            window=monthly_weeks,
+            min_periods=monthly_weeks,
+        ).mean()
+        aggregated[f"{col}_seasonal"] = shifted.rolling(
+            window=seasonal_weeks,
+            min_periods=seasonal_weeks,
+        ).mean()
+
+    return pd.concat([out, pd.DataFrame(aggregated, index=out.index)], axis=1)
+
+
 def run_pipeline(
     input_path: Path | str,
     output_dir: Path | str,
@@ -405,6 +442,7 @@ def run_pipeline(
     for crop, framework in crop_frameworks.items():
         production_weights = _load_production_weights(crop, resolved_production_dir)
         weighted_df = build_weighted_commodity_frame(framework, production_weights)
+        weighted_df = add_monthly_seasonal_features(weighted_df)
         output_path = resolved_output_dir / f"noaa_weekly_weighted_{crop}.csv"
         weighted_df.to_csv(output_path, index=False)
         logger.info(
