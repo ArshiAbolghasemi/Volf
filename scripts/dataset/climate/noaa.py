@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 def save_result(daily_df: pd.DataFrame, weekly_df: pd.DataFrame) -> None:
     output_path = DATA_DIR / "climate"
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    daily_df.to_csv(output_path / "noaa_daily.csv", index=False)
-    weekly_df.to_csv(output_path / "noaa_weekly.csv", index=False)
+    daily_df.to_csv(output_path / "noaa_daily_new.csv", index=False)
+    weekly_df.to_csv(output_path / "noaa_weekly_new.csv", index=False)
     logger.info("Saved result at %s", output_path)
 
 
