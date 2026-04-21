@@ -5,20 +5,25 @@ from typing import cast
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
 
 from src.dataset.climate.crop_seasonal import crop_season_flag
 from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
 
-METRIC_COLUMNS = ("TMAX", "TMIN")
-Q3_LOW = 0.75
-Q3_HIGH = 0.90
-LEFT_Q4_HIGH = 0.10
-LEFT_Q3_HIGH = 0.25
+
 CROPS = ("corn", "wheat", "soybean")
-STATE_ABBREV_TO_NAME = {
+SPI_COLUMNS = ("SPI_1m", "SPI_3m")
+
+# TMAX: right tail - heat stress
+TMAX_Q3_LOW = 0.75  # 75th-90th pct -> moderate heat stress
+TMAX_Q3_HIGH = 0.90  # above 90th pct -> severe heat stress
+
+# TMIN: left tail - cold stress
+TMIN_Q3_HIGH = 0.25  # 10th-25th pct -> moderate cold stress
+TMIN_Q4_HIGH = 0.10  # below 10th pct -> severe cold stress
+
+STATE_ABBREV_TO_NAME: dict[str, str] = {
     "AL": "Alabama",
     "AK": "Alaska",
     "AZ": "Arizona",
@@ -72,51 +77,41 @@ STATE_ABBREV_TO_NAME = {
 }
 
 
-def _resolve_input_path(raw_path: str) -> Path:
-    path = Path(raw_path)
-    if path.exists():
-        return path
+def _require_path(path: Path, label: str) -> Path:
+    if not path.exists():
+        msg = f"{label} not found: {path}"
+        raise FileNotFoundError(msg)
+    return path
 
-    msg = f"Input file not found: {path}"
-    raise FileNotFoundError(msg)
+
+def _resolve_input_path(raw: str) -> Path:
+    return _require_path(Path(raw), "Input file")
 
 
 def _resolve_production_dir() -> Path:
-    path = DATA_DIR / "production_by_state"
-    if path.exists():
-        return path
-
-    msg = f"Production directory not found: {path}"
-    raise FileNotFoundError(msg)
+    return _require_path(DATA_DIR / "production_by_state", "Production directory")
 
 
 def _resolve_spi_input() -> Path:
-    path = DATA_DIR / "climate" / "spi_weekly_multiscale.csv"
-    if path.exists():
-        return path
-
-    msg = f"SPI file not found: {path}"
-    raise FileNotFoundError(msg)
+    return _require_path(DATA_DIR / "climate" / "spi_weekly_multiscale.csv", "SPI file")
 
 
-def _merge_spi_1m(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
+def _merge_spi_features(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
     spi_df = pd.read_csv(spi_path)
-    required_cols = {"state", "SPI_1m"}
-    missing = sorted(required_cols - set(spi_df.columns))
+
+    missing = sorted({"state", *SPI_COLUMNS} - set(spi_df.columns))
     if missing:
         msg = f"Missing required SPI columns: {missing}"
         raise ValueError(msg)
-
-    # NOAA weekly dates are week-start Mondays, so we prioritize week_date if present.
-    if "week_date" in spi_df.columns:
-        spi_df["merge_date"] = pd.to_datetime(spi_df["week_date"], errors="coerce")
-    else:
-        msg = "SPI input must have either 'week_date' or 'date' column."
+    if "week_date" not in spi_df.columns:
+        msg = "SPI input must have a 'week_date' column."
         raise ValueError(msg)
 
-    spi_weekly = cast("pd.DataFrame", spi_df[["state", "merge_date", "SPI_1m"]].copy())
-    spi_weekly = spi_weekly.dropna(subset=["merge_date"]).drop_duplicates(
-        subset=["state", "merge_date"], keep="last"
+    spi_df["merge_date"] = pd.to_datetime(spi_df["week_date"], errors="coerce")
+    spi_weekly = (
+        cast("pd.DataFrame", spi_df[["state", "merge_date", *SPI_COLUMNS]])
+        .dropna(subset=["merge_date"])
+        .drop_duplicates(subset=["state", "merge_date"], keep="last")
     )
 
     out = noaa_weekly.copy()
@@ -125,172 +120,121 @@ def _merge_spi_1m(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
         msg = "NOAA weekly column 'date' contains invalid values."
         raise ValueError(msg)
 
-    out = out.merge(
-        spi_weekly,
-        left_on=["state", "date"],
-        right_on=["state", "merge_date"],
-        how="left",
-    )
-    return out.drop(columns=["merge_date"])
+    return out.merge(
+        spi_weekly, left_on=["state", "date"], right_on=["state", "merge_date"], how="left"
+    ).drop(columns=["merge_date"])
 
 
-def construct_weekly_state_zscores(df: pd.DataFrame) -> pd.DataFrame:
-    required = {"state", "date", *METRIC_COLUMNS}
-    missing = sorted(required - set(df.columns))
+def _compute_zscores(df: pd.DataFrame) -> pd.DataFrame:
+    missing = sorted({"state", "date", "TMAX", "TMIN"} - set(df.columns))
     if missing:
         msg = f"Missing required columns: {missing}"
         raise ValueError(msg)
 
     out = df.copy()
     out["date"] = pd.to_datetime(out["date"], errors="coerce")
-    if bool(out["date"].isna().any()):
-        msg = "Column 'date' contains invalid values."
-        raise ValueError(msg)
-
     out["week_of_year"] = out["date"].dt.isocalendar().week.astype(int)
+    out["year"] = out["date"].dt.year
+    out["month"] = out["date"].dt.month
 
-    for metric in METRIC_COLUMNS:
-        stats = cast(
-            "pd.DataFrame",
-            out.groupby(["state", "week_of_year"])[metric].agg(["mean", "std"]),
-        )
-        stats = stats.rename(
-            columns={
-                "mean": f"{metric}_week_mean",
-                "std": f"{metric}_week_std",
-            },
-        )
-        out = out.merge(
-            stats.reset_index(),
-            on=["state", "week_of_year"],
-            how="left",
-        )
-
-        std_col = f"{metric}_week_std"
-        mean_col = f"{metric}_week_mean"
-        z_col = f"{metric}_zscore"
-        out[z_col] = (out[metric] - out[mean_col]) / out[std_col].replace(0, np.nan)
-        z_stats = cast(
-            "pd.DataFrame",
-            out.groupby(["state", "week_of_year"])[z_col].agg(["mean", "std"]),
-        )
-        z_stats = z_stats.rename(
-            columns={
-                "mean": f"{metric}_zscore_mean",
-                "std": f"{metric}_zscore_std",
-            }
-        )
-        out = out.merge(
-            z_stats.reset_index(),
-            on=["state", "week_of_year"],
-            how="left",
-        )
-
-        z_mean_col = f"{metric}_zscore_mean"
-        z_std_col = f"{metric}_zscore_std"
-        q3_low_col = f"{metric}_q3_low"
-        q3_high_col = f"{metric}_q3_high"
-        z_values = out[z_col].to_numpy(dtype=float)
-        z_mu = out[z_mean_col].to_numpy(dtype=float)
-        z_sigma = out[z_std_col].to_numpy(dtype=float)
-        valid_sigma = np.isfinite(z_sigma) & (z_sigma > 0.0)
-
-        if metric == "TMIN":
-            left_q4_high = np.full(len(out), np.nan, dtype=float)
-            left_q3_high = np.full(len(out), np.nan, dtype=float)
-            left_q4_high[valid_sigma] = norm.ppf(
-                LEFT_Q4_HIGH,
-                loc=z_mu[valid_sigma],
-                scale=z_sigma[valid_sigma],
-            )
-            left_q3_high[valid_sigma] = norm.ppf(
-                LEFT_Q3_HIGH,
-                loc=z_mu[valid_sigma],
-                scale=z_sigma[valid_sigma],
-            )
-
-            in_left_q3 = (
-                valid_sigma
-                & np.isfinite(z_values)
-                & (z_values > left_q4_high)
-                & (z_values <= left_q3_high)
-            )
-            in_left_q4 = valid_sigma & np.isfinite(z_values) & (z_values <= left_q4_high)
-
-            out["TMIN_left_q3_value"] = np.where(in_left_q3, z_values, 0.0)
-            out["TMIN_left_q4_value"] = np.where(in_left_q4, z_values, 0.0)
-        elif metric == "TMAX":
-            q3_low = np.full(len(out), np.nan, dtype=float)
-            q3_high = np.full(len(out), np.nan, dtype=float)
-            q3_low[valid_sigma] = norm.ppf(
-                Q3_LOW,
-                loc=z_mu[valid_sigma],
-                scale=z_sigma[valid_sigma],
-            )
-            q3_high[valid_sigma] = norm.ppf(
-                Q3_HIGH,
-                loc=z_mu[valid_sigma],
-                scale=z_sigma[valid_sigma],
-            )
-            out[q3_low_col] = q3_low
-            out[q3_high_col] = q3_high
-
-            in_q3 = (
-                valid_sigma
-                & np.isfinite(z_values)
-                & (z_values >= q3_low)
-                & (z_values <= q3_high)
-            )
-            in_q4 = valid_sigma & np.isfinite(z_values) & (z_values > q3_high)
-
-            out["TMAX_q3_value"] = np.where(in_q3, z_values, 0.0)
-            out["TMAX_q4_value"] = np.where(in_q4, z_values, 0.0)
+    for metric in ("TMAX", "TMIN"):
+        grp = out.groupby(["state", "week_of_year"])[metric]
+        mean = grp.transform("mean")
+        std = grp.transform("std").replace(0, np.nan)
+        out[f"{metric}_zscore"] = (out[metric] - mean) / std
 
     return out
 
 
-def _value_feature_columns(df: pd.DataFrame) -> list[str]:
-    return [col for col in df.columns if col.endswith("_value")]
+def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
+    """Assign extreme z-score values from state/week quantile thresholds.
+
+    For each (state, week_of_year), compute fixed quantile thresholds from the full
+    historical z-score distribution, then assign band values:
+
+      TMAX (right tail - heat stress):
+        Q3 value : z-score if 75th <= z < 90th, else 0
+        Q4 value : z-score if z >= 90th,         else 0
+
+      TMIN (left tail - cold stress):
+        Q3 value : z-score if 10th < z <= 25th,  else 0
+        Q4 value : z-score if z <= 10th,          else 0
+    """
+    group_cols = ["state", "week_of_year"]
+    tmax_group = out.groupby(group_cols)["TMAX_zscore"]
+    tmin_group = out.groupby(group_cols)["TMIN_zscore"]
+
+    out["tmax_q3_thresh"] = tmax_group.transform(
+        lambda values: values.quantile(TMAX_Q3_LOW)
+    )
+    out["tmax_q4_thresh"] = tmax_group.transform(
+        lambda values: values.quantile(TMAX_Q3_HIGH)
+    )
+    out["tmin_q4_thresh"] = tmin_group.transform(
+        lambda values: values.quantile(TMIN_Q4_HIGH)
+    )
+    out["tmin_q3_thresh"] = tmin_group.transform(
+        lambda values: values.quantile(TMIN_Q3_HIGH)
+    )
+
+    tmax_z = out["TMAX_zscore"].to_numpy(dtype=float)
+    tmin_z = out["TMIN_zscore"].to_numpy(dtype=float)
+    tmax_ok = np.isfinite(tmax_z)
+    tmin_ok = np.isfinite(tmin_z)
+
+    tmax_q3 = out["tmax_q3_thresh"].to_numpy(dtype=float)
+    tmax_q4 = out["tmax_q4_thresh"].to_numpy(dtype=float)
+    tmin_q3 = out["tmin_q3_thresh"].to_numpy(dtype=float)
+    tmin_q4 = out["tmin_q4_thresh"].to_numpy(dtype=float)
+
+    # TMAX: right tail
+    out["TMAX_q3_value"] = np.where(
+        tmax_ok & (tmax_z >= tmax_q3) & (tmax_z < tmax_q4), tmax_z, 0.0
+    )
+    out["TMAX_q4_value"] = np.where(tmax_ok & (tmax_z >= tmax_q4), tmax_z, 0.0)
+
+    # TMIN: left tail
+    out["TMIN_q3_value"] = np.where(
+        tmin_ok & (tmin_z > tmin_q4) & (tmin_z <= tmin_q3), tmin_z, 0.0
+    )
+    out["TMIN_q4_value"] = np.where(tmin_ok & (tmin_z <= tmin_q4), tmin_z, 0.0)
+
+    return out.drop(
+        columns=["tmax_q3_thresh", "tmax_q4_thresh", "tmin_q3_thresh", "tmin_q4_thresh"]
+    )
 
 
-def construct_crop_frameworks(zscore_df: pd.DataFrame) -> dict[str, pd.DataFrame]:
-    if "week_of_year" not in zscore_df.columns:
-        msg = "Column 'week_of_year' is required to build crop frameworks."
-        raise ValueError(msg)
+_EXTREME_VALUE_COLS = [
+    "TMAX_q3_value",
+    "TMAX_q4_value",
+    "TMIN_q3_value",
+    "TMIN_q4_value",
+]
 
-    value_cols = _value_feature_columns(zscore_df)
-    if not value_cols:
-        msg = "No '_value' columns found in zscore dataframe."
-        raise ValueError(msg)
 
-    frameworks: dict[str, pd.DataFrame] = {}
-    for crop in CROPS:
-        out = zscore_df.copy()
+def _apply_seasonal_mask(df: pd.DataFrame, crop: str) -> pd.DataFrame:
+    """Zero out extremes outside planting/harvesting windows.
 
-        seasonal_flags = out["week_of_year"].apply(
-            lambda week, crop=crop: crop_season_flag(int(week), crop)
-        )
-        out["is_planting_week"] = seasonal_flags.map(
-            lambda values: values["is_planting_week"]
-        )
-        out["is_harvesting_week"] = seasonal_flags.map(
-            lambda values: values["is_harvesting_week"]
-        )
+    Adds _in_planting and _in_harvesting variants for each extreme value column.
+    Only these masked columns are kept downstream - raw extremes are dropped.
+    """
+    out = df.copy()
+    flags = out["week_of_year"].apply(lambda w: crop_season_flag(int(w), crop))
 
-        for col in value_cols:
-            out[f"{col}_in_planting"] = out[col] * out["is_planting_week"]
-            out[f"{col}_in_harvesting"] = out[col] * out["is_harvesting_week"]
+    out["is_planting_week"] = flags.map(lambda f: f["is_planting_week"])
+    out["is_harvesting_week"] = flags.map(lambda f: f["is_harvesting_week"])
 
-        frameworks[crop] = out
+    for col in _EXTREME_VALUE_COLS:
+        out[f"{col}_in_planting"] = out[col] * out["is_planting_week"]
+        out[f"{col}_in_harvesting"] = out[col] * out["is_harvesting_week"]
 
-    return frameworks
+    return out.drop(
+        columns=["is_planting_week", "is_harvesting_week", *_EXTREME_VALUE_COLS]
+    )
 
 
 def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
-    path = production_dir / f"{crop}.csv"
-    if not path.exists():
-        msg = f"Production file not found for {crop}: {path}"
-        raise FileNotFoundError(msg)
+    path = _require_path(production_dir / f"{crop}.csv", f"{crop} production by state")
 
     production_df = pd.read_csv(path)
     if "state" not in production_df.columns:
@@ -303,160 +247,137 @@ def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
         msg = f"No production-by-year columns found for {crop} in: {path}"
         raise ValueError(msg)
 
-    long_df = production_df[["state", *year_cols]].melt(
-        id_vars="state",
-        value_vars=year_cols,
-        var_name="year_col",
-        value_name="production",
+    long = production_df[["state", *year_cols]].melt(
+        id_vars="state", value_vars=year_cols, var_name="year_col", value_name="production"
     )
-    long_df["year"] = long_df["year_col"].str.extract(r"(\d{4})$").astype(float)
-    long_df["year"] = long_df["year"].astype("Int64")
-    long_df["production"] = pd.to_numeric(long_df["production"], errors="coerce")
+    long["year"] = long["year_col"].str.extract(r"(\d{4})$").astype(float).astype("Int64")
+    long["production"] = pd.to_numeric(long["production"], errors="coerce")
+    long["state"] = long["state"].astype(str).str.strip()
 
-    long_df["state"] = long_df["state"].astype(str).str.strip()
-    long_df = cast("pd.DataFrame", long_df[long_df["state"] != "United States"].copy())
-    long_df = long_df.dropna(subset=["year", "production"])
-    long_df = long_df[long_df["production"] > 0].copy()
-    long_df["total_production_year"] = long_df.groupby("year")["production"].transform(
-        "sum"
+    long = (
+        long[long["state"] != "United States"]
+        .dropna(subset=["year", "production"])
+        .pipe(lambda d: d[d["production"] > 0])
+        .copy()
     )
-    long_df["state_weight"] = long_df["production"] / long_df["total_production_year"]
+    long["total_production_year"] = long.groupby("year")["production"].transform("sum")
+    long["state_weight"] = long["production"] / long["total_production_year"]
 
-    return cast(
-        "pd.DataFrame", long_df[["state", "year", "state_weight"]]
-    ).drop_duplicates()
+    return cast("pd.DataFrame", long[["state", "year", "state_weight"]].drop_duplicates())
+
+
+def _weighted_aggregate(
+    df: pd.DataFrame,
+    group_cols: list[str],
+    value_cols: list[str],
+    weight_col: str,
+) -> pd.DataFrame:
+    """Compute a production-weighted mean: sum(value * weight) / sum(weight)."""
+    working = df[group_cols + value_cols + [weight_col]].copy()
+    working[weight_col] = working[weight_col].fillna(0.0)
+    for col in value_cols:
+        working[col] = pd.to_numeric(working[col], errors="coerce").fillna(0.0)
+
+    weighted = working.copy()
+    for col in value_cols:
+        weighted[col] = weighted[col] * weighted[weight_col]
+
+    agg = weighted.groupby(group_cols, as_index=False)[value_cols].sum()
+    totals = (
+        weighted.groupby(group_cols, as_index=False)[weight_col]
+        .sum()
+        .rename(columns={weight_col: "total_weight"})
+    )
+    agg = agg.merge(totals, on=group_cols, how="left")
+    for col in value_cols:
+        agg[col] = np.where(agg["total_weight"] > 0, agg[col] / agg["total_weight"], 0.0)
+
+    return agg
+
+
+def _seasonal_value_cols(df: pd.DataFrame) -> list[str]:
+    """All _in_planting and _in_harvesting extreme value columns."""
+    return [col for col in df.columns if col.endswith(("_in_planting", "_in_harvesting"))]
 
 
 def build_weighted_commodity_frame(
-    crop_frame: pd.DataFrame,
+    masked_frame: pd.DataFrame,
     production_weights: pd.DataFrame,
 ) -> pd.DataFrame:
-    required = {"state", "date"}
-    missing = sorted(required - set(crop_frame.columns))
-    if missing:
-        msg = f"Missing required columns in crop frame: {missing}"
-        raise ValueError(msg)
+    """Aggregate state-level masked extremes into commodity-level signals.
 
-    out = crop_frame.copy()
-    out["date"] = pd.to_datetime(out["date"], errors="coerce")
-    if bool(out["date"].isna().any()):
-        msg = "Column 'date' contains invalid values."
-        raise ValueError(msg)
+    Weighted by each state's share of production.
+    Then attach weekly and monthly re-aggregations, plus raw SPI columns.
+    """
+    out = masked_frame.copy()
+    out["state_name"] = out["state"].map(STATE_ABBREV_TO_NAME).fillna(out["state"])
 
-    out["state_name"] = out["state"].map(STATE_ABBREV_TO_NAME)
-    out["year"] = out["date"].dt.year.astype("Int64")
-    merged = out.merge(
+    out = out.merge(
         production_weights,
         left_on=["state_name", "year"],
         right_on=["state", "year"],
         how="left",
+        suffixes=("", "_prod"),
+    ).drop(columns=["state_prod"], errors="ignore")
+    out["state_weight"] = pd.to_numeric(out["state_weight"], errors="coerce").fillna(0.0)
+
+    value_cols = _seasonal_value_cols(out)
+    base_group = ["date", "year", "month", "week_of_year"]
+    spi_cols = [c for c in SPI_COLUMNS if c in out.columns]
+
+
+    all_value_cols = value_cols + spi_cols
+
+    aggregated = _weighted_aggregate(out, base_group, all_value_cols, "state_weight")
+
+    # Trailing windows over the commodity-level weekly series:
+    # weekly_*  -> last 4 weeks (including current week)
+    # monthly_* -> last 13 weeks (including current week), approx 1 quarter
+    aggregated = aggregated.sort_values("date").reset_index(drop=True)
+    for col in value_cols:
+        aggregated[f"weekly_{col}"] = (
+            aggregated[col].rolling(window=4, min_periods=1).mean()
+        )
+        aggregated[f"monthly_{col}"] = (
+            aggregated[col].rolling(window=13, min_periods=1).mean()
+        )
+
+    keep = (
+        ["date"]
+        + all_value_cols
+        + [f"weekly_{c}" for c in value_cols]
+        + [f"monthly_{c}" for c in value_cols]
     )
-    merged["state_weight"] = merged["state_weight"].fillna(0.0)
-
-    exclude_cols = {
-        "week_of_year",
-        "is_planting_week",
-        "is_harvesting_week",
-        "is_active_season",
-        "year",
-        "state_weight",
-    }
-    numeric_cols = [
-        col
-        for col in merged.columns
-        if pd.api.types.is_numeric_dtype(merged[col]) and col not in exclude_cols
-    ]
-    if not numeric_cols:
-        msg = "No numeric feature columns available for weighted aggregation."
-        raise ValueError(msg)
-
-    weighted_values = merged[numeric_cols].mul(merged["state_weight"], axis=0)
-    weighted_totals = weighted_values.groupby(merged["date"], sort=True).sum()
-    weighted_totals.index.name = "date"
-    weighted_df = weighted_totals.reset_index()
-    weight_sums = merged.groupby("date", sort=True)["state_weight"].sum()
-    weighted_df["total_state_weight"] = weighted_df["date"].map(weight_sums.to_dict())
-    return weighted_df.sort_values("date").reset_index(drop=True)
+    return aggregated[keep].sort_values("date").reset_index(drop=True)
 
 
-def add_monthly_seasonal_features(
-    weighted_df: pd.DataFrame,
-    monthly_weeks: int = 4,
-    seasonal_weeks: int = 13,
-) -> pd.DataFrame:
-    if "date" not in weighted_df.columns:
-        msg = "Weighted dataframe must contain a 'date' column."
-        raise ValueError(msg)
+def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Path]:
+    resolved_input = _resolve_input_path(str(input_path))
+    resolved_production = _resolve_production_dir()
+    resolved_spi = _resolve_spi_input()
+    resolved_output = Path(output_dir)
+    resolved_output.mkdir(parents=True, exist_ok=True)
 
-    out = weighted_df.sort_values("date").reset_index(drop=True).copy()
-    numeric_cols = [
-        col
-        for col in out.columns
-        if (
-            pd.api.types.is_numeric_dtype(out[col])
-            and col != "total_state_weight"
-            and not col.endswith("_monthly")
-            and not col.endswith("_seasonal")
-        )
-    ]
-
-    aggregated: dict[str, pd.Series] = {}
-    for col in numeric_cols:
-        if col == "SPI_1m":
-            continue
-        # Use only past information: weekly t uses averages from previous weeks.
-        shifted = out[col].shift(1)
-        aggregated[f"{col}_monthly"] = cast(
-            "pd.Series",
-            shifted.rolling(
-                window=monthly_weeks,
-                min_periods=monthly_weeks,
-            ).mean(),
-        )
-        aggregated[f"{col}_seasonal"] = cast(
-            "pd.Series",
-            shifted.rolling(
-                window=seasonal_weeks,
-                min_periods=seasonal_weeks,
-            ).mean(),
-        )
-
-    return pd.concat([out, pd.DataFrame(aggregated, index=out.index)], axis=1)
-
-
-def run_pipeline(
-    input_path: Path | str,
-    output_dir: Path | str,
-) -> dict[str, Path]:
-    resolved_input_path = _resolve_input_path(str(input_path))
-    resolved_production_dir = _resolve_production_dir()
-    resolved_spi_input = _resolve_spi_input()
-    resolved_output_dir = Path(output_dir)
-    resolved_output_dir.mkdir(parents=True, exist_ok=True)
-
-    logger.info("Reading NOAA weekly data from %s", resolved_input_path)
-    raw_df = pd.read_csv(resolved_input_path)
-    raw_df = _merge_spi_1m(raw_df, resolved_spi_input)
-
-    zscore_df = construct_weekly_state_zscores(raw_df)
-    logger.info("Constructed dataframe with z-scores. rows=%d", len(zscore_df))
-    logger.info("Columns added for metrics: %s", ", ".join(METRIC_COLUMNS))
-    crop_frameworks = construct_crop_frameworks(zscore_df)
+    noaa_weekly = pd.read_csv(resolved_input)
+    noaa_with_spi = _merge_spi_features(noaa_weekly, resolved_spi)
+    zscore_df = _compute_zscores(noaa_with_spi)
+    extreme_df = _compute_extreme_values(zscore_df)
 
     outputs: dict[str, Path] = {}
-    for crop, framework in crop_frameworks.items():
-        production_weights = _load_production_weights(crop, resolved_production_dir)
-        weighted_df = build_weighted_commodity_frame(framework, production_weights)
-        weighted_df = add_monthly_seasonal_features(weighted_df)
-        output_path = resolved_output_dir / f"cliamte_weekly_weighted_{crop}.csv"
-        weighted_df.to_csv(output_path, index=False)
+    for crop in CROPS:
+        masked_frame = _apply_seasonal_mask(extreme_df, crop)
+        production_weights = _load_production_weights(crop, resolved_production)
+        weighted_df = build_weighted_commodity_frame(masked_frame, production_weights)
+
+        out_path = resolved_output / f"climate_weekly_weighted_{crop}.csv"
+        weighted_df.to_csv(out_path, index=False)
         logger.info(
-            "Saved %s weighted dataset to %s (rows=%d, cols=%d)",
+            "Saved %s → %s (rows=%d, cols=%d)",
             crop,
-            output_path,
+            out_path,
             len(weighted_df),
             len(weighted_df.columns),
         )
-        outputs[crop] = output_path
+        outputs[crop] = out_path
 
     return outputs
