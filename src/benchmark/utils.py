@@ -16,7 +16,7 @@ CLIMATE_COLUMNS = [
     "NAO_index",
 ]
 
-NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly"]
+NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly", "epu_index"]
 MACRO_COLUMNS = ["DJIA_Index", "WTI_Index", "Broad_Dollar_index", "Stock_Uncertainty"]
 
 
@@ -45,7 +45,7 @@ def build_wheat_feature_sets(
     )
     exo = sorted([col for col in data.columns if col.startswith(("corn_", "soybeans_"))])
     climate = existing_columns(data, CLIMATE_COLUMNS)
-    news = [*existing_columns(data, NEWS_BASE_COLUMNS), "epu_index"]
+    news = existing_columns(data, NEWS_BASE_COLUMNS)
     macro = existing_columns(data, MACRO_COLUMNS)
 
     feature_sets = {
