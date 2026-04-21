@@ -28,6 +28,7 @@ def _load_tokens() -> list[str]:
     raise ValueError(msg)
 
 
+DATA_TYPES = ["AWND", "EVAP"]
 TOKENS = _load_tokens()
 
 BASE_URL: str | None = os.getenv("NOAA_BASE_URL")
@@ -250,13 +251,11 @@ def fetch_state_datatype(
     return rows
 
 
-def fetch_all_data(
-    datatypes: list[str], startdate: str, enddate: str, workers: int
-) -> pd.DataFrame:
+def fetch_all_data(startdate: str, enddate: str, workers: int) -> pd.DataFrame:
     tasks = [
         (state, fips, datatype)
         for state, fips in STATE_FIPS.items()
-        for datatype in datatypes
+        for datatype in DATA_TYPES
     ]
 
     rows: list[dict[str, Any]] = []
@@ -307,10 +306,8 @@ def aggregate_weekly(df: pd.DataFrame) -> pd.DataFrame:
     agg_map = {
         c: v
         for c, v in {
-            "PRCP": "sum",
-            "TMAX": "mean",
-            "TMIN": "mean",
-            "TAVG": "mean",
+            "AWND": "mean",
+            "EVAP": "mean",
         }.items()
         if c in working_df.columns
     }

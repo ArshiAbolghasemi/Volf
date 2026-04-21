@@ -27,15 +27,9 @@ def save_result(daily_df: pd.DataFrame, weekly_df: pd.DataFrame) -> None:
     logger.info("Saved result at %s", output_path)
 
 
-def parse_args() -> tuple[list[str], int, int, int]:
+def parse_args() -> tuple[int, int, int]:
     parser = argparse.ArgumentParser(description="Fetch NOAA GHCND climate data")
 
-    parser.add_argument(
-        "--datatypes",
-        type=str,
-        default="",
-        help="Comma-separated list of datatypes (e.g. PRCP,TMAX,TMIN,TAVG)",
-    )
     parser.add_argument("--startyear", required=True, type=int)
     parser.add_argument("--endyear", required=True, type=int)
     parser.add_argument("--workers", type=int, default=2)
@@ -45,8 +39,7 @@ def parse_args() -> tuple[list[str], int, int, int]:
         msg = f"startyear must be <= endyear. got {args.startyear} > {args.endyear}"
         raise ValueError(msg)
 
-    datatypes = [d.strip().upper() for d in args.datatypes.split(",") if d.strip()]
-    return datatypes, args.startyear, args.endyear, args.workers
+    return args.startyear, args.endyear, args.workers
 
 
 def build_year_intervals(startyear: int, endyear: int) -> list[tuple[str, str]]:
@@ -59,7 +52,7 @@ def build_year_intervals(startyear: int, endyear: int) -> list[tuple[str, str]]:
 
 
 def main() -> None:
-    datatypes, startyear, endyear, workers = parse_args()
+    startyear, endyear, workers = parse_args()
     intervals = build_year_intervals(startyear, endyear)
 
     logger.info(
@@ -71,7 +64,7 @@ def main() -> None:
     raw_chunks: list[pd.DataFrame] = []
     for startdate, enddate in intervals:
         logger.info("Fetching interval %s -> %s", startdate, enddate)
-        interval_df = fetch_all_data(datatypes, startdate, enddate, workers)
+        interval_df = fetch_all_data(startdate, enddate, workers)
         logger.info("Interval %s -> %s rows=%d", startdate, enddate, len(interval_df))
         raw_chunks.append(interval_df)
 
