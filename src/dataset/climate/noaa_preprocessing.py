@@ -23,6 +23,10 @@ TMAX_Q3_HIGH = 0.90  # above 90th pct -> severe heat stress
 TMIN_Q3_HIGH = 0.25  # 10th-25th pct -> moderate cold stress
 TMIN_Q4_HIGH = 0.10  # below 10th pct -> severe cold stress
 
+# AWND: right tail - wind stress
+AWND_Q3_LOW = 0.80  # 80th-90th pct -> moderate wind stress
+AWND_Q3_HIGH = 0.90  # above 90th pct -> severe wind stress
+
 STATE_ABBREV_TO_NAME: dict[str, str] = {
     "AL": "Alabama",
     "AK": "Alaska",
@@ -126,7 +130,7 @@ def _merge_spi_features(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFra
 
 
 def _compute_zscores(df: pd.DataFrame) -> pd.DataFrame:
-    missing = sorted({"state", "date", "TMAX", "TMIN"} - set(df.columns))
+    missing = sorted({"state", "date", "TMAX", "TMIN", "AWND"} - set(df.columns))
     if missing:
         msg = f"Missing required columns: {missing}"
         raise ValueError(msg)
@@ -137,7 +141,7 @@ def _compute_zscores(df: pd.DataFrame) -> pd.DataFrame:
     out["year"] = out["date"].dt.year
     out["month"] = out["date"].dt.month
 
-    for metric in ("TMAX", "TMIN"):
+    for metric in ("TMAX", "TMIN", "AWND"):
         grp = out.groupby(["state", "week_of_year"])[metric]
         mean = grp.transform("mean")
         std = grp.transform("std").replace(0, np.nan)
@@ -159,10 +163,15 @@ def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
       TMIN (left tail - cold stress):
         Q3 value : z-score if 10th < z <= 25th,  else 0
         Q4 value : z-score if z <= 10th,          else 0
+
+      AWND (right tail - wind stress):
+        Q3 value : z-score if 80th <= z < 90th, else 0
+        Q4 value : z-score if z >= 90th,        else 0
     """
     group_cols = ["state", "week_of_year"]
     tmax_group = out.groupby(group_cols)["TMAX_zscore"]
     tmin_group = out.groupby(group_cols)["TMIN_zscore"]
+    awnd_group = out.groupby(group_cols)["AWND_zscore"]
 
     out["tmax_q3_thresh"] = tmax_group.transform(
         lambda values: values.quantile(TMAX_Q3_LOW)
@@ -176,16 +185,26 @@ def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
     out["tmin_q3_thresh"] = tmin_group.transform(
         lambda values: values.quantile(TMIN_Q3_HIGH)
     )
+    out["awnd_q3_thresh"] = awnd_group.transform(
+        lambda values: values.quantile(AWND_Q3_LOW)
+    )
+    out["awnd_q4_thresh"] = awnd_group.transform(
+        lambda values: values.quantile(AWND_Q3_HIGH)
+    )
 
     tmax_z = out["TMAX_zscore"].to_numpy(dtype=float)
     tmin_z = out["TMIN_zscore"].to_numpy(dtype=float)
+    awnd_z = out["AWND_zscore"].to_numpy(dtype=float)
     tmax_ok = np.isfinite(tmax_z)
     tmin_ok = np.isfinite(tmin_z)
+    awnd_ok = np.isfinite(awnd_z)
 
     tmax_q3 = out["tmax_q3_thresh"].to_numpy(dtype=float)
     tmax_q4 = out["tmax_q4_thresh"].to_numpy(dtype=float)
     tmin_q3 = out["tmin_q3_thresh"].to_numpy(dtype=float)
     tmin_q4 = out["tmin_q4_thresh"].to_numpy(dtype=float)
+    awnd_q3 = out["awnd_q3_thresh"].to_numpy(dtype=float)
+    awnd_q4 = out["awnd_q4_thresh"].to_numpy(dtype=float)
 
     # TMAX: right tail
     out["TMAX_q3_value"] = np.where(
@@ -199,8 +218,21 @@ def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
     )
     out["TMIN_q4_value"] = np.where(tmin_ok & (tmin_z <= tmin_q4), tmin_z, 0.0)
 
+    # AWND: right tail
+    out["AWND_q3_value"] = np.where(
+        awnd_ok & (awnd_z >= awnd_q3) & (awnd_z < awnd_q4), awnd_z, 0.0
+    )
+    out["AWND_q4_value"] = np.where(awnd_ok & (awnd_z >= awnd_q4), awnd_z, 0.0)
+
     return out.drop(
-        columns=["tmax_q3_thresh", "tmax_q4_thresh", "tmin_q3_thresh", "tmin_q4_thresh"]
+        columns=[
+            "tmax_q3_thresh",
+            "tmax_q4_thresh",
+            "tmin_q3_thresh",
+            "tmin_q4_thresh",
+            "awnd_q3_thresh",
+            "awnd_q4_thresh",
+        ]
     )
 
 
@@ -209,6 +241,8 @@ _EXTREME_VALUE_COLS = [
     "TMAX_q4_value",
     "TMIN_q3_value",
     "TMIN_q4_value",
+    "AWND_q3_value",
+    "AWND_q4_value",
 ]
 
 
@@ -260,10 +294,35 @@ def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
         .pipe(lambda d: d[d["production"] > 0])
         .copy()
     )
-    long["total_production_year"] = long.groupby("year")["production"].transform("sum")
-    long["state_weight"] = long["production"] / long["total_production_year"]
+    # Use one stable state weight across all years:
+    # 1) average each state's production over all available years
+    # 2) normalize by sum of state averages
+    state_avg = (
+        long.groupby("state", as_index=False)["production"]
+        .mean()
+        .rename(columns={"production": "avg_production"})
+    )
+    total_avg = state_avg["avg_production"].sum()
+    state_avg["state_weight"] = np.where(
+        total_avg > 0,
+        state_avg["avg_production"] / total_avg,
+        0.0,
+    )
 
-    return cast("pd.DataFrame", long[["state", "year", "state_weight"]].drop_duplicates())
+    years = (
+        cast("pd.Series", long["year"].dropna())
+        .astype("Int64")
+        .drop_duplicates()
+        .sort_values()
+    )
+    years_df = pd.DataFrame({"year": years})
+    state_avg["join_key"] = 1
+    years_df["join_key"] = 1
+    expanded = state_avg.merge(years_df, on="join_key", how="inner").drop(
+        columns=["join_key", "avg_production"]
+    )
+
+    return cast("pd.DataFrame", expanded[["state", "year", "state_weight"]])
 
 
 def _weighted_aggregate(
