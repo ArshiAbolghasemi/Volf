@@ -8,7 +8,7 @@ from src.util.path import DATA_DIR
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Construct weekly NOAA z-scores per state for TMAX, TMIN, and TAVG. "
+            "Construct weekly NOAA z-scores per state for TMAX and TMIN. "
             "Create crop-specific seasonal features and production-weighted outputs."
         )
     )
