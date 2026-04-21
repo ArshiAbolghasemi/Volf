@@ -325,7 +325,6 @@ def build_weighted_commodity_frame(
     base_group = ["date", "year", "month", "week_of_year"]
     spi_cols = [c for c in SPI_COLUMNS if c in out.columns]
 
-
     all_value_cols = value_cols + spi_cols
 
     aggregated = _weighted_aggregate(out, base_group, all_value_cols, "state_weight")
