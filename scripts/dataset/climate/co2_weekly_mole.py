@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 from pathlib import Path
 from typing import cast
 
@@ -23,7 +22,12 @@ def _add_co2_features(co2: pd.DataFrame) -> pd.DataFrame:
 def _merge(dataset: pd.DataFrame, co2: pd.DataFrame) -> pd.DataFrame:
     features = _add_co2_features(co2)
     merged = dataset.merge(features, on="date", how="left")
-    missing = merged[["zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]].isna().any(axis=1).sum()
+    missing = (
+        merged[["zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]]
+        .isna()
+        .any(axis=1)
+        .sum()
+    )
     if missing:
         logger.warning("%d row(s) in dataset had no matching CO2 date.", missing)
     return merged
@@ -35,7 +39,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Append CO2 features (zscore_co2, co2_weekly_mean, co2_monthly_mean)"
     )
-    parser.add_argument("--dataset", default="data/ag/v5.csv", help="Path to v6.csv dataset.")
+    parser.add_argument(
+        "--dataset", default="data/ag/v5.csv", help="Path to v6.csv dataset."
+    )
     parser.add_argument(
         "--co2",
         default="data/climate/co2_weekly_mlo.csv",
