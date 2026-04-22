@@ -33,7 +33,9 @@ def _load_station_series(path: Path, state: str) -> pd.DataFrame:
     station["state"] = state
     # Convert to Monday of the week for consistent merging
     station_clean = station[["date", "state", "pdsi"]].dropna(subset=["date", "pdsi"])
-    station_clean["date"] = station_clean["date"] - pd.to_timedelta(station_clean["date"].dt.dayofweek, unit='D')
+    station_clean["date"] = station_clean["date"] - pd.to_timedelta(
+        station_clean["date"].dt.dayofweek, unit="D"
+    )
     return cast("pd.DataFrame", station_clean)
 
 
