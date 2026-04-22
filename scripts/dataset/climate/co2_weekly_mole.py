@@ -14,8 +14,8 @@ def _add_co2_features(co2: pd.DataFrame) -> pd.DataFrame:
     co2 = co2.copy()
     values = co2["co2_molfrac_ppm"]
     co2["zscore_co2"] = (values - values.mean()) / values.std()
-    co2["co2_weekly_mean"] = values.shift(1).rolling(4).mean()
-    co2["co2_monthly_mean"] = values.shift(1).rolling(13).mean()
+    co2["co2_weekly_mean"] = co2["zscore_co2"].shift(1).rolling(4).mean()
+    co2["co2_monthly_mean"] = co2["zscore_co2"].shift(1).rolling(13).mean()
     return cast(
         "pd.DataFrame", co2[["date", "zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]]
     )
