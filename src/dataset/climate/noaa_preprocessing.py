@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 CROPS = ("corn", "wheat", "soybean")
-SPI_COLUMNS = ("SPI_1m", "SPI_3m")
+SPI_COLUMNS = ("SPI_1m", "SPI_3m", "SPI_7d")
 
 # TMAX: right tail - heat stress
 TMAX_Q3_LOW = 0.75  # 75th-90th pct -> moderate heat stress
@@ -275,22 +275,22 @@ def build_weighted_commodity_frame(
     aggregated = _weighted_aggregate(out, base_group, all_value_cols, "state_weight")
 
     # Trailing windows over the commodity-level weekly series:
-    # weekly_*  -> last 4 weeks (including current week)
-    # monthly_* -> last 13 weeks (including current week), approx 1 quarter
+    # monthly_*  -> last 4 weeks (including current week)
+    # seasonal_* -> last 13 weeks (including current week), approx 1 quarter
     aggregated = aggregated.sort_values("date").reset_index(drop=True)
     for col in value_cols:
-        aggregated[f"weekly_{col}"] = (
+        aggregated[f"monthly_{col}"] = (
             aggregated[col].rolling(window=4, min_periods=1).mean()
         )
-        aggregated[f"monthly_{col}"] = (
+        aggregated[f"seasonal_{col}"] = (
             aggregated[col].rolling(window=13, min_periods=1).mean()
         )
 
     keep = (
         ["date"]
         + all_value_cols
-        + [f"weekly_{c}" for c in value_cols]
         + [f"monthly_{c}" for c in value_cols]
+        + [f"seasonal_{c}" for c in value_cols]
     )
     return aggregated[keep].sort_values("date").reset_index(drop=True)
 

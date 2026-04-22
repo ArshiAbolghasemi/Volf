@@ -12,10 +12,10 @@ def _add_co2_features(co2: pd.DataFrame) -> pd.DataFrame:
     co2 = co2.copy()
     values = co2["co2_molfrac_ppm"]
     co2["zscore_co2"] = (values - values.mean()) / values.std()
-    co2["co2_weekly_mean"] = co2["zscore_co2"].shift(1).rolling(4).mean()
-    co2["co2_monthly_mean"] = co2["zscore_co2"].shift(1).rolling(13).mean()
+    co2["co2_monthly_mean"] = co2["zscore_co2"].shift(1).rolling(4).mean()
+    co2["co2_seasonal_mean"] = co2["zscore_co2"].shift(1).rolling(13).mean()
     return cast(
-        "pd.DataFrame", co2[["date", "zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]]
+        "pd.DataFrame", co2[["date", "zscore_co2", "co2_monthly_mean", "co2_seasonal_mean"]]
     )
 
 
@@ -23,7 +23,7 @@ def _merge(dataset: pd.DataFrame, co2: pd.DataFrame) -> pd.DataFrame:
     features = _add_co2_features(co2)
     merged = dataset.merge(features, on="date", how="left")
     missing = (
-        merged[["zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]]
+        merged[["zscore_co2", "co2_monthly_mean", "co2_seasonal_mean"]]
         .isna()
         .any(axis=1)
         .sum()
@@ -37,7 +37,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
     parser = argparse.ArgumentParser(
-        description="Append CO2 features (zscore_co2, co2_weekly_mean, co2_monthly_mean)"
+        description="Append CO2 features (zscore_co2, co2_monthly_mean, co2_seasonal_mean)"
     )
     parser.add_argument(
         "--dataset", default="data/ag/v6.csv", help="Path to v6.csv dataset."

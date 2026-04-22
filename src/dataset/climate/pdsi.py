@@ -19,7 +19,7 @@ MODERATE_DRY_HIGH = 0.20
 
 FEATURE_COLUMNS = ("moderate_wet", "wet", "moderate_dry", "dry")
 ROLLING_FEATURE_COLUMNS = tuple(
-    [f"{prefix}_{col}" for col in FEATURE_COLUMNS for prefix in ("weekly", "monthly")]
+    [f"{prefix}_{col}" for col in FEATURE_COLUMNS for prefix in ("monthly", "seasonal")]
 )
 ALL_PDSI_COLUMNS = FEATURE_COLUMNS + ROLLING_FEATURE_COLUMNS
 
@@ -124,11 +124,11 @@ def _weighted_daily_features(
 
 
 def _add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
-    """Add weekly (4-week) and monthly (13-week) rolling averages for PDSI features."""
+    """Add monthly (4-week) and seasonal (13-week) rolling averages for PDSI features."""
     out = df.copy()
     for col in FEATURE_COLUMNS:
-        out[f"weekly_{col}"] = out[col].rolling(window=4, min_periods=1).mean()
-        out[f"monthly_{col}"] = out[col].rolling(window=13, min_periods=1).mean()
+        out[f"monthly_{col}"] = out[col].rolling(window=4, min_periods=1).mean()
+        out[f"seasonal_{col}"] = out[col].rolling(window=13, min_periods=1).mean()
     return out
 
 
