@@ -33,9 +33,7 @@ def _load_station_series(path: Path, state: str) -> pd.DataFrame:
     station["state"] = state
     # Convert to Monday of the week for consistent merging
     station_clean = station[["date", "state", "pdsi"]].dropna(subset=["date", "pdsi"])
-    station_clean["date"] = station_clean["date"] - pd.to_timedelta(
-        station_clean["date"].dt.dayofweek, unit="D"
-    )
+    station_clean["date"] = station_clean["date"] - pd.to_timedelta(station_clean["date"].dt.dayofweek, unit='D')
     return cast("pd.DataFrame", station_clean)
 
 
@@ -68,94 +66,89 @@ def build_state_pdsi_frame(palmer_dir: Path | str) -> pd.DataFrame:
     )
 
 
-def _add_zscore(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-    group = out.groupby("state")["pdsi"]
-    mean = group.transform("mean")
-    std = group.transform("std").replace(0, np.nan)
-    out["zscore"] = ((out["pdsi"] - mean) / std).fillna(0.0)
-    return out
+def aggregate_pdsi_by_production_weights(
+    state_pdsi: pd.DataFrame,
+    production_weights: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Aggregate state-level PDSI to national level using production weights.
+    
+    New approach: Aggregate FIRST, then compute z-scores and quantiles.
+    This ensures PDSI bands are mutually exclusive at national level.
+    """
+    merged = state_pdsi.merge(production_weights, on="state", how="left")
+    merged["state_weight"] = pd.to_numeric(merged["state_weight"], errors="coerce").fillna(0.0)
+    
+    # Weighted aggregation by date
+    weighted = merged[["date", "pdsi", "state_weight"]].copy()
+    weighted["pdsi"] = (
+        pd.to_numeric(weighted["pdsi"], errors="coerce").fillna(0.0) 
+        * weighted["state_weight"]
+    )
+    
+    # Group by date and sum
+    agg = weighted.groupby("date", as_index=False).agg({
+        "pdsi": "sum",
+        "state_weight": "sum"
+    })
+    
+    # Normalize by total weight
+    agg["pdsi"] = np.where(agg["state_weight"] > 0, agg["pdsi"] / agg["state_weight"], 0.0)
+    
+    return agg.drop(columns=["state_weight"]).sort_values("date").reset_index(drop=True)
 
 
-def _add_quantile_features(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-    state_group = out.groupby("state")["zscore"]
-
-    out["q80"] = state_group.transform(lambda values: values.quantile(MODERATE_WET_LOW))
-    out["q90"] = state_group.transform(lambda values: values.quantile(WET_LOW))
-    out["q10"] = state_group.transform(lambda values: values.quantile(DRY_HIGH))
-    out["q20"] = state_group.transform(lambda values: values.quantile(MODERATE_DRY_HIGH))
-
+def compute_national_pdsi_features(national_pdsi: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute z-scores and PDSI bands on national-level aggregated data.
+    
+    This ensures bands are mutually exclusive (no overlaps).
+    """
+    out = national_pdsi.copy()
+    
+    # Compute z-score
+    mean = out["pdsi"].mean()
+    std = out["pdsi"].std()
+    out["zscore"] = (out["pdsi"] - mean) / std if std > 0 else 0.0
+    
+    # Compute quantile thresholds
+    q80 = out["zscore"].quantile(MODERATE_WET_LOW)
+    q90 = out["zscore"].quantile(WET_LOW)
+    q10 = out["zscore"].quantile(DRY_HIGH)
+    q20 = out["zscore"].quantile(MODERATE_DRY_HIGH)
+    
     z = out["zscore"].to_numpy(dtype=float)
-    q80 = out["q80"].to_numpy(dtype=float)
-    q90 = out["q90"].to_numpy(dtype=float)
-    q10 = out["q10"].to_numpy(dtype=float)
-    q20 = out["q20"].to_numpy(dtype=float)
-
+    
+    # Apply quantile logic (mutually exclusive bands)
     out["moderate_wet"] = np.where((z >= q80) & (z < q90), z, 0.0)
     out["wet"] = np.where(z >= q90, z, 0.0)
     out["moderate_dry"] = np.where((z > q10) & (z <= q20), z, 0.0)
     out["dry"] = np.where(z <= q10, z, 0.0)
-
-    # Validate: at state level, bands should be mutually exclusive
+    
+    # Validate: bands should be mutually exclusive
     wet_overlap = (out["moderate_wet"] != 0) & (out["wet"] != 0)
     dry_overlap = (out["moderate_dry"] != 0) & (out["dry"] != 0)
-
+    
     if wet_overlap.any():
         msg = (
-            f"State-level overlap detected in wet bands: "
-            f"{wet_overlap.sum()} rows have both moderate_wet and wet non-zero. "
-            f"This indicates incorrect quantile logic."
+            f"National-level overlap detected in wet bands: "
+            f"{wet_overlap.sum()} rows have both moderate_wet and wet non-zero."
         )
         raise ValueError(msg)
-
+    
     if dry_overlap.any():
         msg = (
-            f"State-level overlap detected in dry bands: "
-            f"{dry_overlap.sum()} rows have both moderate_dry and dry non-zero. "
-            f"This indicates incorrect quantile logic."
+            f"National-level overlap detected in dry bands: "
+            f"{dry_overlap.sum()} rows have both moderate_dry and dry non-zero."
         )
         raise ValueError(msg)
-
-    logger.info(
-        "✓ State-level PDSI bands validated: no overlaps within wet or dry categories"
-    )
-
-    return out.drop(columns=["q80", "q90", "q10", "q20"])
+    
+    logger.info("✓ National-level PDSI bands validated: no overlaps within wet or dry categories")
+    
+    return out.drop(columns=["zscore"])
 
 
-def _weighted_daily_features(
-    state_features: pd.DataFrame, weights: pd.DataFrame
-) -> pd.DataFrame:
-    """Aggregate state-level PDSI features using production weights.
-
-    Note: After aggregation, multiple PDSI bands can be non-zero for the same date.
-    This is expected and correct - it represents days where different states
-    experienced different drought/wetness conditions.
-    """
-    merged = state_features.merge(weights, on="state", how="left")
-    merged["state_weight"] = pd.to_numeric(merged["state_weight"], errors="coerce").fillna(
-        0.0
-    )
-
-    weighted = merged[["date", *FEATURE_COLUMNS, "state_weight"]].copy()
-    for col in FEATURE_COLUMNS:
-        weighted[col] = (
-            pd.to_numeric(weighted[col], errors="coerce").fillna(0.0)
-            * weighted["state_weight"]
-        )
-
-    totals = weighted.groupby("date", as_index=False)["state_weight"].sum()
-    agg = weighted.groupby("date", as_index=False)[list(FEATURE_COLUMNS)].sum()
-    agg = agg.merge(totals, on="date", how="left")
-    for col in FEATURE_COLUMNS:
-        agg[col] = np.where(agg["state_weight"] > 0, agg[col] / agg["state_weight"], 0.0)
-
-    result = agg.drop(columns=["state_weight"]).sort_values("date").reset_index(drop=True)
-    return _add_rolling_windows(result)
-
-
-def _add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
+def add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
     """Add monthly (4-week) and seasonal (13-week) rolling averages for PDSI features."""
     out = df.copy()
     for col in FEATURE_COLUMNS:
@@ -211,8 +204,14 @@ def run_pipeline(
     ag_dir: Path | str,
     output_dir: Path | str | None = None,
 ) -> dict[str, Path]:
+    """
+    Run the PDSI pipeline with new approach:
+    1. Build state-level PDSI frame
+    2. Aggregate by production weights (national level)
+    3. Compute z-scores and bands on aggregated data
+    4. Add rolling windows
+    """
     state_pdsi = build_state_pdsi_frame(palmer_dir)
-    state_features = _add_quantile_features(_add_zscore(state_pdsi))
 
     resolved_production_dir = require_path(Path(production_dir), "Production directory")
     resolved_ag_dir = require_path(Path(ag_dir), "data/ag directory")
@@ -221,12 +220,28 @@ def run_pipeline(
         resolved_output.mkdir(parents=True, exist_ok=True)
 
     outputs: dict[str, Path] = {}
+    
     for crop in CROPS:
+        logger.info(f"Processing {crop}...")
+        
+        # Load production weights
         weights = load_production_weights(crop, resolved_production_dir)
-        crop_df = _weighted_daily_features(state_features, weights)
+        
+        # Aggregate to national level
+        national_pdsi = aggregate_pdsi_by_production_weights(state_pdsi, weights)
+        
+        # Compute features on national data
+        feature_df = compute_national_pdsi_features(national_pdsi)
+        
+        # Add rolling windows
+        crop_df = add_rolling_windows(feature_df)
+        
+        # Append to ag file
         ag_path = _append_metrics_to_ag_file(crop, crop_df, resolved_ag_dir)
         outputs[crop] = ag_path
         logger.info("Appended %s pdsi features to %s", crop, ag_path)
+        
+        # Save standalone file if output dir specified
         if resolved_output is not None:
             out_path = resolved_output / f"{crop}_pdsi.csv"
             crop_df.to_csv(out_path, index=False)
