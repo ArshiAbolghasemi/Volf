@@ -97,12 +97,42 @@ def _add_quantile_features(df: pd.DataFrame) -> pd.DataFrame:
     out["moderate_dry"] = np.where((z > q10) & (z <= q20), z, 0.0)
     out["dry"] = np.where(z <= q10, z, 0.0)
 
+    # Validate: at state level, bands should be mutually exclusive
+    wet_overlap = (out["moderate_wet"] != 0) & (out["wet"] != 0)
+    dry_overlap = (out["moderate_dry"] != 0) & (out["dry"] != 0)
+
+    if wet_overlap.any():
+        msg = (
+            f"State-level overlap detected in wet bands: "
+            f"{wet_overlap.sum()} rows have both moderate_wet and wet non-zero. "
+            f"This indicates incorrect quantile logic."
+        )
+        raise ValueError(msg)
+
+    if dry_overlap.any():
+        msg = (
+            f"State-level overlap detected in dry bands: "
+            f"{dry_overlap.sum()} rows have both moderate_dry and dry non-zero. "
+            f"This indicates incorrect quantile logic."
+        )
+        raise ValueError(msg)
+
+    logger.info(
+        "✓ State-level PDSI bands validated: no overlaps within wet or dry categories"
+    )
+
     return out.drop(columns=["q80", "q90", "q10", "q20"])
 
 
 def _weighted_daily_features(
     state_features: pd.DataFrame, weights: pd.DataFrame
 ) -> pd.DataFrame:
+    """Aggregate state-level PDSI features using production weights.
+
+    Note: After aggregation, multiple PDSI bands can be non-zero for the same date.
+    This is expected and correct - it represents days where different states
+    experienced different drought/wetness conditions.
+    """
     merged = state_features.merge(weights, on="state", how="left")
     merged["state_weight"] = pd.to_numeric(merged["state_weight"], errors="coerce").fillna(
         0.0

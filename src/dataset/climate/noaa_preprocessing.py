@@ -111,6 +111,9 @@ def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
       AWND (right tail - wind stress):
         Q3 value : z-score if 80th <= z < 90th, else 0
         Q4 value : z-score if z >= 90th,        else 0
+
+    Note: At the state level, q3 and q4 are mutually exclusive (no overlaps).
+    After weighted aggregation across states, overlaps can occur and are expected.
     """
     group_cols = ["state", "week_of_year"]
     tmax_group = out.groupby(group_cols)["TMAX_zscore"]
@@ -168,6 +171,23 @@ def _compute_extreme_values(out: pd.DataFrame) -> pd.DataFrame:
     )
     out["AWND_q4_value"] = np.where(awnd_ok & (awnd_z >= awnd_q4), awnd_z, 0.0)
 
+    # Validate: at state level, q3 and q4 should be mutually exclusive
+    for metric in ["TMAX", "TMIN", "AWND"]:
+        q3_col = f"{metric}_q3_value"
+        q4_col = f"{metric}_q4_value"
+        overlap = (out[q3_col] != 0) & (out[q4_col] != 0)
+        if overlap.any():
+            msg = (
+                f"State-level overlap detected in {metric}: "
+                f"{overlap.sum()} rows have both q3 and q4 non-zero. "
+                f"This indicates incorrect quantile logic."
+            )
+            raise ValueError(msg)
+
+    logger.info(
+        "✓ State-level extreme values validated: no overlaps between q3 and q4 bands"
+    )
+
     return out.drop(
         columns=[
             "tmax_q3_thresh",
@@ -217,7 +237,12 @@ def _weighted_aggregate(
     value_cols: list[str],
     weight_col: str,
 ) -> pd.DataFrame:
-    """Compute a production-weighted mean: sum(value * weight) / sum(weight)."""
+    """Compute a production-weighted mean: sum(value * weight) / sum(weight).
+
+    Note: After aggregation, q3 and q4 values can both be non-zero for the same
+    date. This is expected and correct - it represents weeks where different states
+    experienced different severity levels (some moderate, some severe extremes).
+    """
     working = df[group_cols + value_cols + [weight_col]].copy()
     working[weight_col] = working[weight_col].fillna(0.0)
     for col in value_cols:
