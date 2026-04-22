@@ -40,7 +40,7 @@ def main() -> None:
         description="Append CO2 features (zscore_co2, co2_weekly_mean, co2_monthly_mean)"
     )
     parser.add_argument(
-        "--dataset", default="data/ag/v5.csv", help="Path to v6.csv dataset."
+        "--dataset", default="data/ag/v6.csv", help="Path to v6.csv dataset."
     )
     parser.add_argument(
         "--co2",
