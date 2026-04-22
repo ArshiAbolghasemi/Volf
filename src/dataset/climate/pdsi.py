@@ -31,9 +31,10 @@ def _load_station_series(path: Path, state: str) -> pd.DataFrame:
     station["date"] = pd.to_datetime(station["date_raw"], format="%Y%m%d", errors="coerce")
     station["pdsi"] = pd.to_numeric(station["pdsi"], errors="coerce")
     station["state"] = state
-    return cast(
-        "pd.DataFrame", station[["date", "state", "pdsi"]].dropna(subset=["date", "pdsi"])
-    )
+    # Convert to Monday of the week for consistent merging
+    station_clean = station[["date", "state", "pdsi"]].dropna(subset=["date", "pdsi"])
+    station_clean["date"] = station_clean["date"] - pd.to_timedelta(station_clean["date"].dt.dayofweek, unit='D')
+    return cast("pd.DataFrame", station_clean)
 
 
 def build_state_pdsi_frame(palmer_dir: Path | str) -> pd.DataFrame:
@@ -91,8 +92,8 @@ def _add_quantile_features(df: pd.DataFrame) -> pd.DataFrame:
 
     out["moderate_wet"] = np.where((z >= q80) & (z < q90), z, 0.0)
     out["wet"] = np.where(z >= q90, z, 0.0)
-    out["moderate_dry"] = np.where((z >= q10) & (z < q20), z, 0.0)
-    out["dry"] = np.where(z < q10, z, 0.0)
+    out["moderate_dry"] = np.where((z > q10) & (z <= q20), z, 0.0)
+    out["dry"] = np.where(z <= q10, z, 0.0)
 
     return out.drop(columns=["q80", "q90", "q10", "q20"])
 
