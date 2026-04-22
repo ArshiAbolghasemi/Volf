@@ -16,6 +16,11 @@ DRY_HIGH = 0.10
 MODERATE_DRY_HIGH = 0.20
 
 FEATURE_COLUMNS = ("moderate_wet", "wet", "moderate_dry", "dry")
+ROLLING_FEATURE_COLUMNS = tuple(
+    [f"{prefix}_{col}" for col in FEATURE_COLUMNS for prefix in ("weekly", "monthly")]
+)
+ALL_PDSI_COLUMNS = FEATURE_COLUMNS + ROLLING_FEATURE_COLUMNS
+
 STATE_DIR_PARTS = 2
 
 
@@ -158,7 +163,17 @@ def _weighted_daily_features(
     for col in FEATURE_COLUMNS:
         agg[col] = np.where(agg["state_weight"] > 0, agg[col] / agg["state_weight"], 0.0)
 
-    return agg.drop(columns=["state_weight"]).sort_values("date").reset_index(drop=True)
+    result = agg.drop(columns=["state_weight"]).sort_values("date").reset_index(drop=True)
+    return _add_rolling_windows(result)
+
+
+def _add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
+    """Add weekly (4-week) and monthly (13-week) rolling averages for PDSI features."""
+    out = df.copy()
+    for col in FEATURE_COLUMNS:
+        out[f"weekly_{col}"] = out[col].rolling(window=4, min_periods=1).mean()
+        out[f"monthly_{col}"] = out[col].rolling(window=13, min_periods=1).mean()
+    return out
 
 
 def _align_pdsi_to_ag_rows(
@@ -171,9 +186,9 @@ def _align_pdsi_to_ag_rows(
             raise ValueError(msg)
         keyed = pd.DataFrame({"date": ag_dates})
         merged = keyed.merge(
-            pdsi_features[["date", *FEATURE_COLUMNS]], on="date", how="left"
+            pdsi_features[["date", *ALL_PDSI_COLUMNS]], on="date", how="left"
         )
-        return merged[list(FEATURE_COLUMNS)].fillna(0.0)
+        return merged[list(ALL_PDSI_COLUMNS)].fillna(0.0)
 
     if len(pdsi_features) < len(ag_df):
         msg = (
@@ -184,7 +199,7 @@ def _align_pdsi_to_ag_rows(
         raise ValueError(msg)
 
     # data/ag files currently have no date column, so align from the end.
-    return pdsi_features[list(FEATURE_COLUMNS)].tail(len(ag_df)).reset_index(drop=True)
+    return pdsi_features[list(ALL_PDSI_COLUMNS)].tail(len(ag_df)).reset_index(drop=True)
 
 
 def _append_metrics_to_ag_file(
@@ -195,7 +210,7 @@ def _append_metrics_to_ag_file(
     aligned = _align_pdsi_to_ag_rows(pdsi_features, ag_df, crop)
 
     out = ag_df.copy()
-    for col in FEATURE_COLUMNS:
+    for col in ALL_PDSI_COLUMNS:
         out[col] = aligned[col].to_numpy()
 
     out.to_csv(ag_path, index=False)
