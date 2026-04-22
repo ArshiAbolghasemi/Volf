@@ -1,5 +1,4 @@
 import logging
-import re
 from pathlib import Path
 from typing import cast
 
@@ -7,6 +6,11 @@ import numpy as np
 import pandas as pd
 
 from src.dataset.climate.crop_seasonal import crop_season_flag
+from src.dataset.util.path import require_path
+from src.dataset.util.production_by_state import (
+    STATE_ABBREV_TO_NAME,
+    load_production_weights,
+)
 from src.util.path import DATA_DIR
 
 logger = logging.getLogger(__name__)
@@ -27,77 +31,17 @@ TMIN_Q4_HIGH = 0.10  # below 10th pct -> severe cold stress
 AWND_Q3_LOW = 0.80  # 80th-90th pct -> moderate wind stress
 AWND_Q3_HIGH = 0.90  # above 90th pct -> severe wind stress
 
-STATE_ABBREV_TO_NAME: dict[str, str] = {
-    "AL": "Alabama",
-    "AK": "Alaska",
-    "AZ": "Arizona",
-    "AR": "Arkansas",
-    "CA": "California",
-    "CO": "Colorado",
-    "CT": "Connecticut",
-    "DE": "Delaware",
-    "FL": "Florida",
-    "GA": "Georgia",
-    "HI": "Hawaii",
-    "ID": "Idaho",
-    "IL": "Illinois",
-    "IN": "Indiana",
-    "IA": "Iowa",
-    "KS": "Kansas",
-    "KY": "Kentucky",
-    "LA": "Louisiana",
-    "ME": "Maine",
-    "MD": "Maryland",
-    "MA": "Massachusetts",
-    "MI": "Michigan",
-    "MN": "Minnesota",
-    "MS": "Mississippi",
-    "MO": "Missouri",
-    "MT": "Montana",
-    "NE": "Nebraska",
-    "NV": "Nevada",
-    "NH": "New Hampshire",
-    "NJ": "New Jersey",
-    "NM": "New Mexico",
-    "NY": "New York",
-    "NC": "North Carolina",
-    "ND": "North Dakota",
-    "OH": "Ohio",
-    "OK": "Oklahoma",
-    "OR": "Oregon",
-    "PA": "Pennsylvania",
-    "RI": "Rhode Island",
-    "SC": "South Carolina",
-    "SD": "South Dakota",
-    "TN": "Tennessee",
-    "TX": "Texas",
-    "UT": "Utah",
-    "VT": "Vermont",
-    "VA": "Virginia",
-    "WA": "Washington",
-    "WV": "West Virginia",
-    "WI": "Wisconsin",
-    "WY": "Wyoming",
-}
-
-
-def _require_path(path: Path, label: str) -> Path:
-    if not path.exists():
-        msg = f"{label} not found: {path}"
-        raise FileNotFoundError(msg)
-    return path
-
 
 def _resolve_input_path(raw: str) -> Path:
-    return _require_path(Path(raw), "Input file")
+    return require_path(Path(raw), "Input file")
 
 
 def _resolve_production_dir() -> Path:
-    return _require_path(DATA_DIR / "production_by_state", "Production directory")
+    return require_path(DATA_DIR / "production_by_state", "Production directory")
 
 
 def _resolve_spi_input() -> Path:
-    return _require_path(DATA_DIR / "climate" / "spi_weekly_multiscale.csv", "SPI file")
+    return require_path(DATA_DIR / "climate" / "spi_weekly_multiscale.csv", "SPI file")
 
 
 def _merge_spi_features(noaa_weekly: pd.DataFrame, spi_path: Path) -> pd.DataFrame:
@@ -267,64 +211,6 @@ def _apply_seasonal_mask(df: pd.DataFrame, crop: str) -> pd.DataFrame:
     )
 
 
-def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
-    path = _require_path(production_dir / f"{crop}.csv", f"{crop} production by state")
-
-    production_df = pd.read_csv(path)
-    if "state" not in production_df.columns:
-        msg = f"Missing 'state' column in production file: {path}"
-        raise ValueError(msg)
-
-    pattern = re.compile(rf"^{crop.capitalize()}ProductionByState_(\d{{4}})$")
-    year_cols = [col for col in production_df.columns if pattern.match(col)]
-    if not year_cols:
-        msg = f"No production-by-year columns found for {crop} in: {path}"
-        raise ValueError(msg)
-
-    long = production_df[["state", *year_cols]].melt(
-        id_vars="state", value_vars=year_cols, var_name="year_col", value_name="production"
-    )
-    long["year"] = long["year_col"].str.extract(r"(\d{4})$").astype(float).astype("Int64")
-    long["production"] = pd.to_numeric(long["production"], errors="coerce")
-    long["state"] = long["state"].astype(str).str.strip()
-
-    long = (
-        long[long["state"] != "United States"]
-        .dropna(subset=["year", "production"])
-        .pipe(lambda d: d[d["production"] > 0])
-        .copy()
-    )
-    # Use one stable state weight across all years:
-    # 1) average each state's production over all available years
-    # 2) normalize by sum of state averages
-    state_avg = (
-        long.groupby("state", as_index=False)["production"]
-        .mean()
-        .rename(columns={"production": "avg_production"})
-    )
-    total_avg = state_avg["avg_production"].sum()
-    state_avg["state_weight"] = np.where(
-        total_avg > 0,
-        state_avg["avg_production"] / total_avg,
-        0.0,
-    )
-
-    years = (
-        cast("pd.Series", long["year"].dropna())
-        .astype("Int64")
-        .drop_duplicates()
-        .sort_values()
-    )
-    years_df = pd.DataFrame({"year": years})
-    state_avg["join_key"] = 1
-    years_df["join_key"] = 1
-    expanded = state_avg.merge(years_df, on="join_key", how="inner").drop(
-        columns=["join_key", "avg_production"]
-    )
-
-    return cast("pd.DataFrame", expanded[["state", "year", "state_weight"]])
-
-
 def _weighted_aggregate(
     df: pd.DataFrame,
     group_cols: list[str],
@@ -373,8 +259,8 @@ def build_weighted_commodity_frame(
 
     out = out.merge(
         production_weights,
-        left_on=["state_name", "year"],
-        right_on=["state", "year"],
+        left_on=["state_name"],
+        right_on=["state"],
         how="left",
         suffixes=("", "_prod"),
     ).drop(columns=["state_prod"], errors="ignore")
@@ -424,7 +310,7 @@ def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Pa
     outputs: dict[str, Path] = {}
     for crop in CROPS:
         masked_frame = _apply_seasonal_mask(extreme_df, crop)
-        production_weights = _load_production_weights(crop, resolved_production)
+        production_weights = load_production_weights(crop, resolved_production)
         weighted_df = build_weighted_commodity_frame(masked_frame, production_weights)
 
         out_path = resolved_output / f"climate_weekly_weighted_{crop}.csv"

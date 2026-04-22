@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from src.climate.pdsi import run_pipeline
+from src.dataset.climate.pdsi import run_pipeline
 from src.util.path import DATA_DIR
 
 

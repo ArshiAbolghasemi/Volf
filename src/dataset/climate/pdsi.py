@@ -1,10 +1,12 @@
 import logging
-import re
 from pathlib import Path
 from typing import cast
 
 import numpy as np
 import pandas as pd
+
+from src.dataset.util.path import require_path
+from src.dataset.util.production_by_state import load_production_weights
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +26,6 @@ ALL_PDSI_COLUMNS = FEATURE_COLUMNS + ROLLING_FEATURE_COLUMNS
 STATE_DIR_PARTS = 2
 
 
-def _require_path(path: Path, label: str) -> Path:
-    if not path.exists():
-        msg = f"{label} not found: {path}"
-        raise FileNotFoundError(msg)
-    return path
-
-
 def _load_station_series(path: Path, state: str) -> pd.DataFrame:
     station = pd.read_csv(path, skiprows=1, names=["date_raw", "pdsi"], header=None)
     station["date"] = pd.to_datetime(station["date_raw"], format="%Y%m%d", errors="coerce")
@@ -42,7 +37,7 @@ def _load_station_series(path: Path, state: str) -> pd.DataFrame:
 
 
 def build_state_pdsi_frame(palmer_dir: Path | str) -> pd.DataFrame:
-    root = _require_path(Path(palmer_dir), "Palmer directory")
+    root = require_path(Path(palmer_dir), "Palmer directory")
     frames: list[pd.DataFrame] = []
 
     for state_dir in sorted(root.iterdir()):
@@ -100,46 +95,6 @@ def _add_quantile_features(df: pd.DataFrame) -> pd.DataFrame:
     out["dry"] = np.where(z < q10, z, 0.0)
 
     return out.drop(columns=["q80", "q90", "q10", "q20"])
-
-
-def _load_production_weights(crop: str, production_dir: Path) -> pd.DataFrame:
-    path = _require_path(production_dir / f"{crop}.csv", f"{crop} production by state")
-    production_df = pd.read_csv(path)
-    if "state" not in production_df.columns:
-        msg = f"Missing 'state' column in production file: {path}"
-        raise ValueError(msg)
-
-    pattern = re.compile(rf"^{crop.capitalize()}ProductionByState_(\d{{4}})$")
-    year_cols = [col for col in production_df.columns if pattern.match(col)]
-    if not year_cols:
-        msg = f"No production-by-year columns found for {crop} in: {path}"
-        raise ValueError(msg)
-
-    long = production_df[["state", *year_cols]].melt(
-        id_vars="state",
-        value_vars=year_cols,
-        var_name="year_col",
-        value_name="production",
-    )
-    long["production"] = pd.to_numeric(long["production"], errors="coerce")
-    long["state"] = long["state"].astype(str).str.strip()
-    long = (
-        long[long["state"] != "United States"]
-        .dropna(subset=["production"])
-        .pipe(lambda d: d[d["production"] > 0])
-    )
-
-    state_avg = (
-        long.groupby("state", as_index=False)["production"]
-        .mean()
-        .rename(columns={"production": "avg_production"})
-    )
-    total = state_avg["avg_production"].sum()
-    state_avg["state_weight"] = np.where(
-        total > 0, state_avg["avg_production"] / total, 0.0
-    )
-
-    return cast("pd.DataFrame", state_avg[["state", "state_weight"]])
 
 
 def _weighted_daily_features(
@@ -205,7 +160,7 @@ def _align_pdsi_to_ag_rows(
 def _append_metrics_to_ag_file(
     crop: str, pdsi_features: pd.DataFrame, ag_dir: Path
 ) -> Path:
-    ag_path = _require_path(ag_dir / f"{crop}.csv", f"data/ag/{crop}.csv")
+    ag_path = require_path(ag_dir / f"{crop}.csv", f"data/ag/{crop}.csv")
     ag_df = pd.read_csv(ag_path)
     aligned = _align_pdsi_to_ag_rows(pdsi_features, ag_df, crop)
 
@@ -226,15 +181,15 @@ def run_pipeline(
     state_pdsi = build_state_pdsi_frame(palmer_dir)
     state_features = _add_quantile_features(_add_zscore(state_pdsi))
 
-    resolved_production_dir = _require_path(Path(production_dir), "Production directory")
-    resolved_ag_dir = _require_path(Path(ag_dir), "data/ag directory")
+    resolved_production_dir = require_path(Path(production_dir), "Production directory")
+    resolved_ag_dir = require_path(Path(ag_dir), "data/ag directory")
     resolved_output = Path(output_dir) if output_dir else None
     if resolved_output is not None:
         resolved_output.mkdir(parents=True, exist_ok=True)
 
     outputs: dict[str, Path] = {}
     for crop in CROPS:
-        weights = _load_production_weights(crop, resolved_production_dir)
+        weights = load_production_weights(crop, resolved_production_dir)
         crop_df = _weighted_daily_features(state_features, weights)
         ag_path = _append_metrics_to_ag_file(crop, crop_df, resolved_ag_dir)
         outputs[crop] = ag_path
