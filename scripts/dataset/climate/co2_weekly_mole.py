@@ -1,13 +1,12 @@
 import argparse
+import logging
 import sys
 from pathlib import Path
 from typing import cast
 
 import pandas as pd
 
-
-def _write(message: str) -> None:
-    sys.stdout.write(f"{message}\n")
+logger = logging.getLogger(__name__)
 
 
 def _add_co2_features(co2: pd.DataFrame) -> pd.DataFrame:
@@ -22,22 +21,21 @@ def _add_co2_features(co2: pd.DataFrame) -> pd.DataFrame:
 
 
 def _merge(dataset: pd.DataFrame, co2: pd.DataFrame) -> pd.DataFrame:
-    if len(co2) < len(dataset):
-        msg = f"CO2 rows ({len(co2)}) are fewer than v6 rows ({len(dataset)})."
-        raise ValueError(msg)
-
-    features = _add_co2_features(co2).tail(len(dataset)).reset_index(drop=True)
-    feature_cols = ["zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]
-    return pd.concat([dataset.reset_index(drop=True), features[feature_cols]], axis=1)
+    features = _add_co2_features(co2)
+    merged = dataset.merge(features, on="date", how="left")
+    missing = merged[["zscore_co2", "co2_weekly_mean", "co2_monthly_mean"]].isna().any(axis=1).sum()
+    if missing:
+        logger.warning("%d row(s) in dataset had no matching CO2 date.", missing)
+    return merged
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+
     parser = argparse.ArgumentParser(
         description="Append CO2 features (zscore_co2, co2_weekly_mean, co2_monthly_mean)"
     )
-    parser.add_argument(
-        "--dataset", default="data/ag/v6.csv", help="Path to v6.csv dataset."
-    )
+    parser.add_argument("--dataset", default="data/ag/v5.csv", help="Path to v6.csv dataset.")
     parser.add_argument(
         "--co2",
         default="data/climate/co2_weekly_mlo.csv",
@@ -50,17 +48,18 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    dataset = pd.read_csv(args.dataset)
-    co2 = pd.read_csv(args.co2)
+    dataset = pd.read_csv(args.dataset, parse_dates=["date"])
+    co2 = pd.read_csv(args.co2, parse_dates=["date"])
+
     merged = _merge(dataset, co2)
 
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     merged.to_csv(output_path, index=False)
 
-    _write(f"Saved: {output_path}")
-    _write(f"Rows: {len(merged)}")
-    _write(f"Columns: {len(merged.columns)}")
+    logger.info("Saved: %s", output_path)
+    logger.info("Rows: %d", len(merged))
+    logger.info("Columns: %d", len(merged.columns))
 
 
 if __name__ == "__main__":
