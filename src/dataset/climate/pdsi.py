@@ -5,6 +5,7 @@ from typing import cast
 import numpy as np
 import pandas as pd
 
+from src.dataset.climate.crop_seasonal import crop_season_flag
 from src.dataset.util.path import require_path
 from src.dataset.util.production_by_state import load_production_weights
 
@@ -18,10 +19,18 @@ DRY_HIGH = 0.10
 MODERATE_DRY_HIGH = 0.20
 
 FEATURE_COLUMNS = ("moderate_wet", "wet", "moderate_dry", "dry")
+SEASON_PERIODS = ("in_planting", "in_harvesting")
+SEASONAL_FEATURE_COLUMNS = tuple(
+    [f"{col}_{period}" for col in FEATURE_COLUMNS for period in SEASON_PERIODS]
+)
 ROLLING_FEATURE_COLUMNS = tuple(
+    [f"{prefix}_{col}" for col in SEASONAL_FEATURE_COLUMNS for prefix in ("monthly", "seasonal")]
+)
+ALL_PDSI_COLUMNS = SEASONAL_FEATURE_COLUMNS + ROLLING_FEATURE_COLUMNS
+LEGACY_ROLLING_FEATURE_COLUMNS = tuple(
     [f"{prefix}_{col}" for col in FEATURE_COLUMNS for prefix in ("monthly", "seasonal")]
 )
-ALL_PDSI_COLUMNS = FEATURE_COLUMNS + ROLLING_FEATURE_COLUMNS
+LEGACY_ALL_PDSI_COLUMNS = FEATURE_COLUMNS + LEGACY_ROLLING_FEATURE_COLUMNS
 
 STATE_DIR_PARTS = 2
 
@@ -151,10 +160,33 @@ def compute_national_pdsi_features(national_pdsi: pd.DataFrame) -> pd.DataFrame:
 def add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
     """Add monthly (4-week) and seasonal (13-week) rolling averages for PDSI features."""
     out = df.copy()
-    for col in FEATURE_COLUMNS:
+    for col in SEASONAL_FEATURE_COLUMNS:
         out[f"monthly_{col}"] = out[col].rolling(window=4, min_periods=1).mean()
         out[f"seasonal_{col}"] = out[col].rolling(window=13, min_periods=1).mean()
     return out
+
+
+def apply_crop_season_masks(pdsi_features: pd.DataFrame, crop: str) -> pd.DataFrame:
+    """Restrict PDSI features to planting/harvesting weeks for a given crop."""
+    out = pdsi_features.copy()
+    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    if bool(out["date"].isna().any()):
+        msg = "PDSI feature frame has invalid values in 'date'."
+        raise ValueError(msg)
+
+    out["week_of_year"] = out["date"].dt.isocalendar().week.astype(int)
+    flags = out["week_of_year"].apply(lambda w: crop_season_flag(int(w), crop))
+    out["is_planting_week"] = flags.map(lambda f: f["is_planting_week"])
+    out["is_harvesting_week"] = flags.map(lambda f: f["is_harvesting_week"])
+
+    for feature in FEATURE_COLUMNS:
+        out[f"{feature}_in_planting"] = out[feature] * out["is_planting_week"]
+        out[f"{feature}_in_harvesting"] = out[feature] * out["is_harvesting_week"]
+
+    return out.drop(
+        columns=[*FEATURE_COLUMNS, "week_of_year", "is_planting_week", "is_harvesting_week"],
+        errors="ignore",
+    )
 
 
 def _align_pdsi_to_ag_rows(
@@ -190,7 +222,7 @@ def _append_metrics_to_ag_file(
     ag_df = pd.read_csv(ag_path)
     aligned = _align_pdsi_to_ag_rows(pdsi_features, ag_df, crop)
 
-    out = ag_df.copy()
+    out = ag_df.drop(columns=list(LEGACY_ALL_PDSI_COLUMNS), errors="ignore").copy()
     for col in ALL_PDSI_COLUMNS:
         out[col] = aligned[col].to_numpy()
 
@@ -209,7 +241,8 @@ def run_pipeline(
     1. Build state-level PDSI frame
     2. Aggregate by production weights (national level)
     3. Compute z-scores and bands on aggregated data
-    4. Add rolling windows
+    4. Apply crop-specific planting/harvesting masks
+    5. Add rolling windows
     """
     state_pdsi = build_state_pdsi_frame(palmer_dir)
 
@@ -233,8 +266,11 @@ def run_pipeline(
         # Compute features on national data
         feature_df = compute_national_pdsi_features(national_pdsi)
         
+        # Keep only planting/harvesting season signals for this crop
+        masked_df = apply_crop_season_masks(feature_df, crop)
+
         # Add rolling windows
-        crop_df = add_rolling_windows(feature_df)
+        crop_df = add_rolling_windows(masked_df)
         
         # Append to ag file
         ag_path = _append_metrics_to_ag_file(crop, crop_df, resolved_ag_dir)
