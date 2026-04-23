@@ -28,7 +28,7 @@ def _load_tokens() -> list[str]:
     raise ValueError(msg)
 
 
-DATA_TYPES = ["TMAX", "TMIN", "TAVG", "AWND"]
+DATA_TYPES = ["TMAX", "TMIN", "AWND"]
 TOKENS = _load_tokens()
 
 BASE_URL: str | None = os.getenv("NOAA_BASE_URL")
@@ -308,7 +308,6 @@ def aggregate_weekly(df: pd.DataFrame) -> pd.DataFrame:
         for c, v in {
             "TMAX": "mean",
             "TMIN": "mean",
-            "TAVG": "mean",
             "AWND": "mean",
         }.items()
         if c in working_df.columns
