@@ -155,7 +155,7 @@ def aggregate_by_production_weights(
     return agg.drop(columns=["state_weight"])
 
 
-def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataFrame:
+def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataFrame:  # noqa: PLR0912, C901
     """Compute z-scores and extreme values on national-level aggregated data.
 
     This ensures q3 and q4 bands are mutually exclusive (no overlaps).
@@ -277,12 +277,6 @@ def add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Path]:
-    """Run the NOAA preprocessing pipeline with new approach:
-    1. Merge SPI features
-    2. Aggregate by production weights (national level)
-    3. Compute z-scores and quantiles on aggregated data
-    4. Add rolling windows
-    """
     resolved_input = _resolve_input_path(str(input_path))
     resolved_production = _resolve_production_dir()
     resolved_spi = _resolve_spi_input()
@@ -296,7 +290,7 @@ def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Pa
     outputs: dict[str, Path] = {}
 
     for crop in CROPS:
-        logger.info(f"Processing {crop}...")
+        logger.info("Processing %s...", crop)
 
         # Load production weights
         production_weights = load_production_weights(crop, resolved_production)

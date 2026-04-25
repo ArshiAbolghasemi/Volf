@@ -248,13 +248,6 @@ def run_pipeline(
     ag_dir: Path | str,
     output_dir: Path | str | None = None,
 ) -> dict[str, Path]:
-    """Run the PDSI pipeline with new approach:
-    1. Build state-level PDSI frame
-    2. Aggregate by production weights (national level)
-    3. Compute z-scores and bands on aggregated data
-    4. Apply crop-specific planting/harvesting masks
-    5. Add rolling windows
-    """
     state_pdsi = build_state_pdsi_frame(palmer_dir)
 
     resolved_production_dir = require_path(Path(production_dir), "Production directory")
@@ -266,7 +259,7 @@ def run_pipeline(
     outputs: dict[str, Path] = {}
 
     for crop in CROPS:
-        logger.info(f"Processing {crop}...")
+        logger.info("Processing %s...", crop)
 
         # Load production weights
         weights = load_production_weights(crop, resolved_production_dir)
