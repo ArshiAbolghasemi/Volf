@@ -30,9 +30,9 @@ def _load_tokens() -> list[str]:
 
 DATA_TYPES = [
     "PRCP",
-    #"TMAX",
-    #"TMIN",
-    #"AWND",
+    # "TMAX",
+    # "TMIN",
+    # "AWND",
 ]
 TOKENS = _load_tokens()
 
@@ -312,9 +312,9 @@ def aggregate_weekly(df: pd.DataFrame) -> pd.DataFrame:
         c: v
         for c, v in {
             "PRCP": "sum",
-            #"TMAX": "mean",
-            #"TMIN": "mean",
-            #"AWND": "mean",
+            # "TMAX": "mean",
+            # "TMIN": "mean",
+            # "AWND": "mean",
         }.items()
         if c in working_df.columns
     }

@@ -78,91 +78,108 @@ def aggregate_by_production_weights(
     production_weights: pd.DataFrame,
     crop: str,
 ) -> pd.DataFrame:
-    """
-    Aggregate state-level raw metrics to national level using production weights.
-    
+    """Aggregate state-level raw metrics to national level using production weights.
+
     New approach: Aggregate FIRST, then compute z-scores and quantiles.
     This ensures q3 and q4 bands are mutually exclusive at national level.
     """
     merged = state_df.copy()
     merged["state_name"] = merged["state"].map(STATE_ABBREV_TO_NAME).fillna(merged["state"])
     merged = merged.merge(
-        production_weights, 
-        left_on="state_name", 
-        right_on="state", 
+        production_weights,
+        left_on="state_name",
+        right_on="state",
         how="left",
-        suffixes=("", "_prod")
+        suffixes=("", "_prod"),
     )
     merged = merged.drop(columns=["state_prod"], errors="ignore")
-    merged["state_weight"] = pd.to_numeric(merged["state_weight"], errors="coerce").fillna(0.0)
-    
+    merged["state_weight"] = pd.to_numeric(merged["state_weight"], errors="coerce").fillna(
+        0.0
+    )
+
     # Add temporal columns
     merged["date"] = pd.to_datetime(merged["date"], errors="coerce")
     merged["week_of_year"] = merged["date"].dt.isocalendar().week.astype(int)
     merged["year"] = merged["date"].dt.year
     merged["month"] = merged["date"].dt.month
-    
+
     # Apply seasonal flags
     flags = merged["week_of_year"].apply(lambda w: crop_season_flag(int(w), crop))
     merged["is_planting_week"] = flags.map(lambda f: f["is_planting_week"])
     merged["is_harvesting_week"] = flags.map(lambda f: f["is_harvesting_week"])
-    
+
     # Metrics to aggregate
     base_metrics = ["TMAX", "TMIN", "AWND"]
     spi_metrics = [c for c in SPI_COLUMNS if c in merged.columns]
     all_metrics = base_metrics + spi_metrics
-    
+
     # Weighted aggregation by date
-    weighted = merged[["date", "week_of_year", "year", "month", 
-                       "is_planting_week", "is_harvesting_week",
-                       *all_metrics, "state_weight"]].copy()
-    
+    weighted = merged[
+        [
+            "date",
+            "week_of_year",
+            "year",
+            "month",
+            "is_planting_week",
+            "is_harvesting_week",
+            *all_metrics,
+            "state_weight",
+        ]
+    ].copy()
+
     for metric in all_metrics:
         weighted[metric] = (
-            pd.to_numeric(weighted[metric], errors="coerce").fillna(0.0) 
+            pd.to_numeric(weighted[metric], errors="coerce").fillna(0.0)
             * weighted["state_weight"]
         )
-    
+
     # Group by date and sum
-    group_cols = ["date", "week_of_year", "year", "month", "is_planting_week", "is_harvesting_week"]
-    agg = weighted.groupby(group_cols, as_index=False).agg({
-        **{m: "sum" for m in all_metrics},
-        "state_weight": "sum"
-    })
-    
+    group_cols = [
+        "date",
+        "week_of_year",
+        "year",
+        "month",
+        "is_planting_week",
+        "is_harvesting_week",
+    ]
+    agg = weighted.groupby(group_cols, as_index=False).agg(
+        {**dict.fromkeys(all_metrics, "sum"), "state_weight": "sum"}
+    )
+
     # Normalize by total weight
     for metric in all_metrics:
-        agg[metric] = np.where(agg["state_weight"] > 0, agg[metric] / agg["state_weight"], 0.0)
-    
+        agg[metric] = np.where(
+            agg["state_weight"] > 0, agg[metric] / agg["state_weight"], 0.0
+        )
+
     return agg.drop(columns=["state_weight"])
 
 
 def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Compute z-scores and extreme values on national-level aggregated data.
-    
+    """Compute z-scores and extreme values on national-level aggregated data.
+
     This ensures q3 and q4 bands are mutually exclusive (no overlaps).
     """
     out = national_df.copy()
-    
+
     # Compute z-scores by week of year
     for metric in ["TMAX", "TMIN", "AWND"]:
         if metric not in out.columns:
             continue
-            
+
         grp = out.groupby("week_of_year")[metric]
         mean = grp.transform("mean")
         std = grp.transform("std").replace(0, np.nan)
         out[f"{metric}_zscore"] = (out[metric] - mean) / std
-    
+
     # Compute quantile thresholds by week of year
     for metric in ["TMAX", "TMIN", "AWND"]:
         zscore_col = f"{metric}_zscore"
         if zscore_col not in out.columns:
             continue
-        
+
         grp = out.groupby("week_of_year")[zscore_col]
-        
+
         if metric == "TMAX":
             out[f"{metric}_q3_thresh"] = grp.transform(lambda x: x.quantile(TMAX_Q3_LOW))
             out[f"{metric}_q4_thresh"] = grp.transform(lambda x: x.quantile(TMAX_Q3_HIGH))
@@ -172,18 +189,18 @@ def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataF
         elif metric == "AWND":
             out[f"{metric}_q3_thresh"] = grp.transform(lambda x: x.quantile(AWND_Q3_LOW))
             out[f"{metric}_q4_thresh"] = grp.transform(lambda x: x.quantile(AWND_Q3_HIGH))
-    
+
     # Apply extreme value logic
     for metric in ["TMAX", "TMIN", "AWND"]:
         zscore_col = f"{metric}_zscore"
         if zscore_col not in out.columns:
             continue
-        
+
         z = out[zscore_col].to_numpy(dtype=float)
         q3 = out[f"{metric}_q3_thresh"].to_numpy(dtype=float)
         q4 = out[f"{metric}_q4_thresh"].to_numpy(dtype=float)
         z_ok = np.isfinite(z)
-        
+
         if metric in ["TMAX", "AWND"]:
             # Right tail
             out[f"{metric}_q3_value"] = np.where(z_ok & (z >= q3) & (z < q4), z, 0.0)
@@ -192,17 +209,32 @@ def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataF
             # Left tail
             out[f"{metric}_q3_value"] = np.where(z_ok & (z > q4) & (z <= q3), z, 0.0)
             out[f"{metric}_q4_value"] = np.where(z_ok & (z <= q4), z, 0.0)
-        
+
         # Apply seasonal masks
-        out[f"{metric}_q3_value_in_planting"] = out[f"{metric}_q3_value"] * out["is_planting_week"]
-        out[f"{metric}_q3_value_in_harvesting"] = out[f"{metric}_q3_value"] * out["is_harvesting_week"]
-        out[f"{metric}_q4_value_in_planting"] = out[f"{metric}_q4_value"] * out["is_planting_week"]
-        out[f"{metric}_q4_value_in_harvesting"] = out[f"{metric}_q4_value"] * out["is_harvesting_week"]
-        
+        out[f"{metric}_q3_value_in_planting"] = (
+            out[f"{metric}_q3_value"] * out["is_planting_week"]
+        )
+        out[f"{metric}_q3_value_in_harvesting"] = (
+            out[f"{metric}_q3_value"] * out["is_harvesting_week"]
+        )
+        out[f"{metric}_q4_value_in_planting"] = (
+            out[f"{metric}_q4_value"] * out["is_planting_week"]
+        )
+        out[f"{metric}_q4_value_in_harvesting"] = (
+            out[f"{metric}_q4_value"] * out["is_harvesting_week"]
+        )
+
         # Drop intermediate columns
-        out = out.drop(columns=[f"{metric}_q3_thresh", f"{metric}_q4_thresh", 
-                                f"{metric}_q3_value", f"{metric}_q4_value"], errors="ignore")
-    
+        out = out.drop(
+            columns=[
+                f"{metric}_q3_thresh",
+                f"{metric}_q4_thresh",
+                f"{metric}_q3_value",
+                f"{metric}_q4_value",
+            ],
+            errors="ignore",
+        )
+
     # Validate: q3 and q4 should be mutually exclusive
     for metric in ["TMAX", "TMIN", "AWND"]:
         for period in ["in_planting", "in_harvesting"]:
@@ -216,32 +248,36 @@ def compute_national_zscores_and_extremes(national_df: pd.DataFrame) -> pd.DataF
                         f"{overlap.sum()} rows have both q3 and q4 non-zero."
                     )
                     raise ValueError(msg)
-    
-    logger.info("✓ National-level extreme values validated: no overlaps between q3 and q4 bands")
-    
+
+    logger.info(
+        "✓ National-level extreme values validated: no overlaps between q3 and q4 bands"
+    )
+
     return out
 
 
 def add_rolling_windows(df: pd.DataFrame) -> pd.DataFrame:
     """Add monthly (4-week) and seasonal (13-week) rolling averages."""
     out = df.copy()
-    
+
     # Get all value columns
-    value_cols = [col for col in out.columns if any(x in col for x in 
-                  ["_q3_value_", "_q4_value_", "SPI_"])]
-    
+    value_cols = [
+        col
+        for col in out.columns
+        if any(x in col for x in ["_q3_value_", "_q4_value_", "SPI_"])
+    ]
+
     out = out.sort_values("date").reset_index(drop=True)
-    
+
     for col in value_cols:
         out[f"monthly_{col}"] = out[col].rolling(window=4, min_periods=1).mean()
         out[f"seasonal_{col}"] = out[col].rolling(window=13, min_periods=1).mean()
-    
+
     return out
 
 
 def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Path]:
-    """
-    Run the NOAA preprocessing pipeline with new approach:
+    """Run the NOAA preprocessing pipeline with new approach:
     1. Merge SPI features
     2. Aggregate by production weights (national level)
     3. Compute z-scores and quantiles on aggregated data
@@ -258,22 +294,24 @@ def run_pipeline(input_path: Path | str, output_dir: Path | str) -> dict[str, Pa
     noaa_with_spi = _merge_spi_features(noaa_weekly, resolved_spi)
 
     outputs: dict[str, Path] = {}
-    
+
     for crop in CROPS:
         logger.info(f"Processing {crop}...")
-        
+
         # Load production weights
         production_weights = load_production_weights(crop, resolved_production)
-        
+
         # Aggregate to national level
-        national_df = aggregate_by_production_weights(noaa_with_spi, production_weights, crop)
-        
+        national_df = aggregate_by_production_weights(
+            noaa_with_spi, production_weights, crop
+        )
+
         # Compute z-scores and extremes on national data
         extreme_df = compute_national_zscores_and_extremes(national_df)
-        
+
         # Add rolling windows
         final_df = add_rolling_windows(extreme_df)
-        
+
         # Save
         out_path = resolved_output / f"climate_weekly_weighted_{crop}.csv"
         final_df.to_csv(out_path, index=False)
