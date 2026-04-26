@@ -97,13 +97,8 @@ def _build_quantile_masks(  # noqa: PLR0911
         }
     if variable_name == "AWND":
         return {
-            "moderate_high": (zscore >= q80) & (zscore <= q90),
-            "extreme_high": zscore > q90,
-        }
-    if variable_name in SPI_VARS:
-        return {
-            "high": (zscore >= q80) & (zscore <= q90),
-            "extreme": zscore > q90,
+            "moderate_high_wind": (zscore >= q80) & (zscore <= q90),
+            "extreme_high_wind": zscore > q90,
         }
     if variable_name == "pdsi":
         return {
@@ -159,12 +154,28 @@ def _process_state_variable(
         mask_filled = mask.fillna(value=False)
         selected[mask_filled] = values_for_output[mask_filled]
 
-        planting_col = f"{label}_in_planting"
-        harvesting_col = f"{label}_in_harvesting"
+        variable_prefix = variable_name.lower()
+        planting_col = f"{variable_prefix}_{label}_in_planting"
+        harvesting_col = f"{variable_prefix}_{label}_in_harvesting"
 
         out[planting_col] = np.where(planting_flag, selected, 0.0)
         out[harvesting_col] = np.where(harvesting_flag, selected, 0.0)
 
+    return out
+
+
+def _process_state_spi_variable(
+    state_df: pd.DataFrame,
+    variable_name: str,
+    crop: str,
+) -> pd.DataFrame:
+    series = pd.to_numeric(state_df[variable_name], errors="coerce").fillna(0.0)
+    planting_flag, harvesting_flag = _state_season_flags(state_df, crop)
+    variable_prefix = variable_name.lower()
+
+    out = pd.DataFrame({"date": state_df["date"], "state": state_df["state"]})
+    out[f"{variable_prefix}_in_planting"] = np.where(planting_flag, series, 0.0)
+    out[f"{variable_prefix}_in_harvesting"] = np.where(harvesting_flag, series, 0.0)
     return out
 
 
@@ -213,7 +224,7 @@ def _prepare_spi_states(crop: str, spi_path: Path) -> pd.DataFrame:
         for variable_name in SPI_VARS:
             if variable_name not in state_data.columns:
                 continue
-            var_features = _process_state_variable(state_data, variable_name, crop)
+            var_features = _process_state_spi_variable(state_data, variable_name, crop)
             value_cols = [
                 col for col in var_features.columns if col not in ("date", "state")
             ]
@@ -360,12 +371,9 @@ def process_crop(  # noqa: PLR0913
 
     climate = weighted.merge(co2_features, on="date", how="outer").sort_values("date")
     climate_cols = [column for column in climate.columns if column != "date"]
-    climate = climate.rename(
-        columns={column: f"{crop}_{column}" for column in climate_cols}
-    )
 
     merged = v6_df.merge(climate, on="date", how="left")
-    new_cols = [column for column in merged.columns if column.startswith(f"{crop}_")]
+    new_cols = [column for column in climate_cols if column in merged.columns]
     merged[new_cols] = merged[new_cols].fillna(0.0)
     logger.info("Completed crop=%s rows=%d new_cols=%d", crop, len(merged), len(new_cols))
     return merged
