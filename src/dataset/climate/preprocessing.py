@@ -30,6 +30,14 @@ V6_FILE = DATA_DIR / "ag" / "v6.csv"
 ALPHA = 0.05
 MIN_ADF_OBS = 10
 MIN_TREND_OBS = 2
+SPI_VERY_WET_LOW = 1.5
+SPI_WET_EXTREME_CUTOFF = 2.0
+SPI_VERY_DRY_HIGH = -1.5
+SPI_DRY_EXTREME_CUTOFF = -2.0
+PDSI_VERY_WET_LOW = 3.0
+PDSI_WET_EXTREME_CUTOFF = 4.0
+PDSI_EXTREME_DROUGHT_HIGH = -3.0
+PDSI_SEVERE_DROUGHT_CUTOFF = -4.0
 
 
 def run_adf_test(series: pd.Series) -> tuple[bool, float]:
@@ -112,6 +120,56 @@ def _build_quantile_masks(  # noqa: PLR0911
     return {}
 
 
+def _monthly_quantile_extremes(
+    *,
+    series: pd.Series,
+    dates: pd.Series,
+    variable_name: str,
+    use_adf_detrend: bool,
+) -> dict[str, pd.Series]:
+    out: dict[str, pd.Series] = {}
+    for month in range(1, 13):
+        month_mask = dates.dt.month == month
+        if not bool(month_mask.any()):
+            continue
+
+        month_series = series[month_mask].copy()
+        if month_series.dropna().empty:
+            continue
+
+        if use_adf_detrend:
+            has_trend, p_value = run_adf_test(month_series)
+            if has_trend:
+                detrended, trend_vals = linear_detrend(month_series)
+                series_for_quantile = detrended
+                values_for_output = detrended.copy()
+                if trend_vals is not None:
+                    values_for_output = values_for_output + trend_vals
+                logger.info(
+                    "Trend detected for %s month=%d p=%.5f",
+                    variable_name,
+                    month,
+                    p_value,
+                )
+            else:
+                series_for_quantile = month_series
+                values_for_output = month_series
+        else:
+            series_for_quantile = month_series
+            values_for_output = month_series
+
+        zscore = _standardize(series_for_quantile)
+        masks = _build_quantile_masks(zscore, variable_name)
+        for label, label_mask in masks.items():
+            if label not in out:
+                out[label] = pd.Series(0.0, index=series.index, dtype=float)
+            mask_filled = label_mask.fillna(value=False)
+            selected_idx = month_series.index[mask_filled]
+            out[label].loc[selected_idx] = values_for_output.loc[selected_idx]
+
+    return out
+
+
 def _state_season_flags(state_df: pd.DataFrame, crop: str) -> tuple[pd.Series, pd.Series]:
     flags = state_df["week_of_year"].apply(lambda week: crop_season_flag(int(week), crop))
     is_planting = flags.map(lambda item: item["is_planting_week"] == 1)
@@ -123,37 +181,20 @@ def _process_state_variable(
     state_df: pd.DataFrame,
     variable_name: str,
     crop: str,
+    *,
+    use_adf_detrend: bool,
 ) -> pd.DataFrame:
     series = pd.to_numeric(state_df[variable_name], errors="coerce")
-    has_trend, p_value = run_adf_test(series)
-
-    if has_trend:
-        detrended, trend_values = linear_detrend(series)
-        series_for_quantile = detrended
-        logger.info(
-            "Trend detected for %s (%s), p=%.5f",
-            variable_name,
-            state_df["state"].iloc[0],
-            p_value,
-        )
-    else:
-        trend_values = None
-        series_for_quantile = series
-
-    zscore = _standardize(series_for_quantile)
-    quantile_masks = _build_quantile_masks(zscore, variable_name)
+    quantile_values = _monthly_quantile_extremes(
+        series=series,
+        dates=state_df["date"],
+        variable_name=variable_name,
+        use_adf_detrend=use_adf_detrend,
+    )
     planting_flag, harvesting_flag = _state_season_flags(state_df, crop)
 
-    values_for_output = series_for_quantile.copy()
-    if trend_values is not None:
-        values_for_output = values_for_output + trend_values
-
     out = pd.DataFrame({"date": state_df["date"], "state": state_df["state"]})
-    for label, mask in quantile_masks.items():
-        selected = pd.Series(0.0, index=state_df.index, dtype=float)
-        mask_filled = mask.fillna(value=False)
-        selected[mask_filled] = values_for_output[mask_filled]
-
+    for label, selected in quantile_values.items():
         variable_prefix = variable_name.lower()
         planting_col = f"{variable_prefix}_{label}_in_planting"
         harvesting_col = f"{variable_prefix}_{label}_in_harvesting"
@@ -169,13 +210,84 @@ def _process_state_spi_variable(
     variable_name: str,
     crop: str,
 ) -> pd.DataFrame:
-    series = pd.to_numeric(state_df[variable_name], errors="coerce").fillna(0.0)
+    series = pd.to_numeric(state_df[variable_name], errors="coerce")
     planting_flag, harvesting_flag = _state_season_flags(state_df, crop)
     variable_prefix = variable_name.lower()
+    very_wet = (series >= SPI_VERY_WET_LOW) & (series <= SPI_WET_EXTREME_CUTOFF)
+    extreme_wet = series > SPI_WET_EXTREME_CUTOFF
+    very_dry = (series <= SPI_VERY_DRY_HIGH) & (series >= SPI_DRY_EXTREME_CUTOFF)
+    extreme_dry = series < SPI_DRY_EXTREME_CUTOFF
+    very_wet_mask = very_wet.fillna(value=False)
+    extreme_wet_mask = extreme_wet.fillna(value=False)
+    very_dry_mask = very_dry.fillna(value=False)
+    extreme_dry_mask = extreme_dry.fillna(value=False)
 
     out = pd.DataFrame({"date": state_df["date"], "state": state_df["state"]})
-    out[f"{variable_prefix}_in_planting"] = np.where(planting_flag, series, 0.0)
-    out[f"{variable_prefix}_in_harvesting"] = np.where(harvesting_flag, series, 0.0)
+    out[f"{variable_prefix}_very_wet_in_planting"] = np.where(
+        planting_flag & very_wet_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_very_wet_in_harvesting"] = np.where(
+        harvesting_flag & very_wet_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_extreme_wet_in_planting"] = np.where(
+        planting_flag & extreme_wet_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_extreme_wet_in_harvesting"] = np.where(
+        harvesting_flag & extreme_wet_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_very_dry_in_planting"] = np.where(
+        planting_flag & very_dry_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_very_dry_in_harvesting"] = np.where(
+        harvesting_flag & very_dry_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_extreme_dry_in_planting"] = np.where(
+        planting_flag & extreme_dry_mask, series, 0.0
+    )
+    out[f"{variable_prefix}_extreme_dry_in_harvesting"] = np.where(
+        harvesting_flag & extreme_dry_mask, series, 0.0
+    )
+    return out
+
+
+def _process_state_pdsi_variable(state_df: pd.DataFrame, crop: str) -> pd.DataFrame:
+    series = pd.to_numeric(state_df["pdsi"], errors="coerce")
+    planting_flag, harvesting_flag = _state_season_flags(state_df, crop)
+
+    very_wet = (series >= PDSI_VERY_WET_LOW) & (series <= PDSI_WET_EXTREME_CUTOFF)
+    extreme_wet = series > PDSI_WET_EXTREME_CUTOFF
+    extreme_drought = (series <= PDSI_EXTREME_DROUGHT_HIGH) & (
+        series >= PDSI_SEVERE_DROUGHT_CUTOFF
+    )
+    severe_drought = series < PDSI_SEVERE_DROUGHT_CUTOFF
+    very_wet_mask = very_wet.fillna(value=False)
+    extreme_wet_mask = extreme_wet.fillna(value=False)
+    extreme_drought_mask = extreme_drought.fillna(value=False)
+    severe_drought_mask = severe_drought.fillna(value=False)
+
+    out = pd.DataFrame({"date": state_df["date"], "state": state_df["state"]})
+    out["pdsi_very_wet_in_planting"] = np.where(planting_flag & very_wet_mask, series, 0.0)
+    out["pdsi_very_wet_in_harvesting"] = np.where(
+        harvesting_flag & very_wet_mask, series, 0.0
+    )
+    out["pdsi_extreme_wet_in_planting"] = np.where(
+        planting_flag & extreme_wet_mask, series, 0.0
+    )
+    out["pdsi_extreme_wet_in_harvesting"] = np.where(
+        harvesting_flag & extreme_wet_mask, series, 0.0
+    )
+    out["pdsi_extreme_drought_in_planting"] = np.where(
+        planting_flag & extreme_drought_mask, series, 0.0
+    )
+    out["pdsi_extreme_drought_in_harvesting"] = np.where(
+        harvesting_flag & extreme_drought_mask, series, 0.0
+    )
+    out["pdsi_severe_drought_in_planting"] = np.where(
+        planting_flag & severe_drought_mask, series, 0.0
+    )
+    out["pdsi_severe_drought_in_harvesting"] = np.where(
+        harvesting_flag & severe_drought_mask, series, 0.0
+    )
     return out
 
 
@@ -193,7 +305,12 @@ def _prepare_noaa_states(crop: str, noaa_path: Path) -> pd.DataFrame:
         for variable_name in NOAA_VARS:
             if variable_name not in state_data.columns:
                 continue
-            var_features = _process_state_variable(state_data, variable_name, crop)
+            var_features = _process_state_variable(
+                state_data,
+                variable_name,
+                crop,
+                use_adf_detrend=True,
+            )
             value_cols = [
                 col for col in var_features.columns if col not in ("date", "state")
             ]
@@ -249,7 +366,7 @@ def _prepare_pdsi_states(crop: str, palmer_dir: Path) -> pd.DataFrame:
         state_data = pdsi_df[pdsi_df["state"] == state].copy()
         if state_data.empty:
             continue
-        state_frames.append(_process_state_variable(state_data, "pdsi", crop))
+        state_frames.append(_process_state_pdsi_variable(state_data, crop))
 
     if not state_frames:
         return pd.DataFrame(columns=["date", "state"])
@@ -264,23 +381,16 @@ def _prepare_co2_features(crop: str, co2_path: Path) -> pd.DataFrame:
     co2_df["week_of_year"] = co2_df["date"].dt.isocalendar().week.astype(int)
 
     series = pd.to_numeric(co2_df[co2_value_col], errors="coerce")
-    has_trend, _ = run_adf_test(series)
-    if has_trend:
-        detrended, trend_values = linear_detrend(series)
-        series_for_quantile = detrended
-    else:
-        trend_values = None
-        series_for_quantile = series
-
-    zscore = _standardize(series_for_quantile)
-    masks = _build_quantile_masks(zscore, "co2")
-    selected = pd.Series(0.0, index=co2_df.index, dtype=float)
-    if "extreme" in masks:
-        extreme_mask = masks["extreme"].fillna(value=False)
-        selected[extreme_mask] = series_for_quantile[extreme_mask]
-    if trend_values is not None:
-        non_zero = selected != 0
-        selected[non_zero] = selected[non_zero] + trend_values[non_zero]
+    monthly_selected = _monthly_quantile_extremes(
+        series=series,
+        dates=co2_df["date"],
+        variable_name="co2",
+        use_adf_detrend=True,
+    )
+    selected = monthly_selected.get(
+        "extreme",
+        pd.Series(0.0, index=co2_df.index, dtype=float),
+    )
 
     flags = co2_df["week_of_year"].apply(lambda week: crop_season_flag(int(week), crop))
     is_planting = flags.map(lambda item: item["is_planting_week"] == 1)
