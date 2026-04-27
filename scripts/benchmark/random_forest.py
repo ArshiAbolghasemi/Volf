@@ -137,6 +137,8 @@ def _load_config_from_json(path: str) -> WheatRFBenchmarkConfig:
         csv_path=raw.get("csv_path", str(DATA_DIR / "ag" / "v4.csv")),
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
+        core_columns_by_target=raw.get("core_columns_by_target"),
+        climate_columns=raw.get("climate_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
         target_horizons=(
             [int(v) for v in raw["target_horizons"]]

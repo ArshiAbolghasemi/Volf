@@ -10,10 +10,54 @@ DEFAULT_CORE_COLUMNS = ["wheat_weekly_rv", "wheat_monthly_rv", "wheat_seasonal_r
 CLIMATE_COLUMNS = [
     "ssta_elino",
     "ssta_lanina",
-    "dry",
-    "wet",
     "SOI_index",
     "NAO_index",
+    "tmax_hot_in_planting",
+    "tmax_hot_in_harvesting",
+    "tmax_very_hot_in_planting",
+    "tmax_very_hot_in_harvesting",
+    "tmin_cold_in_planting",
+    "tmin_cold_in_harvesting",
+    "tmin_very_cold_in_planting",
+    "tmin_very_cold_in_harvesting",
+    "awnd_moderate_high_wind_in_planting",
+    "awnd_moderate_high_wind_in_harvesting",
+    "awnd_extreme_high_wind_in_planting",
+    "awnd_extreme_high_wind_in_harvesting",
+    "spi_7d_very_wet_in_planting",
+    "spi_7d_very_wet_in_harvesting",
+    "spi_7d_extreme_wet_in_planting",
+    "spi_7d_extreme_wet_in_harvesting",
+    "spi_7d_very_dry_in_planting",
+    "spi_7d_very_dry_in_harvesting",
+    "spi_7d_extreme_dry_in_planting",
+    "spi_7d_extreme_dry_in_harvesting",
+    "spi_1m_very_wet_in_planting",
+    "spi_1m_very_wet_in_harvesting",
+    "spi_1m_extreme_wet_in_planting",
+    "spi_1m_extreme_wet_in_harvesting",
+    "spi_1m_very_dry_in_planting",
+    "spi_1m_very_dry_in_harvesting",
+    "spi_1m_extreme_dry_in_planting",
+    "spi_1m_extreme_dry_in_harvesting",
+    "spi_3m_very_wet_in_planting",
+    "spi_3m_very_wet_in_harvesting",
+    "spi_3m_extreme_wet_in_planting",
+    "spi_3m_extreme_wet_in_harvesting",
+    "spi_3m_very_dry_in_planting",
+    "spi_3m_very_dry_in_harvesting",
+    "spi_3m_extreme_dry_in_planting",
+    "spi_3m_extreme_dry_in_harvesting",
+    "pdsi_very_wet_in_planting",
+    "pdsi_very_wet_in_harvesting",
+    "pdsi_extreme_wet_in_planting",
+    "pdsi_extreme_wet_in_harvesting",
+    "pdsi_extreme_drought_in_planting",
+    "pdsi_extreme_drought_in_harvesting",
+    "pdsi_severe_drought_in_planting",
+    "pdsi_severe_drought_in_harvesting",
+    "co2_extreme_in_planting",
+    "co2_extreme_in_harvesting",
 ]
 
 NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly", "epu_index"]
@@ -32,19 +76,47 @@ def normalize_target_mode(value: str) -> Literal["point", "mean"]:
     raise ValueError(msg)
 
 
-def build_wheat_feature_sets(
+def infer_target_prefix(target_col: str) -> str:
+    if target_col.endswith("_weekly_rv"):
+        return target_col[: -len("_weekly_rv")]
+    return target_col.split("_", 1)[0]
+
+
+def default_core_columns_for_target(target_col: str) -> list[str]:
+    prefix = infer_target_prefix(target_col)
+    return [f"{prefix}_weekly_rv", f"{prefix}_monthly_rv", f"{prefix}_seasonal_rv"]
+
+
+def build_target_feature_sets(
     data: pd.DataFrame,
     *,
+    target_col: str,
     core_columns: list[str] | None = None,
+    climate_columns: list[str] | None = None,
 ) -> dict[str, list[str]]:
-    core = core_columns or existing_columns(data, DEFAULT_CORE_COLUMNS)
+    default_core = default_core_columns_for_target(target_col)
+    core = core_columns or existing_columns(data, default_core)
     core_set = set(core)
 
+    target_prefix = infer_target_prefix(target_col)
+    commodity_prefixes = ("wheat_", "corn_", "soybeans_")
+
     endo = sorted(
-        [col for col in data.columns if col.startswith("wheat_") and col not in core_set]
+        [
+            col
+            for col in data.columns
+            if col.startswith(f"{target_prefix}_") and col not in core_set
+        ]
     )
-    exo = sorted([col for col in data.columns if col.startswith(("corn_", "soybeans_"))])
-    climate = existing_columns(data, CLIMATE_COLUMNS)
+    exo = sorted(
+        [
+            col
+            for col in data.columns
+            if col.startswith(commodity_prefixes)
+            and not col.startswith(f"{target_prefix}_")
+        ]
+    )
+    climate = existing_columns(data, climate_columns or CLIMATE_COLUMNS)
     news = existing_columns(data, NEWS_BASE_COLUMNS)
     macro = existing_columns(data, MACRO_COLUMNS)
 
@@ -71,3 +143,16 @@ def build_wheat_feature_sets(
                 unique_cols.append(col)
         cleaned[name] = unique_cols
     return cleaned
+
+
+def build_wheat_feature_sets(
+    data: pd.DataFrame,
+    *,
+    core_columns: list[str] | None = None,
+) -> dict[str, list[str]]:
+    return build_target_feature_sets(
+        data,
+        target_col=DEFAULT_TARGET,
+        core_columns=core_columns,
+        climate_columns=CLIMATE_COLUMNS,
+    )

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd  # noqa: TC002
 
 from src.benchmark.utils import (
-    build_wheat_feature_sets as _build_wheat_feature_sets_common,
+    build_target_feature_sets as _build_target_feature_sets_common,
 )
 from src.benchmark.utils import existing_columns as _existing_columns_common
 from src.model import HARModelConfig, HARRunConfig, HARSelectionConfig, HARWalkForwardConfig
@@ -24,9 +24,16 @@ def existing_columns(data: pd.DataFrame, columns: list[str]) -> list[str]:
 def build_wheat_feature_sets(
     data: pd.DataFrame,
     *,
+    target_col: str = "wheat_weekly_rv",
     core_columns: list[str] | None = None,
+    climate_columns: list[str] | None = None,
 ) -> dict[str, list[str]]:
-    return _build_wheat_feature_sets_common(data, core_columns=core_columns)
+    return _build_target_feature_sets_common(
+        data,
+        target_col=target_col,
+        core_columns=core_columns,
+        climate_columns=climate_columns,
+    )
 
 
 def default_run_configs() -> dict[str, HARRunConfig]:

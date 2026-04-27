@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 
+from src.benchmark.utils import default_core_columns_for_target
 from src.model import (
     HARExperimentResult,
     HARFeatureConfig,
@@ -301,7 +302,7 @@ def _run_benchmark_task(  # noqa: PLR0913
     return horizon, model_name, feature_set_name, best_result
 
 
-def run_wheat_har_benchmark_multi_horizon(
+def run_wheat_har_benchmark_multi_horizon(  # noqa: C901
     *,
     config: WheatHARBenchmarkConfig | None = None,
     data: pd.DataFrame | None = None,
@@ -316,13 +317,27 @@ def run_wheat_har_benchmark_multi_horizon(
         data = data.sort_values("Date").reset_index(drop=True)
         logger.info("Data sorted by Date. rows=%d", len(data))
 
-    core = cfg.core_columns or existing_columns(data, DEFAULT_CORE_COLUMNS)
+    target_specific_core = None
+    if cfg.core_columns_by_target and cfg.target_col in cfg.core_columns_by_target:
+        target_specific_core = cfg.core_columns_by_target[cfg.target_col]
+    fallback_core = default_core_columns_for_target(cfg.target_col)
+    core = (
+        target_specific_core
+        or cfg.core_columns
+        or existing_columns(data, fallback_core)
+        or existing_columns(data, DEFAULT_CORE_COLUMNS)
+    )
     if not core:
         msg = "No valid core columns found in data."
         raise ValueError(msg)
     logger.info("Using core columns: %s", core)
 
-    feature_sets = build_wheat_feature_sets(data, core_columns=core)
+    feature_sets = build_wheat_feature_sets(
+        data,
+        target_col=cfg.target_col,
+        core_columns=core,
+        climate_columns=cfg.climate_columns,
+    )
     data_signature_value = dataset_signature(data)
     model_run_configs = cfg.run_configs or default_run_configs()
     horizons = resolve_target_horizons(cfg)

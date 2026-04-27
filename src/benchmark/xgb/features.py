@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.benchmark.utils import build_wheat_feature_sets, existing_columns
+from src.benchmark.utils import build_target_feature_sets, existing_columns
 from src.model import XGBModelConfig, XGBRunConfig, XGBWalkForwardConfig
 
 from .types import (
@@ -52,5 +52,7 @@ def default_run_configs() -> dict[str, XGBRunConfig]:
         ),
     }
 
+
+build_wheat_feature_sets = build_target_feature_sets
 
 __all__ = ["build_wheat_feature_sets", "default_run_configs", "existing_columns"]

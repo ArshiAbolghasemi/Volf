@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 
+from src.benchmark.utils import default_core_columns_for_target
 from src.model import (
     XGBExperimentResult,
     XGBFeatureConfig,
@@ -342,8 +343,22 @@ def run_wheat_xgb_benchmark_multi_horizon(
     if data is None:
         data = pd.read_csv(cfg.csv_path)
 
-    core = cfg.core_columns or existing_columns(data, DEFAULT_CORE_COLUMNS)
-    feature_sets = build_wheat_feature_sets(data, core_columns=core)
+    target_specific_core = None
+    if cfg.core_columns_by_target and cfg.target_col in cfg.core_columns_by_target:
+        target_specific_core = cfg.core_columns_by_target[cfg.target_col]
+    fallback_core = default_core_columns_for_target(cfg.target_col)
+    core = (
+        target_specific_core
+        or cfg.core_columns
+        or existing_columns(data, fallback_core)
+        or existing_columns(data, DEFAULT_CORE_COLUMNS)
+    )
+    feature_sets = build_wheat_feature_sets(
+        data,
+        target_col=cfg.target_col,
+        core_columns=core,
+        climate_columns=cfg.climate_columns,
+    )
     model_run_configs = cfg.run_configs or default_run_configs()
     target_horizons = resolve_target_horizons(cfg)
     data_signature_value = dataset_signature(data)
