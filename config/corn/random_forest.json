@@ -1,0 +1,140 @@
+{
+  "csv_path": "data/ag/corn.csv",
+  "target_col": "corn_weekly_rv",
+  "target_horizons": [
+    1,
+    4,
+    8,
+    12,
+    16
+  ],
+  "use_cache": true,
+  "cache_dir": ".cache/benchmark",
+  "cache_overwrite": false,
+  "target_mode": "point",
+  "core_columns_by_target": {
+    "wheat_weekly_rv": [
+      "wheat_weekly_rv",
+      "wheat_monthly_rv",
+      "wheat_seasonal_rv"
+    ],
+    "corn_weekly_rv": [
+      "corn_weekly_rv",
+      "corn_monthly_rv",
+      "corn_seasonal_rv"
+    ],
+    "soybeans_weekly_rv": [
+      "soybeans_weekly_rv",
+      "soybeans_monthly_rv",
+      "soybeans_seasonal_rv"
+    ]
+  },
+  "climate_columns": [
+    "ssta_elino",
+    "ssta_lanina",
+    "SOI_index",
+    "NAO_index",
+    "tmax_hot_in_planting",
+    "tmax_hot_in_harvesting",
+    "tmax_very_hot_in_planting",
+    "tmax_very_hot_in_harvesting",
+    "tmin_cold_in_planting",
+    "tmin_cold_in_harvesting",
+    "tmin_very_cold_in_planting",
+    "tmin_very_cold_in_harvesting",
+    "awnd_moderate_high_wind_in_planting",
+    "awnd_moderate_high_wind_in_harvesting",
+    "awnd_extreme_high_wind_in_planting",
+    "awnd_extreme_high_wind_in_harvesting",
+    "spi_7d_in_planting",
+    "spi_7d_in_harvesting",
+    "spi_1m_in_planting",
+    "spi_1m_in_harvesting",
+    "spi_3m_in_planting",
+    "spi_3m_in_harvesting",
+    "pdsi_extreme_dry_in_planting",
+    "pdsi_extreme_dry_in_harvesting",
+    "pdsi_dry_in_planting",
+    "pdsi_dry_in_harvesting",
+    "pdsi_wet_in_planting",
+    "pdsi_wet_in_harvesting",
+    "pdsi_extreme_wet_in_planting",
+    "pdsi_extreme_wet_in_harvesting",
+    "co2_extreme_in_planting",
+    "co2_extreme_in_harvesting"
+  ],
+  "run_configs": {
+    "rf_expanding": {
+      "walk_forward": {
+        "window_type": "expanding",
+        "initial_train_size": 260,
+        "test_size": 4,
+        "step": 4
+      },
+      "model": {
+        "n_estimators": 100,
+        "max_depth": 4,
+        "min_samples_split": 4,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt",
+        "bootstrap": true,
+        "random_state": 42,
+        "n_jobs": -1,
+        "target_transform": "log",
+        "log_transform_rv_features": true
+      }
+    },
+    "rf_rolling": {
+      "walk_forward": {
+        "window_type": "rolling",
+        "initial_train_size": 260,
+        "test_size": 4,
+        "step": 4,
+        "rolling_window_size": 260
+      },
+      "model": {
+        "n_estimators": 100,
+        "max_depth": 4,
+        "min_samples_split": 4,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt",
+        "bootstrap": true,
+        "random_state": 42,
+        "n_jobs": -1,
+        "target_transform": "log",
+        "log_transform_rv_features": true
+      }
+    }
+  },
+  "grid_search": {
+    "enabled": true,
+    "metric": "test_r2",
+    "maximize_metric": true,
+    "initial_train_sizes": [
+      208,
+      260
+    ],
+    "test_sizes": [
+      2,
+      4
+    ],
+    "steps": [
+      2,
+      4,
+      8
+    ],
+    "max_depths": [
+      4,
+      6
+    ],
+    "min_samples_splits": [
+      4,
+      8
+    ],
+    "min_samples_leafs": [
+      2,
+      4
+    ],
+    "max_candidates": 48
+  }
+}
