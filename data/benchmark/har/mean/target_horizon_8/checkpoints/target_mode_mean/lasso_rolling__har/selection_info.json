@@ -1,0 +1,31 @@
+{
+  "best_alpha": 0.017091780979285567,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.129293     0.053066    0.032956\n1   0.120579     0.051728    0.033122\n2   0.112453     0.050533    0.033296\n3   0.104874     0.049465    0.033470\n4   0.097805     0.048509    0.033642\n..       ...          ...         ...\n95  0.000171     0.049472    0.039142\n96  0.000159     0.049488    0.039152\n97  0.000149     0.049503    0.039163\n98  0.000139     0.049517    0.039172\n99  0.000129     0.049531    0.039181\n\n[100 rows x 3 columns]",
+  "dropped_features": [],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_rv"
+  ],
+  "lasso_selected_features": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 3,
+  "n_samples_used": 208,
+  "n_selected_by_lasso": 3,
+  "n_selected_total": 3,
+  "n_windows": 77,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_rv": 1.0
+  },
+  "target_col": "RV_target"
+}

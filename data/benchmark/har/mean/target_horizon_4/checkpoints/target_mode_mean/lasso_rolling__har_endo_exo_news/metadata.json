@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/har/mean/target_horizon_4/checkpoints/target_mode_mean/lasso_rolling__har_endo_exo_news",
+  "feature_set": "har_endo_exo_news",
+  "model_family": "har",
+  "model_type": "lasso_rolling",
+  "saved_at_utc": "2026-04-28T19:10:55.405074+00:00",
+  "target_horizon": 4,
+  "target_mode": "mean"
+}

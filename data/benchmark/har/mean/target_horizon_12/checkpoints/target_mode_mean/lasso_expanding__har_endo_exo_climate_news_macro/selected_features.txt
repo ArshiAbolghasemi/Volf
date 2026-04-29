@@ -1,0 +1,11 @@
+DJIA_Index
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rv
+awnd_extreme_high_wind_in_harvesting
+awnd_moderate_high_wind_in_harvesting
+pdsi_extreme_wet_in_harvesting
+ssta_lanina
+Text_Climate_Anomaly
+soybeans_seasonal_rsk
+wheat_seasonal_jumps

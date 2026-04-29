@@ -1,0 +1,14 @@
+DJIA_Index
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rv
+SOI_index
+corn_seasonal_jumps
+corn_seasonal_tru
+pdsi_extreme_wet_in_harvesting
+soybeans_seasonal_lev
+soybeans_weekly_rku
+ssta_lanina
+wheat_monthly_jumps
+wheat_monthly_rvb
+wheat_seasonal_tru
