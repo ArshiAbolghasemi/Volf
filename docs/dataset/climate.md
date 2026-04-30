@@ -763,7 +763,31 @@ Data format:
 - `Date`: weekly timestamp in `YYYY-MM-DD` format
 - `SOI_index`: normalized SOI value (dimensionless, typically ranging from -30 to +30)
 
----
+### 6.3 Sea Surface Temperature Anomaly – El Niño (SSTA El Niño)
+
+#### What is SSTA El Niño?
+
+The **Sea Surface Temperature Anomaly (SSTA) El Niño index** represents deviations of sea surface temperature from the long‑term climatological mean in the **central and eastern equatorial Pacific Ocean**, typically over the Niño regions (e.g., Niño 3, Niño 3.4).
+
+**Physical interpretation:**
+- **Positive SSTA values**: Warmer‑than‑average sea surface temperatures, indicating **El Niño conditions**.
+- **Near‑zero values**: Neutral ENSO conditions.
+- **Magnitude** reflects the strength of the El Niño event.
+
+El Niño conditions are associated with large‑scale shifts in atmospheric circulation, influencing precipitation patterns, temperature extremes, and storm tracks across the globe.
+
+### 6.4 Sea Surface Temperature Anomaly – La Niña (SSTA La Niña)
+
+#### What is SSTA La Niña?
+
+The **Sea Surface Temperature Anomaly (SSTA) La Niña index** captures periods of **cooler‑than‑average sea surface temperatures** in the same equatorial Pacific regions used for El Niño monitoring.
+
+**Physical interpretation:**
+- **Negative SSTA values**: Cooler‑than‑average sea surface temperatures, indicating **La Niña conditions**.
+- **Near‑zero values**: Neutral ENSO conditions.
+- **Magnitude** reflects the intensity of the La Niña event.
+
+La Niña events are linked to strengthened trade winds and altered global weather patterns, often producing effects opposite to those observed during El Niño.
 
 ## 7. Code References
 
