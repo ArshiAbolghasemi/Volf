@@ -278,8 +278,8 @@ Z_{s,m}(i) = \frac{\tilde{X}_{s,m}(i) - \mu_{s,m}}{\sigma_{s,m}}
 $$
 
 where:
-- $\mu_{s,m} = \frac{1}{n} \sum_{i=1}^{n} \tilde{X}_{s,m}(i)$ is the mean  
-- $\sigma_{s,m} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} \left(\tilde{X}_{s,m}(i) - \mu_{s,m}\right)^2}$ is the standard deviation  
+- $\mu_{s,m}$ is the mean
+- $\sigma_{s,m}$ is the standard deviation
 - $n$ is the number of observations in month $m$ for state $s$
 
 **Step 5: Quantile-based extreme detection**
@@ -690,15 +690,6 @@ Outputs:
 
 ---
 
-## 6. What This Document Intentionally Excludes
-
-This document does not describe climate datasets that are present in the repository but are not consumed by `src/dataset/climate/preprocessing.py`, including:
-- PRISM download helpers in `src/dataset/climate/prism.py`
-- Temperature anomaly and Google Trends climate files
-- legacy or alternative preprocessing flows that are not part of the active merged pipeline
-
----
-
 ## 6. Climate Oscillation Indices
 
 The repository includes two major climate oscillation indices that capture large-scale atmospheric circulation patterns. While these indices are not currently consumed by the main preprocessing pipeline in `src/dataset/climate/preprocessing.py`, they are available for analysis and may be integrated into future feature sets.
@@ -707,32 +698,11 @@ The repository includes two major climate oscillation indices that capture large
 
 #### What is NAO?
 
-The North Atlantic Oscillation (NAO) is a large-scale atmospheric circulation pattern that describes the variability in the pressure difference between the Icelandic Low and the Azores High in the North Atlantic region.
+The North Atlantic Os ffcillation (NAO) is a large-scale atmospheric circulation pattern that describes the variability in the pressure difference between the Icelandic Low and the Azores High in the North Atlantic region.
 
 **Physical interpretation:**
 - **Positive NAO phase**: Strong pressure gradient between the Icelandic Low and Azores High, leading to stronger westerly winds, warmer and wetter winters in Europe, and colder and drier conditions in the Mediterranean and Middle East.
 - **Negative NAO phase**: Weak pressure gradient, leading to weaker westerly winds, colder winters in northern Europe, and wetter conditions in the Mediterranean.
-
-**Impact on climate:**
-- Influences winter temperature and precipitation patterns across the North Atlantic, Europe, and eastern North America
-- Affects storm tracks and frequency of extreme weather events
-- Can modulate agricultural growing conditions in affected regions
-
-#### Mathematical definition
-
-The NAO index is typically defined as the normalized pressure difference between two stations:
-
-$$
-\text{NAO} = \frac{(P_{\text{Azores}} - P_{\text{Iceland}}) - \mu}{\sigma}
-$$
-
-where:
-- $P_{\text{Azores}}$ is the sea-level pressure at the Azores High (subtropical station)
-- $P_{\text{Iceland}}$ is the sea-level pressure at the Icelandic Low (subpolar station)
-- $\mu$ is the long-term mean of the pressure difference
-- $\sigma$ is the standard deviation of the pressure difference
-
-Alternative definitions use principal component analysis (PCA) on sea-level pressure fields over the North Atlantic.
 
 #### How NAO data is gathered
 
@@ -766,26 +736,6 @@ The Southern Oscillation Index (SOI) is a standardized measure of the atmospheri
 - **Positive SOI**: Higher pressure at Tahiti relative to Darwin, associated with La Niña conditions (cooler sea surface temperatures in the eastern Pacific, increased rainfall in Australia and Indonesia, drier conditions in the Americas).
 - **Neutral SOI**: Near-zero values indicate neutral ENSO conditions.
 
-**Impact on climate:**
-- Influences global temperature and precipitation patterns
-- Affects tropical cyclone activity, monsoon strength, and drought frequency
-- Modulates agricultural productivity in ENSO-sensitive regions (e.g., Australia, Southeast Asia, South America)
-
-#### Mathematical definition
-
-The SOI is defined as the normalized pressure difference between Tahiti and Darwin:
-
-$$
-\text{SOI} = 10 \times \frac{(P_{\text{Tahiti}} - P_{\text{Darwin}}) - \mu}{\sigma}
-$$
-
-where:
-- $P_{\text{Tahiti}}$ is the mean sea-level pressure at Tahiti
-- $P_{\text{Darwin}}$ is the mean sea-level pressure at Darwin
-- $\mu$ is the long-term mean of the pressure difference
-- $\sigma$ is the standard deviation of the pressure difference
-- The factor of 10 is a conventional scaling to make typical values range from approximately -30 to +30
-
 #### How SOI data is gathered
 
 Source file:
@@ -806,25 +756,6 @@ Gathering process:
 Data format:
 - `Date`: weekly timestamp in `YYYY-MM-DD` format
 - `SOI_index`: normalized SOI value (dimensionless, typically ranging from -30 to +30)
-
-### 6.3 Potential use in feature engineering
-
-While NAO and SOI are not currently used in the main preprocessing pipeline, they could be integrated as additional climate features:
-
-**NAO features:**
-- Direct NAO index values during planting and harvesting seasons
-- Lagged NAO values to capture delayed climate impacts
-- NAO phase indicators (positive/negative/neutral)
-
-**SOI features:**
-- Direct SOI index values during planting and harvesting seasons
-- ENSO phase indicators (El Niño: SOI < -7, La Niña: SOI > +7, Neutral: -7 ≤ SOI ≤ +7)
-- Lagged SOI values to capture delayed teleconnections
-
-Both indices could be particularly valuable for:
-- Capturing large-scale climate variability not reflected in local weather observations
-- Modeling inter-annual climate patterns that affect crop yields
-- Improving predictions during extreme ENSO or NAO events
 
 ---
 
