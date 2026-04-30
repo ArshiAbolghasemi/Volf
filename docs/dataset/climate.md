@@ -231,16 +231,107 @@ Trend handling:
 - quantile selection is done on the detrended series
 - stored values are mapped back to the original scale when a trend was removed
 
+#### Mathematical formulation
+
+For a given climate variable $X$ (e.g., TMAX, TMIN, AWND) observed at state $s$ and time $t$:
+
+**Step 1: Monthly grouping**
+
+Group observations by calendar month $m \in \{1, 2, \ldots, 12\}$:
+
+$$
+X_{s,m} = \{X_{s,t} : \text{month}(t) = m\}
+$$
+
+**Step 2: Stationarity test**
+
+Apply the Augmented Dickey-Fuller test to $X_{s,m}$. The null hypothesis is that the series has a unit root (non-stationary).
+
+If $p \geq 0.05$, reject stationarity and proceed to detrending.
+
+**Step 3: Linear detrending (conditional)**
+
+If the series is non-stationary, fit a linear trend:
+
+$$
+X_{s,m}(i) = \alpha + \beta \cdot i + \epsilon_i
+$$
+
+where $i$ is the observation index within the monthly group, and $(\alpha, \beta)$ are estimated via ordinary least squares.
+
+The detrended series is:
+
+$$
+\tilde{X}_{s,m}(i) = X_{s,m}(i) - (\alpha + \beta \cdot i)
+$$
+
+**Step 4: Standardization**
+
+Compute the z-score for each observation within the monthly group:
+
+$$
+Z_{s,m}(i) = \frac{\tilde{X}_{s,m}(i) - \mu_{s,m}}{\sigma_{s,m}}
+$$
+
+where:
+- $\mu_{s,m} = \frac{1}{n} \sum_{i=1}^{n} \tilde{X}_{s,m}(i)$ is the mean
+- $\sigma_{s,m} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\tilde{X}_{s,m}(i) - \mu_{s,m})^2}$ is the standard deviation
+- $n$ is the number of observations in month $m$ for state $s$
+
+**Step 5: Quantile-based extreme detection**
+
+Compute quantile thresholds $q_p$ from the empirical distribution of $Z_{s,m}$:
+
+$$
+q_p = \inf \{z : P(Z_{s,m} \leq z) \geq p\}
+$$
+
+Define extreme bands based on variable-specific quantile rules (see below).
+
+**Step 6: Value selection**
+
+For each extreme band $B$, the selected value is:
+
+$$
+V_{s,m,B}(i) = 
+\begin{cases}
+X_{s,m}(i) & \text{if } Z_{s,m}(i) \in B \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+If detrending was applied, $X_{s,m}(i)$ is the original (non-detrended) value.
+
+**Step 7: Seasonal masking**
+
+For crop $c$ with planting weeks $P_c$ and harvesting weeks $H_c$, the final feature is:
+
+$$
+F_{s,t,B}^{\text{planting}} = 
+\begin{cases}
+V_{s,m,B}(i) & \text{if } \text{week}(t) \in P_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+F_{s,t,B}^{\text{harvesting}} = 
+\begin{cases}
+V_{s,m,B}(i) & \text{if } \text{week}(t) \in H_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
 Quantile rules by variable:
 - `TMAX`
-  - `hot`: `75th` to `90th` percentile of monthly z-score
-  - `very_hot`: above `90th` percentile
+  - `hot`: $q_{0.75} \leq Z_{s,m} < q_{0.90}$
+  - `very_hot`: $Z_{s,m} \geq q_{0.90}$
 - `TMIN`
-  - `cold`: below `10th` percentile
-  - `very_cold`: `10th` to `25th` percentile
+  - `cold`: $Z_{s,m} < q_{0.10}$
+  - `very_cold`: $q_{0.10} \leq Z_{s,m} < q_{0.25}$
 - `AWND`
-  - `moderate_high_wind`: `80th` to `90th` percentile
-  - `extreme_high_wind`: above `90th` percentile
+  - `moderate_high_wind`: $q_{0.80} \leq Z_{s,m} < q_{0.90}$
+  - `extreme_high_wind`: $Z_{s,m} \geq q_{0.90}$
 
 Feature naming pattern:
 - `tmax_hot_in_planting`
@@ -260,11 +351,82 @@ Steps:
 5. Apply fixed threshold bands directly to the SPI value.
 6. Keep values only during planting or harvesting weeks for the selected crop.
 
+#### Mathematical formulation
+
+The Standardized Precipitation Index (SPI) is computed upstream in `scripts/dataset/climate/noaa_spi.py` using the following process:
+
+**Step 1: Rolling precipitation accumulation**
+
+For a given time scale $k$ (e.g., 7 days, 30 days, 90 days), compute the rolling sum:
+
+$$
+P_k(t) = \sum_{i=0}^{k-1} P(t - i)
+$$
+
+where $P(t)$ is the daily precipitation at time $t$.
+
+**Step 2: Gamma distribution fitting**
+
+Fit a Gamma distribution to the non-zero values of $P_k$:
+
+$$
+f(x; \alpha, \beta) = \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha - 1} e^{-x/\beta}, \quad x > 0
+$$
+
+where:
+- $\alpha$ is the shape parameter
+- $\beta$ is the scale parameter
+- $\Gamma(\alpha) = \int_0^\infty t^{\alpha-1} e^{-t} dt$ is the gamma function
+
+Parameters are estimated via maximum likelihood estimation (MLE).
+
+**Step 3: Cumulative probability**
+
+Compute the cumulative distribution function (CDF):
+
+$$
+F(x) = \int_0^x f(t; \alpha, \beta) dt
+$$
+
+**Step 4: Transformation to standard normal**
+
+Convert the CDF to a standard normal variable:
+
+$$
+\text{SPI}_k(t) = \Phi^{-1}(F(P_k(t)))
+$$
+
+where $\Phi^{-1}$ is the inverse of the standard normal CDF.
+
+**Step 5: Threshold-based extreme detection**
+
+In the preprocessing pipeline, fixed thresholds are applied to the SPI values to identify extreme wet and dry conditions.
+
 Threshold rules:
-- very wet: `1.5 <= SPI <= 2.0`
-- extreme wet: `SPI > 2.0`
-- very dry: `-2.0 <= SPI <= -1.5`
-- extreme dry: `SPI < -2.0`
+- very wet: $1.5 \leq \text{SPI}_k \leq 2.0$
+- extreme wet: $\text{SPI}_k > 2.0$
+- very dry: $-2.0 \leq \text{SPI}_k \leq -1.5$
+- extreme dry: $\text{SPI}_k < -2.0$
+
+**Step 6: Value selection and seasonal masking**
+
+For each threshold band $B$ and crop $c$:
+
+$$
+F_{s,t,k,B}^{\text{planting}} = 
+\begin{cases}
+\text{SPI}_k(t) & \text{if } \text{SPI}_k(t) \in B \text{ and } \text{week}(t) \in P_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+F_{s,t,k,B}^{\text{harvesting}} = 
+\begin{cases}
+\text{SPI}_k(t) & \text{if } \text{SPI}_k(t) \in B \text{ and } \text{week}(t) \in H_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
 
 Feature naming pattern:
 - `spi_7d_very_wet_in_planting`
@@ -285,11 +447,49 @@ Steps:
 7. Apply fixed drought and wetness thresholds.
 8. Keep values only during planting or harvesting weeks for the selected crop.
 
+#### Mathematical formulation
+
+The Palmer Drought Severity Index (PDSI) is read from pre-computed files. The preprocessing pipeline applies the following transformations:
+
+**Step 1: State-level aggregation**
+
+For state $s$ with $n_s$ climate divisions, compute the state-level PDSI:
+
+$$
+\text{PDSI}_s(t) = \frac{1}{n_s} \sum_{d=1}^{n_s} \text{PDSI}_{s,d}(t)
+$$
+
+where $\text{PDSI}_{s,d}(t)$ is the PDSI value for division $d$ in state $s$ at time $t$.
+
+**Step 2: Threshold-based extreme detection**
+
+Fixed thresholds are applied to identify drought and wetness extremes:
+
 Threshold rules:
-- very wet: `3.0 <= PDSI <= 4.0`
-- extreme wet: `PDSI > 4.0`
-- extreme drought: `-4.0 <= PDSI <= -3.0`
-- severe drought: `PDSI < -4.0`
+- very wet: $3.0 \leq \text{PDSI}_s \leq 4.0$
+- extreme wet: $\text{PDSI}_s > 4.0$
+- extreme drought: $-4.0 \leq \text{PDSI}_s \leq -3.0$
+- severe drought: $\text{PDSI}_s < -4.0$
+
+**Step 3: Value selection and seasonal masking**
+
+For each threshold band $B$ and crop $c$:
+
+$$
+F_{s,t,B}^{\text{planting}} = 
+\begin{cases}
+\text{PDSI}_s(t) & \text{if } \text{PDSI}_s(t) \in B \text{ and } \text{week}(t) \in P_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+F_{s,t,B}^{\text{harvesting}} = 
+\begin{cases}
+\text{PDSI}_s(t) & \text{if } \text{PDSI}_s(t) \in B \text{ and } \text{week}(t) \in H_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
 
 Feature naming pattern:
 - `pdsi_very_wet_in_planting`
@@ -311,8 +511,80 @@ Steps:
 7. Mark only the top `5%` tail as extreme.
 8. Keep values only during planting or harvesting weeks for the selected crop.
 
+#### Mathematical formulation
+
+CO2 preprocessing follows the same monthly quantile approach as NOAA variables, but with a single extreme band.
+
+**Step 1: Monthly grouping**
+
+Group CO2 observations by calendar month $m$:
+
+$$
+\text{CO2}_m = \{\text{CO2}(t) : \text{month}(t) = m\}
+$$
+
+**Step 2: Stationarity test and detrending**
+
+Apply the Augmented Dickey-Fuller test. If $p \geq 0.05$, fit a linear trend:
+
+$$
+\text{CO2}_m(i) = \alpha + \beta \cdot i + \epsilon_i
+$$
+
+The detrended series is:
+
+$$
+\tilde{\text{CO2}}_m(i) = \text{CO2}_m(i) - (\alpha + \beta \cdot i)
+$$
+
+**Step 3: Standardization**
+
+Compute the z-score:
+
+$$
+Z_m(i) = \frac{\tilde{\text{CO2}}_m(i) - \mu_m}{\sigma_m}
+$$
+
+**Step 4: Extreme detection**
+
+Compute the 95th percentile threshold:
+
+$$
+q_{0.95} = \inf \{z : P(Z_m \leq z) \geq 0.95\}
+$$
+
+Mark extreme values:
+
+$$
+V_m^{\text{extreme}}(i) = 
+\begin{cases}
+\text{CO2}_m(i) & \text{if } Z_m(i) \geq q_{0.95} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+**Step 5: Seasonal masking**
+
+For crop $c$:
+
+$$
+F_{t}^{\text{planting}} = 
+\begin{cases}
+V_m^{\text{extreme}}(i) & \text{if } \text{week}(t) \in P_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+F_{t}^{\text{harvesting}} = 
+\begin{cases}
+V_m^{\text{extreme}}(i) & \text{if } \text{week}(t) \in H_c \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
 Threshold rule:
-- `co2_extreme`: z-score above the `95th` percentile within the same calendar month
+- `co2_extreme`: $Z_m \geq q_{0.95}$
 
 Feature naming pattern:
 - `co2_extreme_in_planting`
@@ -321,6 +593,48 @@ Feature naming pattern:
 ---
 
 ## 5. Merge And Output Behavior
+
+After state-level features are created, they are aggregated to a national crop-weighted series.
+
+### 5.1 Production-weighted aggregation
+
+For each crop $c$, state $s$, and feature $F$:
+
+**Step 1: Load production weights**
+
+Compute the average production for each state across available years:
+
+$$
+\bar{Y}_{c,s} = \frac{1}{T} \sum_{y=1}^{T} Y_{c,s,y}
+$$
+
+where $Y_{c,s,y}$ is the production of crop $c$ in state $s$ in year $y$.
+
+**Step 2: Normalize weights**
+
+Compute the state weight:
+
+$$
+w_{c,s} = \frac{\bar{Y}_{c,s}}{\sum_{s'} \bar{Y}_{c,s'}}
+$$
+
+such that $\sum_s w_{c,s} = 1$.
+
+**Step 3: Weighted aggregation**
+
+For each date $t$ and feature $F$, compute the national value:
+
+$$
+F_{c,t}^{\text{national}} = \sum_{s} w_{c,s} \cdot F_{s,t}
+$$
+
+If the total weight is zero (no production data), fall back to the unweighted mean:
+
+$$
+F_{c,t}^{\text{national}} = \frac{1}{n_s} \sum_{s} F_{s,t}
+$$
+
+### 5.2 Final merge
 
 After NOAA, SPI, and PDSI features are created at the state level:
 - they are outer-joined on `date` and `state`
