@@ -165,13 +165,22 @@ def checkpoint_bundle_dir(
     model_type: str,
     feature_set: str,
 ) -> Path:
-    return (
+    canonical = (
         checkpoint_root
         / f"target_horizon_{target_horizon}"
         / "checkpoints"
         / f"target_mode_{_safe_name(target_mode)}"
         / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
     )
+    if canonical.exists():
+        return canonical
+    legacy = (
+        checkpoint_root
+        / f"target_horizon_{target_horizon}"
+        / "checkpoints"
+        / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
+    )
+    return legacy
 
 
 def load_har_checkpoint_result(

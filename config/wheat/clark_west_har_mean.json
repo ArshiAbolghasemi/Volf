@@ -1,0 +1,67 @@
+{
+  "benchmark_config": "config/wheat/har_mean.json",
+  "checkpoint_root": "wheat/har/mean",
+  "output_root": "wheat/har/mean/cw",
+  "hac_maxlags": null,
+  "pair_template": {
+    "horizons": [4, 8, 12, 16],
+    "model_types": [
+      "bsr_expanding",
+      "bsr_rolling",
+      "lasso_expanding",
+      "lasso_rolling"
+    ],
+    "feature_pairs": [
+      {
+        "name": "har_vs_har_endo",
+        "base_feature_set": "har",
+        "augmented_feature_set": "har_endo"
+      },
+      {
+        "name": "har_endo_vs_har_endo_exo",
+        "base_feature_set": "har_endo",
+        "augmented_feature_set": "har_endo_exo"
+      },
+      {
+        "name": "har_endo_exo_vs_news",
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_news"
+      },
+      {
+        "name": "har_endo_exo_vs_macro",
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_macro"
+      },
+      {
+        "name": "har_endo_exo_vs_climate",
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_climate"
+      },
+      {
+        "name": "news_vs_news_macro",
+        "base_feature_set": "har_endo_exo_news",
+        "augmented_feature_set": "har_endo_exo_news_macro"
+      },
+      {
+        "name": "climate_vs_climate_news",
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_news"
+      },
+      {
+        "name": "climate_vs_climate_macro",
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_macro"
+      },
+      {
+        "name": "climate_macro_vs_full",
+        "base_feature_set": "har_endo_exo_climate_macro",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro"
+      },
+      {
+        "name": "har_vs_full",
+        "base_feature_set": "har",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro"
+      }
+    ]
+  }
+}

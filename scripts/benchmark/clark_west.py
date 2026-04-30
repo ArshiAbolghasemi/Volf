@@ -157,11 +157,55 @@ def _load_clark_west_config(
                 setattr(benchmark_cfg, key, value)
 
     pairs_raw = raw.get("pairs")
-    if not isinstance(pairs_raw, list) or not pairs_raw:
-        msg = "Clark-West config must include a non-empty 'pairs' list."
+    pairs: list[ClarkWestPairConfig] = []
+    if isinstance(pairs_raw, list) and pairs_raw:
+        pairs = [ClarkWestPairConfig(**pair) for pair in pairs_raw]
+    elif isinstance(raw.get("pair_template"), dict):
+        template = cast("dict[str, Any]", raw["pair_template"])
+        horizons = template.get("horizons") or benchmark_cfg.target_horizons
+        model_types = template.get("model_types")
+        feature_pairs = template.get("feature_pairs")
+        if not isinstance(horizons, list) or not horizons:
+            msg = "pair_template.horizons must be a non-empty list."
+            raise ValueError(msg)
+        if not isinstance(model_types, list) or not model_types:
+            msg = "pair_template.model_types must be a non-empty list."
+            raise ValueError(msg)
+        if not isinstance(feature_pairs, list) or not feature_pairs:
+            msg = "pair_template.feature_pairs must be a non-empty list."
+            raise ValueError(msg)
+        for horizon in horizons:
+            for model_type in model_types:
+                for feature_pair in feature_pairs:
+                    if not isinstance(feature_pair, dict):
+                        continue
+                    base_fs = feature_pair.get("base_feature_set")
+                    aug_fs = feature_pair.get("augmented_feature_set")
+                    if not isinstance(base_fs, str) or not isinstance(aug_fs, str):
+                        continue
+                    pair_name = feature_pair.get("name")
+                    if not isinstance(pair_name, str) or not pair_name.strip():
+                        pair_name = f"{base_fs}->{aug_fs}"
+                    pair_hac = feature_pair.get("hac_maxlags")
+                    pairs.append(
+                        ClarkWestPairConfig(
+                            model_type=str(model_type),
+                            base_feature_set=base_fs,
+                            augmented_feature_set=aug_fs,
+                            target_horizon=int(horizon),
+                            name=f"{model_type}:{pair_name}:h{int(horizon)}",
+                            hac_maxlags=(
+                                None if pair_hac is None else int(cast("int", pair_hac))
+                            ),
+                        )
+                    )
+    else:
+        msg = "Clark-West config must include non-empty 'pairs' or 'pair_template'."
         raise ValueError(msg)
 
-    pairs = [ClarkWestPairConfig(**pair) for pair in pairs_raw]
+    if not pairs:
+        msg = "Clark-West config produced an empty pair list."
+        raise ValueError(msg)
 
     cw_cfg = ClarkWestConfig(
         pairs=pairs,

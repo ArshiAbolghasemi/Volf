@@ -53,12 +53,22 @@ def _compute_cw_for_split(
     *,
     hac_maxlags: int | None,
 ) -> dict[str, Any]:
-    cw = clark_west_test(
-        y_true=y_true,
-        y_pred_base=y_pred_base,
-        y_pred_augmented=y_pred_augmented,
-        hac_maxlags=hac_maxlags,
-    )
+    try:
+        cw = clark_west_test(
+            y_true=y_true,
+            y_pred_base=y_pred_base,
+            y_pred_augmented=y_pred_augmented,
+            hac_maxlags=hac_maxlags,
+        )
+    except ValueError:
+        cw = {
+            "cw_stat": float("nan"),
+            "p_value_one_sided": float("nan"),
+            "p_value_two_sided": float("nan"),
+            "mean_adjusted_loss_diff": float("nan"),
+            "n_obs": 0,
+            "augmented_better_at_5pct": False,
+        }
     return {f"{split_name}_{k}": v for k, v in cw.items()}
 
 
