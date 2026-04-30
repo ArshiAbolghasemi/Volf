@@ -1,642 +1,371 @@
- # Climate Data Documentation
- 
- ## Overview
- 
- This document provides a comprehensive description of climate data collection, processing, and feature engineering used in the Volf financial AI system. The climate data serves as a critical component for understanding environmental factors that may influence financial markets.
- 
- ---
- 
- ## 1. Data Collection from GHCN-D Dataset
- 
- ### 1.1 Data Source
- 
- Climate data is collected from the **Global Historical Climatology Network Daily (GHCN-D)** dataset, maintained by the National Oceanic and Atmospheric Administration (NOAA). GHCN-D is an integrated database of daily climate summaries from land surface stations across the globe.
- 
- **Dataset Details:**
- - **Provider:** NOAA National Centers for Environmental Information (NCEI)
- - **Coverage:** Global, with over 100,000 stations
- - **Temporal Range:** 1763 to present (varies by station)
- - **Update Frequency:** Daily
- - **Access Method:** FTP servers, API endpoints, or bulk downloads
- 
- ### 1.2 Primary Climate Variables
- 
- The following core variables are extracted from GHCN-D:
- 
- #### 1.2.1 PRCP - Precipitation
- - **Description:** Total daily precipitation (rain and/or melted snow)
- - **Units:** Tenths of millimeters (converted to millimeters)
- - **Measurement:** 24-hour accumulation
- - **Quality Flags:** Checked for measurement quality and source reliability
- 
- #### 1.2.2 TMAX - Maximum Temperature
- - **Description:** Daily maximum temperature
- - **Units:** Tenths of degrees Celsius (converted to degrees Celsius)
- - **Measurement:** Highest temperature recorded during the 24-hour period
- - **Quality Control:** Outlier detection and consistency checks applied
- 
- #### 1.2.3 TMIN - Minimum Temperature
- - **Description:** Daily minimum temperature
- - **Units:** Tenths of degrees Celsius (converted to degrees Celsius)
- - **Measurement:** Lowest temperature recorded during the 24-hour period
- - **Quality Control:** Outlier detection and consistency checks applied
- 
- #### 1.2.4 AWND - Average Wind Speed
- - **Description:** Daily average wind speed
- - **Units:** Tenths of meters per second (converted to meters per second)
- - **Measurement:** Average of wind speed measurements throughout the day
- - **Note:** Not available at all stations; requires interpolation or station selection
- 
- #### 1.2.5 SNOW - Snowfall
- - **Description:** Daily snowfall
- - **Units:** Millimeters
- - **Measurement:** 24-hour accumulation of snow
- - **Seasonal Relevance:** Particularly important for winter months
- 
- #### 1.2.6 SNWD - Snow Depth
- - **Description:** Depth of snow on the ground
- - **Units:** Millimeters
- - **Measurement:** Depth at time of observation
- - **Application:** Useful for understanding accumulated snow conditions
- 
- ### 1.3 Data Acquisition Process
- 
- ```
- 1. Station Selection
-    ↓
- 2. API Query / FTP Download
-    ↓
- 3. Data Parsing (CSV/Fixed-width format)
-    ↓
- 4. Unit Conversion
-    ↓
- 5. Quality Flag Filtering
-    ↓
- 6. Missing Data Handling
-    ↓
- 7. Temporal Alignment
-    ↓
- 8. Storage in Database
- ```
- 
- **Station Selection Criteria:**
- - Geographic relevance to financial markets (e.g., major financial centers)
- - Data completeness (>90% coverage for target period)
- - Measurement quality (high-quality flags)
- - Temporal continuity (minimal gaps)
- 
- **Data Quality Filters:**
- - Remove records with quality flags indicating errors
- - Filter extreme outliers using statistical methods (e.g., 5-sigma rule)
- - Validate temporal consistency (e.g., TMIN < TMAX)
- 
- ---
- 
- ## 2. Standardized Precipitation Index (SPI) Calculation
- 
- ### 2.1 Overview
- 
- The **Standardized Precipitation Index (SPI)** is a widely used drought indicator that quantifies precipitation deficits or surpluses over multiple time scales. SPI is calculated by fitting a probability distribution to precipitation data and transforming it to a standard normal distribution.
- 
- ### 2.2 Mathematical Formulation
- 
- #### 2.2.1 Data Aggregation
- 
- For a given time scale $k$ (e.g., 1, 3, 6, 12, or 24 months), aggregate precipitation data:
- 
- $$
- P_k(i) = \sum_{j=0}^{k-1} P(i-j)
- $$
- 
- where:
- - $P_k(i)$ is the accumulated precipitation for time scale $k$ ending at time $i$
- - $P(i)$ is the precipitation at time $i$
- - $k$ is the time scale in months
- 
- #### 2.2.2 Probability Distribution Fitting
- 
- The **Gamma distribution** is typically used to model precipitation data, as it can handle the skewed nature of precipitation (including zero values):
- 
- $$
- g(x) = \frac{1}{\beta^\alpha \Gamma(\alpha)} x^{\alpha-1} e^{-x/\beta}
- $$
- 
- where:
- - $x > 0$ is the precipitation amount
- - $\alpha > 0$ is the shape parameter
- - $\beta > 0$ is the scale parameter
- - $\Gamma(\alpha)$ is the gamma function: $\Gamma(\alpha) = \int_0^\infty t^{\alpha-1} e^{-t} dt$
- 
- #### 2.2.3 Parameter Estimation
- 
- Parameters $\alpha$ and $\beta$ are estimated using **Maximum Likelihood Estimation (MLE)**:
- 
- $$
- \hat{\alpha} = \frac{1}{4A}\left(1 + \sqrt{1 + \frac{4A}{3}}\right)
- $$
- 
- $$
- \hat{\beta} = \frac{\bar{x}}{\hat{\alpha}}
- $$
- 
- where:
- 
- $$
- A = \ln(\bar{x}) - \frac{\sum \ln(x)}{n}
- $$
- 
- - $\bar{x}$ is the mean precipitation
- - $n$ is the number of observations
- 
- #### 2.2.4 Cumulative Probability
- 
- The cumulative probability for a given precipitation value $x$ is:
- 
- $$
- G(x) = \int_0^x g(t) dt = \frac{1}{\beta^\alpha \Gamma(\alpha)} \int_0^x t^{\alpha-1} e^{-t/\beta} dt
- $$
- 
- This can be expressed using the incomplete gamma function:
- 
- $$
- G(x) = \frac{1}{\Gamma(\alpha)} \int_0^{x/\beta} t^{\alpha-1} e^{-t} dt = \frac{\gamma(\alpha, x/\beta)}{\Gamma(\alpha)}
- $$
- 
- where $\gamma(\alpha, x/\beta)$ is the incomplete gamma function.
- 
- #### 2.2.5 Handling Zero Precipitation
- 
- Since precipitation can be zero, the cumulative probability is adjusted:
- 
- $$
- H(x) = q + (1-q) \cdot G(x)
- $$
- 
- where:
- - $q$ is the probability of zero precipitation: $q = \frac{m}{n}$
- - $m$ is the number of zero precipitation observations
- - $n$ is the total number of observations
- 
- #### 2.2.6 Transformation to Standard Normal Distribution
- 
- The SPI is obtained by transforming the cumulative probability $H(x)$ to a standard normal distribution using the inverse normal cumulative distribution function:
- 
- $$
- \text{SPI} = \Phi^{-1}(H(x))
- $$
- 
- where $\Phi^{-1}$ is the inverse of the standard normal cumulative distribution function.
- 
- For computational efficiency, the **Abramowitz and Stegun approximation** is commonly used:
- 
- For $0 < H(x) \leq 0.5$:
- 
- $$
- \text{SPI} = -\left(t - \frac{c_0 + c_1 t + c_2 t^2}{1 + d_1 t + d_2 t^2 + d_3 t^3}\right)
- $$
- 
- For $0.5 < H(x) < 1$:
- 
- $$
- \text{SPI} = +\left(t - \frac{c_0 + c_1 t + c_2 t^2}{1 + d_1 t + d_2 t^2 + d_3 t^3}\right)
- $$
- 
- where:
- 
- $$
- t = \sqrt{\ln\left(\frac{1}{(H(x))^2}\right)} \quad \text{for } H(x) \leq 0.5
- $$
- 
- $$
- t = \sqrt{\ln\left(\frac{1}{(1-H(x))^2}\right)} \quad \text{for } H(x) > 0.5
- $$
- 
- Constants:
- - $c_0 = 2.515517$
- - $c_1 = 0.802853$
- - $c_2 = 0.010328$
- - $d_1 = 1.432788$
- - $d_2 = 0.189269$
- - $d_3 = 0.001308$
- 
- ### 2.3 SPI Interpretation
- 
- | SPI Value | Category | Probability |
- |-----------|----------|-------------|
- | ≥ 2.0 | Extremely wet | ~2.3% |
- | 1.5 to 1.99 | Very wet | ~4.4% |
- | 1.0 to 1.49 | Moderately wet | ~9.2% |
- | -0.99 to 0.99 | Near normal | ~68.2% |
- | -1.0 to -1.49 | Moderately dry | ~9.2% |
- | -1.5 to -1.99 | Severely dry | ~4.4% |
- | ≤ -2.0 | Extremely dry | ~2.3% |
- 
- ### 2.4 Multiple Time Scales
- 
- SPI is calculated for multiple time scales to capture different drought/wetness phenomena:
- 
- - **SPI-1:** 1-month scale (short-term soil moisture, agricultural impacts)
- - **SPI-3:** 3-month scale (seasonal precipitation patterns)
- - **SPI-6:** 6-month scale (medium-term trends, reservoir levels)
- - **SPI-12:** 12-month scale (long-term hydrological drought)
- - **SPI-24:** 24-month scale (multi-year drought cycles)
- 
- ---
- 
- ## 3. Additional Climate Features
- 
- ### 3.1 Derived Temperature Features
- 
- #### 3.1.1 Daily Temperature Range (DTR)
- 
- $$
- \text{DTR} = T_{\max} - T_{\min}
- $$
- 
- **Significance:** Indicates diurnal temperature variation, which affects energy demand and agricultural productivity.
- 
- #### 3.1.2 Mean Temperature (TAVG)
- 
- $$
- T_{\text{avg}} = \frac{T_{\max} + T_{\min}}{2}
- $$
- 
- **Significance:** General temperature indicator for daily conditions.
- 
- #### 3.1.3 Growing Degree Days (GDD)
- 
- $$
- \text{GDD} = \max\left(0, T_{\text{avg}} - T_{\text{base}}\right)
- $$
- 
- where $T_{\text{base}}$ is typically 10°C for most crops.
- 
- **Significance:** Measures heat accumulation for crop development.
- 
- #### 3.1.4 Heating Degree Days (HDD)
- 
- $$
- \text{HDD} = \max\left(0, T_{\text{base}} - T_{\text{avg}}\right)
- $$
- 
- where $T_{\text{base}}$ is typically 18°C (65°F).
- 
- **Significance:** Estimates energy demand for heating.
- 
- #### 3.1.5 Cooling Degree Days (CDD)
- 
- $$
- \text{CDD} = \max\left(0, T_{\text{avg}} - T_{\text{base}}\right)
- $$
- 
- where $T_{\text{base}}$ is typically 18°C (65°F).
- 
- **Significance:** Estimates energy demand for cooling.
- 
- ### 3.2 Temperature Anomalies
- 
- #### 3.2.1 Daily Temperature Anomaly
- 
- $$
- \text{Anomaly}_T(d) = T(d) - \bar{T}_{\text{climatology}}(d)
- $$
- 
- where $\bar{T}_{\text{climatology}}(d)$ is the long-term average temperature for day-of-year $d$ (typically 30-year baseline).
- 
- #### 3.2.2 Standardized Temperature Anomaly
- 
- $$
- \text{Z-score}_T(d) = \frac{T(d) - \bar{T}_{\text{climatology}}(d)}{\sigma_{\text{climatology}}(d)}
- $$
- 
- where $\sigma_{\text{climatology}}(d)$ is the standard deviation for day-of-year $d$.
- 
- ### 3.3 Precipitation Features
- 
- #### 3.3.1 Cumulative Precipitation
- 
- $$
- P_{\text{cum}}(t, k) = \sum_{i=t-k+1}^{t} P(i)
- $$
- 
- where $k$ is the accumulation period (e.g., 7, 30, 90 days).
- 
- #### 3.3.2 Precipitation Intensity
- 
- $$
- I_P = \frac{P_{\text{total}}}{N_{\text{wet days}}}
- $$
- 
- where $N_{\text{wet days}}$ is the number of days with precipitation > threshold (typically 1mm).
- 
- #### 3.3.3 Dry Spell Duration
- 
- Consecutive days with precipitation < threshold (typically 1mm).
- 
- #### 3.3.4 Wet Spell Duration
- 
- Consecutive days with precipitation ≥ threshold.
- 
- ### 3.4 Wind Features
- 
- #### 3.4.1 Wind Power Density
- 
- $$
- \text{WPD} = \frac{1}{2} \rho v^3
- $$
- 
- where:
- - $\rho$ is air density (approximately 1.225 kg/m³ at sea level)
- - $v$ is wind speed (m/s)
- 
- **Significance:** Indicates potential wind energy generation.
- 
- #### 3.4.2 Wind Chill Index (for cold conditions)
- 
- $$
- \text{WCI} = 13.12 + 0.6215 T - 11.37 v^{0.16} + 0.3965 T v^{0.16}
- $$
- 
- where:
- - $T$ is air temperature (°C)
- - $v$ is wind speed (km/h)
- 
- ### 3.5 Extreme Event Indicators
- 
- #### 3.5.1 Extreme Heat Days
- 
- Binary indicator: $\mathbb{1}(T_{\max} > P_{90})$
- 
- where $P_{90}$ is the 90th percentile of historical maximum temperatures.
- 
- #### 3.5.2 Extreme Cold Days
- 
- Binary indicator: $\mathbb{1}(T_{\min} < P_{10})$
- 
- where $P_{10}$ is the 10th percentile of historical minimum temperatures.
- 
- #### 3.5.3 Heavy Precipitation Days
- 
- Binary indicator: $\mathbb{1}(P > P_{95})$
- 
- where $P_{95}$ is the 95th percentile of historical precipitation.
- 
- #### 3.5.4 Frost Days
- 
- Binary indicator: $\mathbb{1}(T_{\min} < 0°C)$
- 
- ### 3.6 Composite Climate Indices
- 
- #### 3.6.1 Palmer Drought Severity Index (PDSI)
- 
- A complex water balance model that considers:
- - Precipitation
- - Temperature
- - Soil moisture capacity
- - Evapotranspiration
- 
- $$
- \text{PDSI}_t = 0.897 \cdot \text{PDSI}_{t-1} + \frac{Z_t}{3}
- $$
- 
- where $Z_t$ is the moisture anomaly index (calculated from water balance).
- 
- #### 3.6.2 Evapotranspiration (ET)
- 
- Estimated using the **Penman-Monteith equation** or simplified **Hargreaves equation**:
- 
- **Hargreaves Equation:**
- 
- $$
- \text{ET}_0 = 0.0023 \cdot R_a \cdot (T_{\text{avg}} + 17.8) \cdot \sqrt{T_{\max} - T_{\min}}
- $$
- 
- where:
- - $\text{ET}_0$ is reference evapotranspiration (mm/day)
- - $R_a$ is extraterrestrial radiation (MJ/m²/day, calculated from latitude and day of year)
- - Temperatures in °C
- 
- ### 3.7 Seasonal and Temporal Features
- 
- #### 3.7.1 Moving Averages
- 
- $$
- \text{MA}_k(t) = \frac{1}{k} \sum_{i=t-k+1}^{t} X(i)
- $$
- 
- Applied to temperature, precipitation, and wind speed with windows $k \in \{7, 14, 30, 90\}$ days.
- 
- #### 3.7.2 Exponential Moving Averages
- 
- $$
- \text{EMA}_t = \alpha \cdot X_t + (1-\alpha) \cdot \text{EMA}_{t-1}
- $$
- 
- where $\alpha = \frac{2}{k+1}$ is the smoothing factor.
- 
- #### 3.7.3 Rate of Change
- 
- $$
- \text{ROC}_k(t) = \frac{X(t) - X(t-k)}{k}
- $$
- 
- Measures the rate of change over $k$ days.
- 
- #### 3.7.4 Volatility
- 
- $$
- \sigma_k(t) = \sqrt{\frac{1}{k-1} \sum_{i=t-k+1}^{t} (X(i) - \bar{X}_k(t))^2}
- $$
- 
- Rolling standard deviation over $k$ days.
- 
- ---
- 
- ## 4. Data Processing Pipeline
- 
- ### 4.1 Workflow
- 
- ```
- Raw GHCN-D Data
-        ↓
- [Quality Control & Filtering]
-        ↓
- [Unit Conversion & Standardization]
-        ↓
- [Missing Data Imputation]
-        ↓
- [Feature Engineering]
-        ├─→ [SPI Calculation]
-        ├─→ [Temperature Derivatives]
-        ├─→ [Precipitation Features]
-        ├─→ [Wind Features]
-        └─→ [Extreme Event Detection]
-        ↓
- [Temporal Aggregation]
-        ↓
- [Normalization & Scaling]
-        ↓
- Feature Store / Database
- ```
- 
- ### 4.2 Missing Data Handling
- 
- **Strategies:**
- 1. **Linear Interpolation:** For short gaps (< 3 days)
- 2. **Climatological Mean:** Replace with long-term average for that day-of-year
- 3. **Spatial Interpolation:** Use nearby stations (inverse distance weighting)
- 4. **Forward/Backward Fill:** For non-critical features
- 5. **Model-based Imputation:** Use machine learning models trained on complete data
- 
- ### 4.3 Temporal Alignment
- 
- All climate features are aligned to a common temporal grid:
- - **Frequency:** Daily
- - **Time Zone:** UTC
- - **Aggregation:** When multiple observations exist, use mean or sum as appropriate
- 
- ### 4.4 Feature Scaling
- 
- Different scaling methods applied based on feature characteristics:
- 
- **Standardization (Z-score):**
- $$
- X_{\text{scaled}} = \frac{X - \mu}{\sigma}
- $$
- 
- **Min-Max Normalization:**
- $$
- X_{\text{scaled}} = \frac{X - X_{\min}}{X_{\max} - X_{\min}}
- $$
- 
- **Robust Scaling:**
- $$
- X_{\text{scaled}} = \frac{X - \text{median}(X)}{\text{IQR}(X)}
- $$
- 
- ---
- 
- ## 5. Integration with Financial Models
- 
- ### 5.1 Climate-Finance Linkages
- 
- Climate features are integrated into financial models through several channels:
- 
- 1. **Direct Impact:** Energy sector stocks affected by temperature extremes
- 2. **Agricultural Commodities:** Crop prices influenced by precipitation and temperature
- 3. **Insurance Sector:** Extreme weather events affect claims and premiums
- 4. **Macroeconomic Indicators:** Climate anomalies impact GDP growth
- 5. **Risk Assessment:** Climate volatility as a risk factor
- 
- ### 5.2 Feature Selection
- 
- Climate features are selected based on:
- - **Correlation Analysis:** With target financial variables
- - **Mutual Information:** Non-linear dependencies
- - **Granger Causality:** Temporal predictive power
- - **Domain Knowledge:** Known climate-finance relationships
- 
- ### 5.3 Lag Structure
- 
- Climate impacts on financial markets often have time lags:
- - **Immediate (0-7 days):** Energy demand, weather derivatives
- - **Short-term (1-4 weeks):** Agricultural futures, retail sales
- - **Medium-term (1-3 months):** Crop yields, insurance claims
- - **Long-term (3-12 months):** Macroeconomic indicators, infrastructure investments
- 
- ---
- 
- ## 6. Data Quality and Validation
- 
- ### 6.1 Quality Metrics
- 
- - **Completeness:** Percentage of non-missing values
- - **Consistency:** Logical relationships (e.g., TMIN < TMAX)
- - **Accuracy:** Comparison with alternative data sources
- - **Timeliness:** Data availability lag
- 
- ### 6.2 Validation Procedures
- 
- 1. **Cross-validation with satellite data** (e.g., MODIS, ERA5)
- 2. **Comparison with regional climate models**
- 3. **Statistical outlier detection** (Tukey's fences, Z-scores)
- 4. **Temporal consistency checks** (sudden jumps, trends)
- 5. **Spatial consistency checks** (comparison with nearby stations)
- 
- ### 6.3 Uncertainty Quantification
- 
- - **Measurement Uncertainty:** Instrument precision
- - **Interpolation Uncertainty:** Spatial/temporal gaps
- - **Model Uncertainty:** SPI and derived features
- - **Propagation:** How uncertainty affects downstream models
- 
- ---
- 
- ## 7. References and Resources
- 
- ### 7.1 Data Sources
- 
- - **NOAA GHCN-D:** https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily
- - **GHCN-D Documentation:** https://www.ncei.noaa.gov/pub/data/ghcn/daily/readme.txt
- 
- ### 7.2 Key Publications
- 
- - McKee, T. B., Doesken, N. J., & Kleist, J. (1993). "The relationship of drought frequency and duration to time scales." *Proceedings of the 8th Conference on Applied Climatology*.
- - Edwards, D. C., & McKee, T. B. (1997). "Characteristics of 20th century drought in the United States at multiple time scales." *Climatology Report Number 97-2*, Colorado State University.
- - Vicente-Serrano, S. M., et al. (2010). "A multiscalar drought index sensitive to global warming: the standardized precipitation evapotranspiration index." *Journal of Climate*, 23(7), 1696-1718.
- 
- ### 7.3 Software Libraries
- 
- - **climate-indices (Python):** SPI, SPEI, PDSI calculations
- - **xclim (Python):** Climate indices and indicators
- - **ClimateIndices.jl (Julia):** High-performance climate index computation
- 
- ---
- 
- ## 8. Appendix: Example Calculations
- 
- ### 8.1 SPI-3 Calculation Example
- 
- **Given:** Monthly precipitation data (mm) for a location:
- 
- | Month | Precipitation |
- |-------|---------------|
- | Jan | 45.2 |
- | Feb | 38.7 |
- | Mar | 52.3 |
- | Apr | 61.8 |
- | May | 73.5 |
- | Jun | 82.1 |
- 
- **Step 1:** Calculate 3-month accumulated precipitation for June:
- $$
- P_3(\text{Jun}) = 73.5 + 82.1 + 61.8 = 217.4 \text{ mm}
- $$
- 
- **Step 2:** Fit gamma distribution to historical 3-month accumulations for June (using 30+ years of data).
- 
- **Step 3:** Calculate cumulative probability $H(217.4)$ using fitted parameters.
- 
- **Step 4:** Transform to standard normal: $\text{SPI-3} = \Phi^{-1}(H(217.4))$
- 
- ### 8.2 Growing Degree Days Example
- 
- **Given:** Daily temperatures for a week in growing season:
- 
- | Day | TMAX (°C) | TMIN (°C) | TAVG (°C) | GDD |
- |-----|-----------|-----------|-----------|-----|
- | 1 | 28.5 | 15.2 | 21.85 | 11.85 |
- | 2 | 30.1 | 16.8 | 23.45 | 13.45 |
- | 3 | 27.3 | 14.5 | 20.90 | 10.90 |
- | 4 | 25.8 | 13.1 | 19.45 | 9.45 |
- | 5 | 29.2 | 15.9 | 22.55 | 12.55 |
- | 6 | 31.5 | 17.6 | 24.55 | 14.55 |
- | 7 | 28.9 | 16.2 | 22.55 | 12.55 |
- 
- **Cumulative GDD for week:** $11.85 + 13.45 + 10.90 + 9.45 + 12.55 + 14.55 + 12.55 = 85.30$
- 
- ---
- 
- **Document Version:** 1.0  
- **Last Updated:** 2025  
- **Maintained by:** Volf Financial AI Team
+# Climate Dataset Documentation
+
+## Overview
+
+This document describes only the climate datasets that are actually consumed by the current unified preprocessing pipeline in `src/dataset/climate/preprocessing.py`.
+
+The active pipeline reads four climate inputs:
+
+- `data/climate/noaa_weekly.csv`
+- `data/climate/spi_weekly_multiscale.csv`
+- `data/climate/co2_weekly_mlo.csv`
+- `data/climate/palmer/`
+
+These inputs are transformed into crop-specific climate features and merged into:
+
+- `data/ag/corn.csv`
+- `data/ag/soybean.csv`
+- `data/ag/wheat.csv`
+
+The pipeline runs per crop and uses crop calendars plus production-by-state weights to turn state-level climate signals into national crop-level features.
+
+---
+
+## 1. Inputs Actually Used
+
+### 1.1 NOAA weekly weather
+
+Source file:
+- `data/climate/noaa_weekly.csv`
+
+Used columns:
+- `state`
+- `date`
+- `TMAX`
+- `TMIN`
+- `AWND`
+
+Notes:
+- `PRCP` exists in the file but is not used directly by `src/dataset/climate/preprocessing.py`.
+- The pipeline parses `date` as a timestamp and derives ISO `week_of_year` from it.
+
+### 1.2 SPI weekly multiscale precipitation index
+
+Source file:
+- `data/climate/spi_weekly_multiscale.csv`
+
+Used columns:
+- `state`
+- `week_date`
+- `SPI_7d`
+- `SPI_1m`
+- `SPI_3m`
+
+Notes:
+- The file may contain additional SPI horizons such as `SPI_2m`, `SPI_6m`, and `SPI_12m`, but the current pipeline only uses `SPI_7d`, `SPI_1m`, and `SPI_3m`.
+- `week_date` is copied into a working `date` column before feature generation.
+
+### 1.3 Weekly CO2 series
+
+Source file:
+- `data/climate/co2_weekly_mlo.csv`
+
+Used columns:
+- `date`
+- the first non-date value column, currently `co2_molfrac_ppm`
+
+Notes:
+- The loader intentionally picks the first column that is not `date`, empty, or `Unnamed: 0`.
+- CO2 is treated as a national series, not a state-level dataset.
+
+### 1.4 Palmer drought index files
+
+Source directory:
+- `data/climate/palmer/`
+
+Directory layout used by the loader:
+- one directory per state, such as `data/climate/palmer/01_Alabama`
+- one CSV per climate division inside each state directory, such as `0101.csv`
+
+Raw file format expected by the loader:
+- first line is a text header and is skipped
+- remaining lines are `YYYYMMDD,pdsi`
+
+Notes:
+- All station or division files inside a state directory are read.
+- State-level weekly PDSI is formed by averaging all divisions for the same state and date.
+
+---
+
+## 2. How These Inputs Are Gathered
+
+### 2.1 NOAA weekly weather gathering
+
+The current preprocessing pipeline consumes `data/climate/noaa_weekly.csv`, which is produced upstream by the NOAA fetcher in `src/dataset/climate/noaa.py` and the CLI wrapper in `scripts/dataset/climate/noaa.py`.
+
+Gathering process:
+1. The script queries NOAA's `GHCND` dataset by state FIPS code.
+2. It requests only four daily data types: `PRCP`, `TMAX`, `TMIN`, and `AWND`.
+3. Requests are paginated with `limit=1000` and increasing `offset`.
+4. Responses are cached locally in `.cache/noaa/*.parquet`.
+5. Multiple NOAA tokens can be supplied with `NOAA_TOKENS`; the client rotates tokens when a daily rate limit is hit.
+6. Daily rows are converted from NOAA units by dividing `value` by `10`.
+7. Daily state-level values are pivoted into wide format.
+8. Daily data is resampled to weekly frequency with `W-MON`, labeled on the left edge of the interval.
+
+Weekly aggregation rules:
+- `PRCP`: weekly sum
+- `TMAX`: weekly mean
+- `TMIN`: weekly mean
+- `AWND`: weekly mean
+
+Output produced upstream:
+- `data/climate/noaa_daily.csv` or refreshed variants of that file
+- `data/climate/noaa_weekly.csv`
+
+### 2.2 SPI weekly gathering
+
+The current preprocessing pipeline consumes `data/climate/spi_weekly_multiscale.csv`, which is produced from `data/climate/noaa_daily.csv` by `scripts/dataset/climate/noaa_spi.py`.
+
+Gathering and derivation process:
+1. Load daily NOAA precipitation by state from `data/climate/noaa_daily.csv`.
+2. Sort observations by `state` and `date`.
+3. Build rolling precipitation totals for six daily windows:
+   - `7d = 7`
+   - `1m = 30`
+   - `2m = 60`
+   - `3m = 90`
+   - `6m = 180`
+   - `12m = 365`
+4. For each state and time scale, fit a Gamma distribution to non-zero rolling totals.
+5. Convert cumulative probabilities to standard normal values with `norm.ppf` to obtain SPI.
+6. Convert daily rows to weekly rows by assigning each date to its week start and keeping the last observation in each state-week.
+
+Important implementation details:
+- Gamma fitting is skipped when fewer than 10 non-zero samples are available.
+- CDF values are clipped to avoid infinite values in `norm.ppf`.
+- Although multiple horizons are written to the SPI file, the downstream climate pipeline uses only `SPI_7d`, `SPI_1m`, and `SPI_3m`.
+
+Output produced upstream:
+- `data/climate/spi_weekly_multiscale.csv`
+
+### 2.3 CO2 weekly gathering
+
+The current preprocessing pipeline reads `data/climate/co2_weekly_mlo.csv` directly.
+
+Within this repository, the preprocessing code assumes the file already exists and does not fetch or regenerate it. The only gathering behavior visible from the pipeline is the file contract:
+- it must contain a `date` column
+- it must contain one usable numeric CO2 value column
+- the series is treated as weekly and national
+
+Downstream preprocessing uses the CO2 series as a univariate weekly climate signal.
+
+### 2.4 Palmer / PDSI gathering
+
+The current preprocessing pipeline reads weekly Palmer drought files from `data/climate/palmer/` directly.
+
+Within this repository, the preprocessing code assumes the Palmer files already exist and does not fetch them. The only gathering behavior visible from the code is the expected on-disk format:
+- state directories must be named like `<code>_<state_name>`
+- each state directory contains climate-division CSV files
+- each CSV contains one header line followed by `date,pdsi` rows
+
+The loader converts the raw division files into a state-level weekly PDSI series by averaging all division files within a state.
+
+---
+
+## 3. How The Active Pipeline Preprocesses Them
+
+The main orchestration happens in `src/dataset/climate/preprocessing.py`.
+
+For each crop in `corn`, `soybean`, and `wheat`, the pipeline:
+1. builds state-level NOAA features
+2. builds state-level SPI features
+3. builds state-level PDSI features
+4. merges those state-level features by `date` and `state`
+5. aggregates state features to one national crop-weighted time series
+6. builds crop-specific CO2 features
+7. merges climate features into `data/ag/v6.csv`
+8. writes the final crop file to `data/ag/<crop>.csv`
+
+### 3.1 Crop season masking
+
+Many features are only retained during crop-relevant weeks using `src/dataset/climate/crop_seasonal.py`.
+
+Crop calendars:
+- corn planting: weeks `10-22`
+- corn harvesting: weeks `36-48`
+- soybean planting: weeks `14-26`
+- soybean harvesting: weeks `36-48`
+- wheat planting: weeks `14-22` and `36-48`
+- wheat harvesting: weeks `20-28` and `32-38`
+
+If a week is outside the crop's planting or harvesting window, the corresponding seasonal feature is set to `0.0`.
+
+### 3.2 Production-weighted national aggregation
+
+State-level climate features are aggregated to a national crop-level series using `src/dataset/util/production_by_state.py`.
+
+Weight construction:
+1. Load `data/production_by_state/<crop>.csv`.
+2. Find year columns matching `CropProductionByState_YYYY`.
+3. Convert the table to long format.
+4. Drop `United States`, missing values, and non-positive production.
+5. Compute each state's average production across available years.
+6. Normalize averages so state weights sum to `1`.
+
+Aggregation rule:
+- for each date and each climate feature, compute the weighted average across states using `state_weight`
+- if total weight is zero, fall back to the unweighted mean for that date
+
+---
+
+## 4. Dataset-Specific Preprocessing
+
+### 4.1 NOAA feature preprocessing
+
+NOAA processing is state-by-state.
+
+Steps:
+1. Read `data/climate/noaa_weekly.csv` with parsed dates.
+2. Derive `week_of_year`.
+3. Process only `TMAX`, `TMIN`, and `AWND`.
+4. For each state, evaluate each variable month-by-month.
+5. Optionally detrend the monthly series when the Augmented Dickey-Fuller test indicates non-stationarity.
+6. Standardize the monthly series with z-scores.
+7. Convert z-scores into quantile-based extreme bands.
+8. Keep values only during planting or harvesting weeks for the selected crop.
+
+Trend handling:
+- `run_adf_test` runs `adfuller(..., autolag="AIC")`
+- if the p-value is at least `0.05`, the code treats the monthly slice as trending and applies linear detrending with `numpy.polyfit`
+- quantile selection is done on the detrended series
+- stored values are mapped back to the original scale when a trend was removed
+
+Quantile rules by variable:
+- `TMAX`
+  - `hot`: `75th` to `90th` percentile of monthly z-score
+  - `very_hot`: above `90th` percentile
+- `TMIN`
+  - `cold`: below `10th` percentile
+  - `very_cold`: `10th` to `25th` percentile
+- `AWND`
+  - `moderate_high_wind`: `80th` to `90th` percentile
+  - `extreme_high_wind`: above `90th` percentile
+
+Feature naming pattern:
+- `tmax_hot_in_planting`
+- `tmax_very_hot_in_harvesting`
+- `tmin_cold_in_planting`
+- `awnd_extreme_high_wind_in_harvesting`
+
+### 4.2 SPI feature preprocessing
+
+SPI processing is also state-by-state, but it does not use monthly quantiles or detrending.
+
+Steps:
+1. Read `data/climate/spi_weekly_multiscale.csv` with parsed `week_date`.
+2. Copy `week_date` into `date`.
+3. Derive `week_of_year`.
+4. Process only `SPI_7d`, `SPI_1m`, and `SPI_3m`.
+5. Apply fixed threshold bands directly to the SPI value.
+6. Keep values only during planting or harvesting weeks for the selected crop.
+
+Threshold rules:
+- very wet: `1.5 <= SPI <= 2.0`
+- extreme wet: `SPI > 2.0`
+- very dry: `-2.0 <= SPI <= -1.5`
+- extreme dry: `SPI < -2.0`
+
+Feature naming pattern:
+- `spi_7d_very_wet_in_planting`
+- `spi_1m_extreme_dry_in_harvesting`
+- `spi_3m_extreme_wet_in_planting`
+
+### 4.3 PDSI feature preprocessing
+
+PDSI processing starts from the Palmer directory and builds state-level weekly values first.
+
+Steps:
+1. Read every division CSV under each state directory in `data/climate/palmer/`.
+2. Skip the first header line in each file.
+3. Parse `YYYYMMDD` into `date` and parse the index value as numeric `pdsi`.
+4. Convert each date to the Monday of the same week for consistent joins.
+5. Average all division values for the same `state` and `date`.
+6. Derive `week_of_year`.
+7. Apply fixed drought and wetness thresholds.
+8. Keep values only during planting or harvesting weeks for the selected crop.
+
+Threshold rules:
+- very wet: `3.0 <= PDSI <= 4.0`
+- extreme wet: `PDSI > 4.0`
+- extreme drought: `-4.0 <= PDSI <= -3.0`
+- severe drought: `PDSI < -4.0`
+
+Feature naming pattern:
+- `pdsi_very_wet_in_planting`
+- `pdsi_extreme_wet_in_harvesting`
+- `pdsi_extreme_drought_in_planting`
+- `pdsi_severe_drought_in_harvesting`
+
+### 4.4 CO2 feature preprocessing
+
+CO2 processing is national rather than state-by-state.
+
+Steps:
+1. Read `data/climate/co2_weekly_mlo.csv` with parsed dates.
+2. Select the first valid numeric value column.
+3. Derive `week_of_year`.
+4. Process the series month-by-month using the same monthly extreme detector used for NOAA.
+5. Run ADF-based trend detection and linear detrending when needed.
+6. Standardize the monthly series.
+7. Mark only the top `5%` tail as extreme.
+8. Keep values only during planting or harvesting weeks for the selected crop.
+
+Threshold rule:
+- `co2_extreme`: z-score above the `95th` percentile within the same calendar month
+
+Feature naming pattern:
+- `co2_extreme_in_planting`
+- `co2_extreme_in_harvesting`
+
+---
+
+## 5. Merge And Output Behavior
+
+After NOAA, SPI, and PDSI features are created at the state level:
+- they are outer-joined on `date` and `state`
+- missing feature values are filled with `0.0`
+- the merged table is aggregated to a national series using crop production weights
+
+Then:
+- national weighted state features are outer-joined with the national CO2 features on `date`
+- the result is merged into `data/ag/v6.csv` on `date`
+- newly added climate columns are filled with `0.0` where missing
+- one output file is written per crop
+
+Outputs:
+- `data/ag/corn.csv`
+- `data/ag/soybean.csv`
+- `data/ag/wheat.csv`
+
+---
+
+## 6. What This Document Intentionally Excludes
+
+This document does not describe climate datasets that are present in the repository but are not consumed by `src/dataset/climate/preprocessing.py`, including:
+- PRISM download helpers in `src/dataset/climate/prism.py`
+- NAO, SOI, temperature anomaly, and Google Trends climate files
+- legacy or alternative preprocessing flows that are not part of the active merged pipeline
+
+---
+
+## 7. Code References
+
+Main pipeline:
+- `src/dataset/climate/preprocessing.py`
+
+NOAA gathering:
+- `src/dataset/climate/noaa.py`
+- `scripts/dataset/climate/noaa.py`
+
+SPI derivation:
+- `scripts/dataset/climate/noaa_spi.py`
+
+Palmer / PDSI loading:
+- `src/dataset/climate/pdsi.py`
+
+Crop seasonal masking:
+- `src/dataset/climate/crop_seasonal.py`
+
+Production weighting:
+- `src/dataset/util/production_by_state.py`
