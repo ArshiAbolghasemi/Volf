@@ -158,6 +158,12 @@ Downstream preprocessing uses this CO₂ time series as a univariate weekly clim
 
 The current preprocessing pipeline reads weekly Palmer drought files from `data/climate/palmer/` directly.
 
+Source:
+
+* Weekly Palmer Drought Severity Index (PDSI) time series from NOAA NCEI:
+  [https://www.ncei.noaa.gov/access/monitoring/weekly-palmers/time-series](https://www.ncei.noaa.gov/access/monitoring/weekly-palmers/time-series)
+
+
 Within this repository, the preprocessing code assumes the Palmer files already exist and does not fetch them. The only gathering behavior visible from the code is the expected on-disk format:
 - state directories must be named like `<code>_<state_name>`
 - each state directory contains climate-division CSV files
