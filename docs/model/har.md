@@ -200,8 +200,11 @@ $$
 
 LASSO performs variable selection by adding an L1 penalty to the regression objective:
 
-$$  
-\min_{\beta} \left\{ \frac{1}{2n}\sum_{i=1}^{n}(y_i - \beta_0 - \mathbf{x}_i^T\boldsymbol{\beta})^2 + \lambda\sum_{j=1}^{p}|\beta_j| \right\}  
+$$
+\min_{\beta} \; \left\{
+\frac{1}{2n}\sum_{i=1}^{n}\left(y_i - \beta_0 - \mathbf{x}_i^T\boldsymbol{\beta}\right)^2
++ \lambda \sum_{j=1}^{p} |\beta_j|
+\right\}
 $$
 
 where:
