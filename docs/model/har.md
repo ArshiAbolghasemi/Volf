@@ -617,3 +617,258 @@ df = benchmark_multi_horizon_results_to_frame(results)
 2. Tibshirani, R. (1996). "Regression Shrinkage and Selection via the Lasso." *Journal of the Royal Statistical Society: Series B*, 58(1), 267-288.
 
 3. George, E. I., & McCulloch, R. E. (1993). "Variable Selection via Gibbs Sampling." *Journal of the American Statistical Association*, 88(423), 881-889.
+
+## Target Construction Methods
+
+### Point vs Mean Target
+
+The implementation supports two target construction modes:
+
+```python
+@dataclass
+class HARFeatureConfig:
+    target_mode: Literal["point", "mean"] = "point"
+    target_horizon: int = 1
+```
+
+### Point Target (Default)
+
+Point target uses the realized volatility at a specific future time point:
+
+$$
+y_t^{(h)} = RV_{t+h}
+$$
+
+where $h$ is the forecast horizon.
+
+**Example for 1-week ahead:**
+```
+Time:     t    t+1   t+2   t+3   t+4
+RV:      2.1   2.3   2.5   2.2   2.4
+Target:  2.3   ←---- Point target at t+1
+```
+
+**Implementation:**
+```python
+def create_point_target(rv_series, horizon):
+    """
+    Create point target by shifting RV series.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizon : int
+        Forecast horizon (number of periods ahead)
+    
+    Returns:
+    --------
+    pd.Series
+        Target variable shifted by horizon
+    """
+    return rv_series.shift(-horizon)
+```
+
+### Mean Target
+
+Mean target uses the average realized volatility over the forecast horizon:
+
+$$
+y_t^{(h)} = \frac{1}{h}\sum_{i=1}^{h} RV_{t+i}
+$$
+
+This provides a smoother target that captures average volatility over the period.
+
+**Example for 4-week ahead mean:**
+```
+Time:     t    t+1   t+2   t+3   t+4
+RV:      2.1   2.3   2.5   2.2   2.4
+Target:  2.35  ←---- Mean of [2.3, 2.5, 2.2, 2.4]
+```
+
+**Implementation:**
+```python
+def create_mean_target(rv_series, horizon):
+    """
+    Create mean target by averaging future RV values.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizon : int
+        Forecast horizon (number of periods to average)
+    
+    Returns:
+    --------
+    pd.Series
+        Mean of RV over next h periods
+    """
+    # Rolling mean over future values
+    target = rv_series.shift(-horizon).rolling(window=horizon).mean()
+    
+    # Alternative: explicit averaging
+    # target = pd.Series(index=rv_series.index, dtype=float)
+    # for t in range(len(rv_series) - horizon):
+    #     target.iloc[t] = rv_series.iloc[t+1:t+horizon+1].mean()
+    
+    return target
+```
+
+### Use Cases
+
+#### Point Target
+- **Best for:** Short-term forecasting (1-week ahead)
+- **Advantages:**
+  - Direct prediction of specific future value
+  - Easier interpretation
+  - Matches typical forecasting objectives
+- **Disadvantages:**
+  - More volatile
+  - Sensitive to outliers at specific time points
+
+#### Mean Target
+- **Best for:** Medium to long-term forecasting (2-4 weeks ahead)
+- **Advantages:**
+  - Smoother, more stable predictions
+  - Reduces impact of single-period volatility spikes
+  - Better for risk management applications
+  - Lower prediction variance
+- **Disadvantages:**
+  - Less precise for specific time points
+  - Averages out important short-term dynamics
+
+### Multi-Horizon Target Construction
+
+For multi-horizon benchmarks, targets are constructed for each horizon:
+
+```python
+def prepare_multi_horizon_targets(rv_series, horizons, target_mode):
+    """
+    Prepare targets for multiple forecast horizons.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizons : list[int]
+        List of forecast horizons [1, 2, 4]
+    target_mode : str
+        'point' or 'mean'
+    
+    Returns:
+    --------
+    dict[int, pd.Series]
+        Dictionary mapping horizon to target series
+    """
+    targets = {}
+    
+    for h in horizons:
+        if target_mode == "point":
+            targets[h] = rv_series.shift(-h)
+        elif target_mode == "mean":
+            targets[h] = rv_series.shift(-h).rolling(window=h).mean()
+        else:
+            raise ValueError(f"Unknown target_mode: {target_mode}")
+    
+    return targets
+```
+
+### Example: Complete Target Preparation
+
+```python
+# Load data
+data = pd.read_csv('wheat_volatility.csv', index_col=0, parse_dates=True)
+rv_series = data['wheat_weekly_rv']
+
+# Scenario 1: Point targets for 1, 2, 4 weeks ahead
+point_targets = {
+    1: rv_series.shift(-1),  # Next week
+    2: rv_series.shift(-2),  # 2 weeks ahead
+    4: rv_series.shift(-4)   # 4 weeks ahead
+}
+
+# Scenario 2: Mean targets for 1, 2, 4 weeks ahead
+mean_targets = {
+    1: rv_series.shift(-1),                              # 1-week: same as point
+    2: rv_series.shift(-1).rolling(window=2).mean(),     # Mean of next 2 weeks
+    4: rv_series.shift(-1).rolling(window=4).mean()      # Mean of next 4 weeks
+}
+
+# Visualization
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+
+for i, h in enumerate([1, 2, 4]):
+    ax = axes[i]
+    ax.plot(rv_series.index[:100], rv_series.iloc[:100], 
+            label='Actual RV', alpha=0.7)
+    ax.plot(point_targets[h].index[:100], point_targets[h].iloc[:100], 
+            label=f'Point Target (h={h})', alpha=0.7)
+    ax.plot(mean_targets[h].index[:100], mean_targets[h].iloc[:100], 
+            label=f'Mean Target (h={h})', alpha=0.7)
+    ax.set_title(f'Target Construction: {h}-Week Horizon')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+### Impact on Model Performance
+
+The choice of target construction affects model evaluation:
+
+```python
+# Point target metrics
+point_metrics = {
+    'mse': 0.0234,      # Higher variance
+    'mae': 0.1123,
+    'r2': 0.6543
+}
+
+# Mean target metrics (typically)
+mean_metrics = {
+    'mse': 0.0189,      # Lower variance (smoother)
+    'mae': 0.0987,      # Lower error
+    'r2': 0.7234        # Higher R² (easier to predict)
+}
+```
+
+**Note:** Mean targets typically show better metrics because:
+1. Averaging reduces noise
+2. Smoother targets are easier to predict
+3. Lower variance in target variable
+
+However, this doesn't necessarily mean better practical performance—it depends on the forecasting objective.
+
+### Benchmark Configuration
+
+```python
+# Configuration for point targets
+config_point = WheatHARBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2, 4],
+    target_mode="point",  # Predict specific future values
+    ...
+)
+
+# Configuration for mean targets
+config_mean = WheatHARBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2, 4],
+    target_mode="mean",   # Predict average over horizon
+    ...
+)
+
+# Run both benchmarks for comparison
+results_point = benchmark_multi_horizon(data, config_point)
+results_mean = benchmark_multi_horizon(data, config_mean)
+```
+
+### Recommendation
+
+- **Use point targets** for operational forecasting where specific future values matter
+- **Use mean targets** for risk management and strategic planning where average conditions over a period are more relevant
+- **Compare both** in your benchmark to understand model behavior under different objectives

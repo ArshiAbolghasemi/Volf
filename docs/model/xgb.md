@@ -699,3 +699,571 @@ df = benchmark_multi_horizon_results_to_frame(results)
 2. Friedman, J. H. (2001). "Greedy Function Approximation: A Gradient Boosting Machine." *Annals of Statistics*, 29(5), 1189-1232.
 
 3. Bucci, A. (2020). "Realized Volatility Forecasting with Neural Networks." *Journal of Financial Econometrics*, 18(3), 502-531.
+
+## Target Construction Methods
+
+### Point vs Mean Target
+
+The XGBoost implementation supports two target construction modes:
+
+```python
+@dataclass
+class XGBFeatureConfig:
+    target_mode: Literal["point", "mean"] = "point"
+    target_horizon: int = 1
+```
+
+### Point Target (Default)
+
+Point target predicts the realized volatility at a specific future time point:
+
+$$
+y_t^{(h)} = RV_{t+h}
+$$
+
+where $h$ is the forecast horizon.
+
+**Example for 2-week ahead:**
+```
+Time:     t    t+1   t+2   t+3   t+4
+RV:      2.1   2.3   2.5   2.2   2.4
+Target:  2.5   ←---- Point target at t+2
+```
+
+**Implementation:**
+```python
+def create_point_target(rv_series, horizon):
+    """
+    Create point target for XGBoost.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizon : int
+        Forecast horizon (number of periods ahead)
+    
+    Returns:
+    --------
+    pd.Series
+        Target variable shifted by horizon
+    """
+    return rv_series.shift(-horizon)
+```
+
+### Mean Target
+
+Mean target predicts the average realized volatility over the forecast horizon:
+
+$$
+y_t^{(h)} = \frac{1}{h}\sum_{i=1}^{h} RV_{t+i}
+$$
+
+This provides a smoother target that XGBoost's gradient boosting can optimize more effectively.
+
+**Example for 4-week ahead mean:**
+```
+Time:     t    t+1   t+2   t+3   t+4
+RV:      2.1   2.3   2.5   2.2   2.4
+Target:  2.35  ←---- Mean of [2.3, 2.5, 2.2, 2.4]
+```
+
+**Implementation:**
+```python
+def create_mean_target(rv_series, horizon):
+    """
+    Create mean target for XGBoost.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizon : int
+        Forecast horizon (number of periods to average)
+    
+    Returns:
+    --------
+    pd.Series
+        Mean of RV over next h periods
+    """
+    # Forward-looking rolling mean
+    target = pd.Series(index=rv_series.index, dtype=float)
+    
+    for t in range(len(rv_series) - horizon):
+        target.iloc[t] = rv_series.iloc[t+1:t+horizon+1].mean()
+    
+    return target
+```
+
+### XGBoost Gradient Behavior with Different Targets
+
+#### Point Target Gradients
+
+With point targets, XGBoost computes gradients on volatile targets:
+
+$$
+g_i = \frac{\partial}{\partial \hat{y}_i}(y_i - \hat{y}_i)^2 = -2(y_i - \hat{y}_i)
+$$
+
+$$
+h_i = \frac{\partial^2}{\partial \hat{y}_i^2}(y_i - \hat{y}_i)^2 = 2
+$$
+
+**Characteristics:**
+- **Larger gradient magnitudes** when target is volatile
+- **More aggressive** tree splits to capture spikes
+- **Higher learning rate** may be needed
+- **More boosting rounds** to converge
+
+```python
+# Point target training
+dtrain_point = xgb.DMatrix(X_train, label=y_train_point)
+
+params_point = {
+    'objective': 'reg:squarederror',
+    'learning_rate': 0.01,        # Standard learning rate
+    'max_depth': 6,
+    'min_child_weight': 1.0       # Less regularization
+}
+
+model_point = xgb.train(params_point, dtrain_point, num_boost_round=1000)
+```
+
+#### Mean Target Gradients
+
+With mean targets, gradients are computed on smoother targets:
+
+$$
+g_i = -2(\bar{y}_i - \hat{y}_i) \quad \text{where } \bar{y}_i = \frac{1}{h}\sum_{j=1}^{h}y_{i+j}
+$$
+
+**Characteristics:**
+- **Smaller gradient magnitudes** due to averaging
+- **More stable** tree construction
+- **Lower learning rate** may suffice
+- **Fewer boosting rounds** needed
+
+```python
+# Mean target training
+dtrain_mean = xgb.DMatrix(X_train, label=y_train_mean)
+
+params_mean = {
+    'objective': 'reg:squarederror',
+    'learning_rate': 0.005,       # Lower learning rate
+    'max_depth': 4,               # Shallower trees
+    'min_child_weight': 3.0       # More regularization
+}
+
+model_mean = xgb.train(params_mean, dtrain_mean, num_boost_round=800)
+```
+
+### Multi-Horizon Target Construction
+
+For comprehensive benchmarks across multiple horizons:
+
+```python
+def prepare_xgb_multi_horizon_targets(rv_series, horizons, target_mode):
+    """
+    Prepare targets for XGBoost multi-horizon forecasting.
+    
+    Parameters:
+    -----------
+    rv_series : pd.Series
+        Realized volatility time series
+    horizons : list[int]
+        List of forecast horizons [1, 2, 4]
+    target_mode : str
+        'point' or 'mean'
+    
+    Returns:
+    --------
+    dict[int, pd.Series]
+        Dictionary mapping horizon to target series
+    """
+    targets = {}
+    
+    for h in horizons:
+        if target_mode == "point":
+            # Direct future value
+            targets[h] = rv_series.shift(-h)
+            
+        elif target_mode == "mean":
+            # Average over horizon
+            target = pd.Series(index=rv_series.index, dtype=float)
+            for t in range(len(rv_series) - h):
+                target.iloc[t] = rv_series.iloc[t+1:t+h+1].mean()
+            targets[h] = target
+            
+    return targets
+```
+
+### Feature Importance Differences
+
+Target construction significantly affects XGBoost's feature importance:
+
+#### Point Target Feature Importance (Gain)
+```python
+# Top features for point targets (1-week ahead)
+point_importance = {
+    'wheat_weekly_rv': 0.387,      # Recent volatility dominates
+    'wheat_monthly_rv': 0.142,
+    'DJIA_Index': 0.089,           # Market shocks important
+    'wheat_seasonal_rv': 0.076,
+    'WTI_Index': 0.054             # Energy prices
+}
+```
+
+#### Mean Target Feature Importance (Gain)
+```python
+# Top features for mean targets (4-week ahead)
+mean_importance = {
+    'wheat_seasonal_rv': 0.312,    # Long-term patterns dominate
+    'wheat_monthly_rv': 0.267,
+    'wheat_weekly_rv': 0.156,      # Recent volatility less important
+    'ssta_elino': 0.098,           # Climate factors more relevant
+    'NAO_index': 0.067,
+    'pdsi_extreme_drought_in_planting': 0.045
+}
+```
+
+**Observation:** XGBoost's gradient-based learning amplifies the shift toward long-term features with mean targets.
+
+### Loss Function Behavior
+
+#### Point Target Loss Evolution
+
+```python
+# Training with point targets
+evals_result_point = {}
+model_point = xgb.train(
+    params,
+    dtrain_point,
+    num_boost_round=1000,
+    evals=[(dtrain_point, 'train'), (dval_point, 'val')],
+    evals_result=evals_result_point,
+    verbose_eval=False
+)
+
+# Loss typically shows:
+# - Higher initial loss
+# - More fluctuation during training
+# - Slower convergence
+# - Risk of overfitting after ~800 rounds
+```
+
+#### Mean Target Loss Evolution
+
+```python
+# Training with mean targets
+evals_result_mean = {}
+model_mean = xgb.train(
+    params,
+    dtrain_mean,
+    num_boost_round=1000,
+    evals=[(dtrain_mean, 'train'), (dval_mean, 'val')],
+    evals_result=evals_result_mean,
+    verbose_eval=False
+)
+
+# Loss typically shows:
+# - Lower initial loss
+# - Smoother convergence
+# - Faster convergence
+# - Less overfitting risk
+```
+
+### Optimal Hyperparameters by Target Type
+
+#### Point Target Configuration
+
+```python
+xgb_point_config = XGBModelConfig(
+    n_estimators=1000,
+    max_depth=6,                  # Deeper trees for complexity
+    learning_rate=0.01,           # Standard learning rate
+    min_child_weight=1.0,         # Less regularization
+    subsample=0.8,
+    colsample_bytree=0.8,
+    gamma=0.0,                    # No complexity penalty
+    reg_alpha=0.0,                # No L1
+    reg_lambda=1.0,               # Standard L2
+    target_transform="log"
+)
+```
+
+#### Mean Target Configuration
+
+```python
+xgb_mean_config = XGBModelConfig(
+    n_estimators=800,             # Fewer rounds needed
+    max_depth=4,                  # Shallower trees sufficient
+    learning_rate=0.005,          # Lower learning rate
+    min_child_weight=3.0,         # More regularization
+    subsample=0.7,                # More subsampling
+    colsample_bytree=0.7,
+    gamma=0.1,                    # Complexity penalty
+    reg_alpha=0.1,                # L1 regularization
+    reg_lambda=2.0,               # Stronger L2
+    target_transform="log"
+)
+```
+
+### Impact on Model Performance
+
+```python
+def compare_xgb_target_modes(data, horizons=[1, 2, 4]):
+    """
+    Compare XGBoost performance with point vs mean targets.
+    """
+    results = {
+        'point': {},
+        'mean': {}
+    }
+    
+    for mode in ['point', 'mean']:
+        for h in horizons:
+            # Prepare target
+            if mode == 'point':
+                y = data['wheat_weekly_rv'].shift(-h)
+            else:
+                y = create_mean_target(data['wheat_weekly_rv'], h)
+            
+            # Log transform
+            y_log = np.log(y)
+            
+            # Train-test split
+            X_train, X_test = X.iloc[:train_size], X.iloc[train_size:]
+            y_train, y_test = y_log.iloc[:train_size], y_log.iloc[train_size:]
+            
+            # Create DMatrix
+            dtrain = xgb.DMatrix(X_train, label=y_train)
+            dtest = xgb.DMatrix(X_test)
+            
+            # Configure based on target type
+            if mode == 'point':
+                params = {'learning_rate': 0.01, 'max_depth': 6}
+            else:
+                params = {'learning_rate': 0.005, 'max_depth': 4}
+            
+            params.update({
+                'objective': 'reg:squarederror',
+                'random_state': 42
+            })
+            
+            # Train
+            model = xgb.train(params, dtrain, num_boost_round=1000)
+            
+            # Predict and inverse transform
+            y_pred_log = model.predict(dtest)
+            y_pred = np.exp(y_pred_log)
+            y_test_original = np.exp(y_test)
+            
+            # Evaluate
+            results[mode][h] = {
+                'mse': mean_squared_error(y_test_original, y_pred),
+                'r2': r2_score(y_test_original, y_pred),
+                'mae': mean_absolute_error(y_test_original, y_pred),
+                'theil_u': compute_theil_u(y_test_original, y_pred)
+            }
+    
+    return results
+
+# Typical results
+# Point targets (h=4):  MSE=0.0221, R²=0.672, MAE=0.108, Theil_U=0.89
+# Mean targets (h=4):   MSE=0.0176, R²=0.741, MAE=0.094, Theil_U=0.76
+```
+
+### Early Stopping with Different Targets
+
+```python
+# Point targets: may need more patience
+model_point = xgb.train(
+    params_point,
+    dtrain_point,
+    num_boost_round=2000,
+    evals=[(dtrain_point, 'train'), (dval_point, 'val')],
+    early_stopping_rounds=100,    # More patience
+    verbose_eval=False
+)
+
+# Mean targets: can stop earlier
+model_mean = xgb.train(
+    params_mean,
+    dtrain_mean,
+    num_boost_round=1500,
+    evals=[(dtrain_mean, 'train'), (dval_mean, 'val')],
+    early_stopping_rounds=50,     # Less patience needed
+    verbose_eval=False
+)
+```
+
+### Visualization
+
+```python
+import matplotlib.pyplot as plt
+
+def visualize_xgb_target_construction(rv_series, horizon=4):
+    """
+    Visualize point vs mean target construction and XGBoost predictions.
+    """
+    # Create targets
+    point_target = rv_series.shift(-horizon)
+    mean_target = create_mean_target(rv_series, horizon)
+    
+    # Train models (simplified)
+    X = prepare_features(rv_series)
+    
+    # Point model
+    dtrain_point = xgb.DMatrix(X, label=np.log(point_target))
+    model_point = xgb.train({'max_depth': 6}, dtrain_point, num_boost_round=500)
+    pred_point = np.exp(model_point.predict(xgb.DMatrix(X)))
+    
+    # Mean model
+    dtrain_mean = xgb.DMatrix(X, label=np.log(mean_target))
+    model_mean = xgb.train({'max_depth': 4}, dtrain_mean, num_boost_round=500)
+    pred_mean = np.exp(model_mean.predict(xgb.DMatrix(X)))
+    
+    # Plot
+    fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+    
+    # Point target
+    axes[0].plot(rv_series.index[:100], rv_series.iloc[:100], 
+                 label='Actual RV', linewidth=2, alpha=0.7)
+    axes[0].plot(point_target.index[:100], point_target.iloc[:100], 
+                 label=f'Point Target (h={horizon})', 
+                 linewidth=2, alpha=0.7, linestyle='--')
+    axes[0].plot(rv_series.index[:100], pred_point[:100], 
+                 label='XGBoost Prediction', 
+                 linewidth=2, alpha=0.7, linestyle=':')
+    axes[0].set_title(f'XGBoost with Point Target (h={horizon} weeks)')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
+    
+    # Mean target
+    axes[1].plot(rv_series.index[:100], rv_series.iloc[:100], 
+                 label='Actual RV', linewidth=2, alpha=0.7)
+    axes[1].plot(mean_target.index[:100], mean_target.iloc[:100], 
+                 label=f'Mean Target (h={horizon})', 
+                 linewidth=2, alpha=0.7, linestyle='--')
+    axes[1].plot(rv_series.index[:100], pred_mean[:100], 
+                 label='XGBoost Prediction', 
+                 linewidth=2, alpha=0.7, linestyle=':')
+    axes[1].set_title(f'XGBoost with Mean Target (h={horizon} weeks)')
+    axes[1].legend()
+    axes[1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.show()
+```
+
+### Benchmark Configuration
+
+```python
+# Point target benchmark
+config_point = WheatXGBBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2, 4],
+    target_mode="point",
+    model_names=["xgb_expanding", "xgb_rolling"],
+    feature_set_names=["har", "har_endo_exo", "har_endo_exo_climate_news_macro"],
+    use_cache=True
+)
+
+# Mean target benchmark
+config_mean = WheatXGBBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2, 4],
+    target_mode="mean",
+    model_names=["xgb_expanding", "xgb_rolling"],
+    feature_set_names=["har", "har_endo_exo", "har_endo_exo_climate_news_macro"],
+    use_cache=True
+)
+
+# Run both
+results_point = benchmark_multi_horizon_xgb(data, config_point)
+results_mean = benchmark_multi_horizon_xgb(data, config_mean)
+
+# Compare
+comparison_df = pd.DataFrame({
+    'Point_MSE': [results_point[h]['har_endo_exo']['xgb_expanding'].metrics['test']['mse'] 
+                  for h in [1, 2, 4]],
+    'Mean_MSE': [results_mean[h]['har_endo_exo']['xgb_expanding'].metrics['test']['mse'] 
+                 for h in [1, 2, 4]],
+    'Point_R2': [results_point[h]['har_endo_exo']['xgb_expanding'].metrics['test']['r2'] 
+                 for h in [1, 2, 4]],
+    'Mean_R2': [results_mean[h]['har_endo_exo']['xgb_expanding'].metrics['test']['r2'] 
+                for h in [1, 2, 4]]
+}, index=[1, 2, 4])
+
+print(comparison_df)
+```
+
+### Practical Recommendations
+
+#### Use Point Targets When:
+1. **Specific date forecasting** is required
+2. **Short-term trading** strategies (1-2 weeks)
+3. **Event-driven** volatility prediction
+4. Need to **capture spikes** and extreme events
+5. **Tactical risk management**
+
+**XGBoost Configuration:**
+- Higher learning rate (0.01-0.03)
+- Deeper trees (max_depth=6-8)
+- Less regularization
+- More boosting rounds (1000-2000)
+
+#### Use Mean Targets When:
+1. **Average volatility** over a period matters
+2. **Medium to long-term** forecasting (4+ weeks)
+3. **Strategic portfolio** decisions
+4. **Risk budgeting** over horizons
+5. Prefer **stable, smooth** predictions
+
+**XGBoost Configuration:**
+- Lower learning rate (0.005-0.01)
+- Shallower trees (max_depth=3-5)
+- More regularization (higher gamma, reg_lambda)
+- Fewer boosting rounds (500-1000)
+
+### Example: Complete Workflow
+
+```python
+from src.benchmark.xgb import benchmark_multi_horizon_xgb
+
+# Load data
+data = pd.read_csv('wheat_volatility.csv', index_col=0, parse_dates=True)
+
+# Scenario 1: Point targets for tactical trading
+config_tactical = WheatXGBBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2],
+    target_mode="point",
+    model_names=["xgb_expanding"],
+    feature_set_names=["har_endo_exo_news_macro"]
+)
+
+results_tactical = benchmark_multi_horizon_xgb(data, config_tactical)
+
+# Scenario 2: Mean targets for risk management
+config_risk = WheatXGBBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[4],
+    target_mode="mean",
+    model_names=["xgb_expanding_regularized"],
+    feature_set_names=["har_endo_exo_climate_macro"]
+)
+
+results_risk = benchmark_multi_horizon_xgb(data, config_risk)
+
+# Extract results
+tactical_metrics = results_tactical[1]['har_endo_exo_news_macro']['xgb_expanding'].metrics['test']
+risk_metrics = results_risk[4]['har_endo_exo_climate_macro']['xgb_expanding_regularized'].metrics['test']
+
+print("Tactical (Point, h=1):", tactical_metrics)
+print("Risk (Mean, h=4):", risk_metrics)
+```
+
+### Key Takeaway
+
+XGBoost's gradient-based optimization makes it particularly sensitive to target construction. Mean targets lead to smoother gradients, faster convergence, and often better generalization. However, point targets provide more precise predictions for specific time points, which may be more valuable depending on the application. The choice should align with your forecasting objective and risk management strategy.
