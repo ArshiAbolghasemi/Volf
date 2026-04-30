@@ -141,14 +141,18 @@ Output produced upstream:
 
 ### 2.3 CO2 weekly gathering
 
-The current preprocessing pipeline reads `data/climate/co2_weekly_mlo.csv` directly.
+The current preprocessing pipeline reads CO₂ data from a file sourced from the NOAA Global Monitoring Laboratory dataset available at:
+[https://gml.noaa.gov/data/dataset.php?item=all-co2-flask](https://gml.noaa.gov/data/dataset.php?item=all-co2-flask)
 
-Within this repository, the preprocessing code assumes the file already exists and does not fetch or regenerate it. The only gathering behavior visible from the pipeline is the file contract:
-- it must contain a `date` column
-- it must contain one usable numeric CO2 value column
-- the series is treated as weekly and national
+Within this repository, the preprocessing code assumes the dataset has already been downloaded and stored locally (e.g., as `data/climate/co2_weekly_mlo.csv`) and does not handle fetching or regeneration.
 
-Downstream preprocessing uses the CO2 series as a univariate weekly climate signal.
+The pipeline relies on the following file contract:
+
+* it must contain a `date` column
+* it must contain one usable numeric CO₂ value column
+* the series is treated as weekly and representative of a single location (e.g., Mauna Loa observations)
+
+Downstream preprocessing uses this CO₂ time series as a univariate weekly climate signal.
 
 ### 2.4 Palmer / PDSI gathering
 
