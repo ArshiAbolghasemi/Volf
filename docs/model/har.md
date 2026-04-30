@@ -19,7 +19,7 @@ where:
 - $RV_t^{(w)}$ is the weekly realized volatility
 - $RV_t^{(m)}$ is the monthly realized volatility (average over ~4 weeks)
 - $RV_t^{(s)}$ is the seasonal realized volatility (average over ~13 weeks)
-- $\epsilon_t$ is the error term with $\mathbb{E}[\epsilon_t] = 0$
+- $\epsilon_t$ is the error term
 
 ### Core HAR Features
 
@@ -134,12 +134,6 @@ $$
 
 where $h$ is the forecast horizon (1, 2, or 4 weeks ahead).
 
-**Characteristics:**
-- Direct prediction of specific future value
-- Captures volatility at exact time point
-- More volatile predictions
-- Suitable for tactical trading decisions
-
 ### Mean Target
 
 Mean target predicts the average realized volatility over the forecast horizon:
@@ -148,192 +142,103 @@ $$
 y_t^{(h)} = \frac{1}{h}\sum_{i=1}^{h} RV_{t+i}
 $$
 
-**Mathematical Formulation:**
-
-For $h=1$ (1-week ahead):
-$$
-y_t^{(1)} = RV_{t+1}
-$$
-
-For $h=2$ (2-week ahead mean):
-$$
-y_t^{(2)} = \frac{1}{2}(RV_{t+1} + RV_{t+2})
-$$
-
-For $h=4$ (4-week ahead mean):
-$$
-y_t^{(4)} = \frac{1}{4}(RV_{t+1} + RV_{t+2} + RV_{t+3} + RV_{t+4})
-$$
-
-**Characteristics:**
-- Smoother target through averaging
-- Reduces impact of single-period volatility spikes
-- Lower prediction variance
-- Suitable for risk management and strategic planning
-
-**Impact on Model Performance:**
-- Mean targets typically show better statistical metrics (higher R², lower MSE)
-- This is due to reduced noise, not necessarily better practical performance
-- Choice depends on forecasting objective
-
-## Multi-Target Training Procedure
-
-### Target Commodities
-
-The system supports three agricultural commodities:
-- **Wheat**: `wheat_weekly_rv` as target
-- **Corn**: `corn_weekly_rv` as target
-- **Soybeans**: `soybeans_weekly_rv` as target
-
-### Forecast Horizons
-
-For each commodity, multiple forecast horizons are evaluated:
-- **h=1**: 1-week ahead forecast
-- **h=2**: 2-week ahead forecast
-- **h=4**: 4-week ahead forecast
-
 ### Walk-Forward Validation
 
 #### Expanding Window Strategy
-Training data accumulates over time, capturing long-term patterns and structural changes.
-- Default initial training size: 104 weeks (~2 years)
-- Test size: 1 week
-- Step size: 1 week
+
+At each iteration, you **keep all past data** and **expand the training set forward**.
+
+##### Setup
+
+- Total time series: ${y_1, y_2, \dots, y_T}$
+- Initial training size: $n_0$
+- Forecast horizon $test size$: $h$
+- Step size: $s$
+
+##### At iteration $k$:
+
+**Training set:**  
+$$
+\mathcal{D}_{\text{train}}^{(k)} = {y_1, y_2, \dots, y_{n_0 + k s}}  
+$$
+
+**Test set:**  
+$$
+\mathcal{D}_{\text{test}}^{(k)} = {y_{n_0 + k s + 1}, \dots, y_{n_0 + k s + h}}  
+$$
+
+
+- Each step:
+	- Training set **grows by $s$** points
+    - Test set **moves forward by $s$**
 
 #### Rolling Window Strategy
-Fixed-size training window focuses on recent market dynamics.
-- Default rolling window size: 104 weeks
-- Test size: 1 week
-- Step size: 1 week
+
+At each iteration, you **keep a fixed-size window** and **slide it forward**.
+
+##### Setup
+
+- Window size: $w$
+- Step size: $s$
+- Forecast horizon: $h$
+
+##### At iteration $k$:
+
+**Training set:**  
+$$
+\mathcal{D}_{\text{train}}^{(k)} = {y_{1 + k s}, \dots, y_{w + k s}}  
+$$
+
+**Test set:**  
+$$
+\mathcal{D}_{\text{test}}^{(k)} = {y_{w + k s + 1}, \dots, y_{w + k s + h}}  
+$$
 
 ## Variable Selection Methods
 
-### LASSO (Least Absolute Shrinkage and Selection Operator)
+#### LASSO (Least Absolute Shrinkage and Selection Operator)
 
 LASSO performs variable selection by adding an L1 penalty to the regression objective:
 
-$$
-\min_{\beta} \left\{ \frac{1}{2n}\sum_{i=1}^{n}(y_i - \beta_0 - \mathbf{x}_i^T\boldsymbol{\beta})^2 + \lambda\sum_{j=1}^{p}|\beta_j| \right\}
+$$  
+\min_{\beta} \left\{ \frac{1}{2n}\sum_{i=1}^{n}(y_i - \beta_0 - \mathbf{x}_i^T\boldsymbol{\beta})^2 + \lambda\sum_{j=1}^{p}|\beta_j| \right\}  
 $$
 
 where:
+
 - $\lambda \geq 0$ is the regularization parameter
 - The L1 penalty $\sum_{j=1}^{p}|\beta_j|$ induces sparsity
 - As $\lambda$ increases, more coefficients are shrunk to exactly zero
 
 **Properties:**
-- Automatic variable selection through coefficient shrinkage
-- Optimal $\lambda$ selected via time-series cross-validation (5 folds)
-- Refit every 4 walk-forward windows to adapt to changing conditions
+
+- Performs automatic variable selection via coefficient shrinkage
+- $\lambda$ is selected using time-series cross-validation (5 folds)
+- Model is refit every 4 walk-forward windows to adapt to changing conditions
+- Feature selection is applied only at these refit points (i.e., once per batch of 4 windows), not at every step
 - Requires feature standardization
 
-### BASR (Bayesian Adaptive Shrinkage Regression)
+### ### BSR (Backward Stepwise Regression)
 
-BASR uses hierarchical Bayesian priors for adaptive coefficient shrinkage:
+BSR performs variable selection by iteratively removing features from a full model based on a chosen criterion:
 
-$$
-\begin{align}
-RV_t &\sim \mathcal{N}(\beta_0 + \mathbf{x}_t^T\boldsymbol{\beta}, \sigma^2) \\
-\beta_j &\sim \mathcal{N}(0, \tau_j^2) \\
-\tau_j^2 &\sim \text{InverseGamma}(a, b)
-\end{align}
+$$  
+\mathcal{F}^{(k+1)} = \mathcal{F}^{(k)} \setminus \{x_{j^\star}\}  
+\quad \text{where} \quad  
+j^\star = \arg\min_j \ \mathcal{C}\big(\mathcal{F}^{(k)} \setminus \{x_j\}\big)
 $$
 
-where $\tau_j^2$ is the variance hyperparameter for coefficient $\beta_j$, allowing adaptive shrinkage.
+where:
+
+- $\mathcal{F}^{(k)}$ is the feature set at iteration $k$
+- $\mathcal{C}(\cdot)$ is a selection criterion (e.g., AIC, BIC, CV error)
+- At each step, the feature whose removal improves the criterion the most is dropped
 
 **Properties:**
-- Different shrinkage for each coefficient based on posterior distributions
-- Significance level $\alpha = 0.05$ for feature selection
-- Features selected if posterior inclusion probability > 0.95
-- Refit every 8 walk-forward windows (more stable than LASSO)
-- No feature standardization required
 
-### Comparison: LASSO vs BASR
+- Starts from the full model and removes one feature at a time
+- Produces sparse models through sequential elimination
+- Criterion (e.g., AIC/BIC or time-series CV) guides feature removal
+- Feature selection is applied only at refit points (e.g., every 4 walk-forward windows), not at every step
+- Computationally more expensive than LASSO due to repeated model fitting
 
-| Aspect | LASSO | BASR |
-|--------|-------|------|
-| Framework | Frequentist | Bayesian |
-| Shrinkage | Uniform (same λ) | Adaptive (different τⱼ) |
-| Uncertainty | Bootstrap/asymptotic | Posterior distribution |
-| Computation | Fast (convex optimization) | Slower (Bayesian inference) |
-| Selection | Hard thresholding | Soft (posterior probabilities) |
-| Refit Frequency | Every 4 windows | Every 8 windows |
-| Standardization | Required | Not required |
-
-## Default Model Configurations
-
-### OLS Models (No Selection)
-- **ols_expanding**: Expanding window, all features, no standardization
-- **ols_rolling**: Rolling window (104 weeks), all features, no standardization
-
-### LASSO Models
-- **lasso_expanding**: Expanding window, LASSO selection, standardized features
-- **lasso_rolling**: Rolling window, LASSO selection, standardized features
-
-### BASR Models
-- **bsr_expanding**: Expanding window, Bayesian selection, no standardization
-- **bsr_rolling**: Rolling window, Bayesian selection, no standardization
-
-## Benchmark Execution
-
-### Comprehensive Benchmark Structure
-
-For each commodity target:
-- **10 feature sets** × **6 model configurations** = **60 experiments**
-- Across **3 horizons** (1, 2, 4 weeks) = **180 total experiments per commodity**
-
-### Evaluation Metrics
-
-- **MSE**: Mean Squared Error
-- **RMSE**: Root Mean Squared Error
-- **MAE**: Mean Absolute Error
-- **R²**: Coefficient of determination
-- **R²log**: R² on log-transformed values
-- **QLIKE**: Quasi-likelihood loss function
-- **MAPE**: Mean Absolute Percentage Error
-
-### Caching System
-
-Results are cached based on:
-- Model configuration (window type, selection method, hyperparameters)
-- Feature set composition
-- Target horizon and mode (point/mean)
-- Data signature (hash of input data)
-
-This enables efficient re-runs and incremental experiments.
-
-## Practical Recommendations
-
-### Feature Set Selection
-
-- **Start with HAR**: Establish baseline with core features
-- **Add Endo**: Capture commodity-specific dynamics
-- **Add Exo**: Incorporate cross-commodity effects
-- **Add Climate**: For agricultural commodities, climate is crucial
-- **Add News/Macro**: For market-driven volatility components
-
-### Model Selection
-
-- **OLS**: Fast baseline, interpretable coefficients
-- **LASSO**: When feature space is large relative to sample size
-- **BASR**: When uncertainty quantification is important
-
-### Window Strategy
-
-- **Expanding**: When long-term patterns are stable
-- **Rolling**: When recent data is more relevant (regime changes)
-
-### Target Mode
-
-- **Point**: For specific date forecasting and tactical decisions
-- **Mean**: For risk management over periods and strategic planning
-
-## References
-
-1. Corsi, F. (2009). "A Simple Approximate Long-Memory Model of Realized Volatility." *Journal of Financial Econometrics*, 7(2), 174-196.
-
-2. Tibshirani, R. (1996). "Regression Shrinkage and Selection via the Lasso." *Journal of the Royal Statistical Society: Series B*, 58(1), 267-288.
-
-3. George, E. I., & McCulloch, R. E. (1993). "Variable Selection via Gibbs Sampling." *Journal of the American Statistical Association*, 88(423), 881-889.
-
-4. Andersen, T. G., Bollerslev, T., & Diebold, F. X. (2007). "Roughing It Up: Including Jump Components in the Measurement, Modeling, and Forecasting of Return Volatility." *The Review of Economics and Statistics*, 89(4), 701-720.
