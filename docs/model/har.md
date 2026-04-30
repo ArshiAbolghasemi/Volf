@@ -1,14 +1,12 @@
-# Heterogeneous Autoregressive (HAR) Model
+# HAR Model Implementation and Training Procedure
 
 ## Overview
 
-The Heterogeneous Autoregressive (HAR) model is a parsimonious yet powerful framework for modeling and forecasting realized volatility. Introduced by Corsi (2009), the HAR model captures the long-memory properties of volatility by incorporating multiple time horizons, reflecting the heterogeneous behavior of market participants operating at different frequencies (daily, weekly, monthly).
+This document describes the Heterogeneous Autoregressive (HAR) model implementation used in the Volf project for volatility forecasting. The HAR model captures long-memory properties of volatility by incorporating multiple time horizons (daily, weekly, monthly), reflecting heterogeneous market participant behavior.
 
 ## Model Specification
 
-### Basic HAR Model
-
-The standard HAR model for realized volatility is specified as:
+### Basic HAR Structure
 
 $$
 RV_t = \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-1}^{(w)} + \beta_m RV_{t-1}^{(m)} + \epsilon_t
@@ -16,583 +14,606 @@ $$
 
 where:
 - $RV_t$ is the realized volatility at time $t$
-- $RV_{t-1}$ is the daily lagged realized volatility
-- $RV_{t-1}^{(w)} = \frac{1}{5}\sum_{i=1}^{5} RV_{t-i}$ is the weekly average (5-day)
-- $RV_{t-1}^{(m)} = \frac{1}{22}\sum_{i=1}^{22} RV_{t-i}$ is the monthly average (22-day)
-- $\epsilon_t$ is the error term with $\mathbb{E}[\epsilon_t] = 0$
+- $RV_{t-1}$ is the daily lagged realized volatility (weekly component)
+- $RV_{t-1}^{(w)} = \frac{1}{5}\sum_{i=1}^{5} RV_{t-i}$ is the monthly average
+- $RV_{t-1}^{(m)} = \frac{1}{22}\sum_{i=1}^{22} RV_{t-i}$ is the seasonal average
+- $\epsilon_t$ is the error term
 
-### Extended HAR Model
-
-The model can be extended to include additional components:
+### Extended HAR with Additional Features
 
 $$
 RV_t = \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-1}^{(w)} + \beta_m RV_{t-1}^{(m)} + \sum_{j=1}^{p} \gamma_j X_{j,t} + \epsilon_t
 $$
 
-where $X_{j,t}$ represents additional predictors such as:
-- Jump components
-- Leverage effects
-- Trading volume
-- Market microstructure variables
+## Implementation Architecture
 
-## Theoretical Foundation
+### Configuration Structure
 
-### Long Memory and Cascade of Volatilities
-
-The HAR model approximates long-memory processes through a cascade of volatility components at different frequencies. This is based on the Heterogeneous Market Hypothesis, which posits that:
-
-1. **Daily traders** react to short-term information (daily component)
-2. **Weekly traders** focus on medium-term trends (weekly component)
-3. **Monthly traders** consider long-term fundamentals (monthly component)
-
-The aggregation of these heterogeneous agents creates the observed long-memory behavior in volatility.
-
-### Relationship to ARFIMA Models
-
-The HAR model can be viewed as a restricted approximation to ARFIMA (Autoregressive Fractionally Integrated Moving Average) models:
-
-$$
-(1-L)^d RV_t = \epsilon_t
-$$
-
-where $d \in (0, 0.5)$ is the fractional differencing parameter. The HAR structure provides a simpler, more interpretable alternative while maintaining forecasting accuracy.
-
-## Implementation
-
-### Data Preparation
+The implementation uses a hierarchical configuration system:
 
 ```python
-import numpy as np
-import pandas as pd
+@dataclass
+class HARFeatureConfig:
+    target_col: str                              # Target variable name
+    core_columns: list[str]                      # Core HAR features (weekly, monthly, seasonal)
+    target_horizon: int = 1                      # Forecast horizon
+    extra_feature_cols: list[str] | None = None  # Additional predictors
+    target_col_name: str = "RV_target"
+    target_mode: Literal["point", "mean"] = "point"  # Point forecast or mean
+    target_floor: float = 1e-10                  # Minimum target value
 
-def prepare_har_features(rv_series, daily_lag=1, weekly_lag=5, monthly_lag=22):
-    """
-    Prepare HAR model features from realized volatility series.
-    
-    Parameters:
-    -----------
-    rv_series : pd.Series
-        Realized volatility time series
-    daily_lag : int
-        Number of days for daily component (default: 1)
-    weekly_lag : int
-        Number of days for weekly component (default: 5)
-    monthly_lag : int
-        Number of days for monthly component (default: 22)
-    
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame with HAR features
-    """
-    df = pd.DataFrame(index=rv_series.index)
-    
-    # Daily component
-    df['RV_daily'] = rv_series.shift(daily_lag)
-    
-    # Weekly component (average of past 5 days)
-    df['RV_weekly'] = rv_series.rolling(window=weekly_lag).mean().shift(1)
-    
-    # Monthly component (average of past 22 days)
-    df['RV_monthly'] = rv_series.rolling(window=monthly_lag).mean().shift(1)
-    
-    # Target variable
-    df['RV_target'] = rv_series
-    
-    return df.dropna()
+@dataclass
+class HARWalkForwardConfig:
+    window_type: Literal["expanding", "rolling"] = "expanding"
+    initial_train_size: int = 104                # Initial training window (weeks)
+    test_size: int = 1                           # Test window size
+    step: int = 1                                # Step size for walk-forward
+    rolling_window_size: int | None = None       # Fixed window size for rolling
+
+@dataclass
+class HARSelectionConfig:
+    method: Literal["lasso", "bsr", "none"] = "lasso"
+    lasso: LassoSelectionConfig | None = None
+    bsr: BSRSelectionConfig | None = None
+    refit_every_windows: int = 1                 # Refit selection every N windows
+
+@dataclass
+class HARModelConfig:
+    add_constant: bool = True
+    standardize_features: bool = False
+    target_transform: Literal["none", "log"] = "log"
+    prediction_floor: float = 1e-10
+    log_transform_rv_features: bool = True
+    feature_floor: float = 1e-10
 ```
 
-### Basic HAR Estimation
+## Multi-Target Training Procedure
+
+### 1. Target Definition
+
+The system supports multiple target variables with different horizons:
 
 ```python
-from sklearn.linear_model import LinearRegression
-
-class HARModel:
-    """
-    Heterogeneous Autoregressive (HAR) model for realized volatility.
-    """
-    
-    def __init__(self, daily_lag=1, weekly_lag=5, monthly_lag=22):
-        self.daily_lag = daily_lag
-        self.weekly_lag = weekly_lag
-        self.monthly_lag = monthly_lag
-        self.model = LinearRegression()
-        self.coefficients_ = None
-        self.intercept_ = None
-        
-    def fit(self, rv_series):
-        """
-        Fit the HAR model.
-        
-        Parameters:
-        -----------
-        rv_series : pd.Series
-            Realized volatility time series
-        """
-        # Prepare features
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']]
-        y = data['RV_target']
-        
-        # Fit model
-        self.model.fit(X, y)
-        self.coefficients_ = self.model.coef_
-        self.intercept_ = self.model.intercept_
-        
-        return self
-    
-    def predict(self, rv_series):
-        """
-        Generate predictions.
-        
-        Parameters:
-        -----------
-        rv_series : pd.Series
-            Realized volatility time series
-        
-        Returns:
-        --------
-        np.ndarray
-            Predicted realized volatility
-        """
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']]
-        return self.model.predict(X)
-    
-    def summary(self):
-        """Print model summary."""
-        print("HAR Model Coefficients:")
-        print(f"Intercept: {self.intercept_:.6f}")
-        print(f"β_daily:   {self.coefficients_[0]:.6f}")
-        print(f"β_weekly:  {self.coefficients_[1]:.6f}")
-        print(f"β_monthly: {self.coefficients_[2]:.6f}")
+# Example targets
+targets = {
+    "wheat_weekly_rv": [1, 2, 4],      # 1-week, 2-week, 4-week ahead
+    "corn_weekly_rv": [1, 2, 4],
+    "soybeans_weekly_rv": [1, 2, 4]
+}
 ```
 
-## Variable Selection Approaches
+### 2. Feature Set Construction
 
-### 1. LASSO (Least Absolute Shrinkage and Selection Operator)
+For each target, multiple feature sets are automatically constructed:
 
-LASSO performs variable selection by adding an L1 penalty to the regression objective:
+```python
+def build_target_feature_sets(target_col: str, data: pd.DataFrame):
+    """
+    Builds hierarchical feature sets for a given target.
+    
+    Feature Sets:
+    - har: Core HAR features only (weekly, monthly, seasonal)
+    - har_endo: Core + endogenous features (same commodity)
+    - har_endo_exo: Core + endo + exogenous (other commodities)
+    - har_endo_exo_news: + news sentiment features
+    - har_endo_exo_macro: + macroeconomic indicators
+    - har_endo_exo_climate: + climate variables
+    - har_endo_exo_climate_news: + climate + news
+    - har_endo_exo_climate_macro: + climate + macro
+    - har_endo_exo_news_macro: + news + macro
+    - har_endo_exo_climate_news_macro: All features
+    """
+    
+    # Core HAR features (always included)
+    core = [f"{prefix}_weekly_rv", f"{prefix}_monthly_rv", f"{prefix}_seasonal_rv"]
+    
+    # Endogenous features (same commodity, different transformations)
+    endo = [col for col in data.columns if col.startswith(f"{prefix}_")]
+    
+    # Exogenous features (other commodities)
+    exo = [col for col in data.columns 
+           if col.startswith(("wheat_", "corn_", "soybeans_")) 
+           and not col.startswith(f"{prefix}_")]
+    
+    # Climate features
+    climate = ["ssta_elino", "ssta_lanina", "SOI_index", "NAO_index", 
+               "tmax_hot_in_planting", "tmin_cold_in_harvesting", ...]
+    
+    # News sentiment
+    news = ["frbsf_sentiment", "Text_Climate_Anomaly", "epu_index"]
+    
+    # Macroeconomic
+    macro = ["DJIA_Index", "WTI_Index", "Broad_Dollar_index", "Stock_Uncertainty"]
+    
+    return feature_sets
+```
+
+### 3. Walk-Forward Validation
+
+Two windowing approaches are implemented:
+
+#### Expanding Window
+
+```
+Training:  [--------------------]
+Test:                            [*]
+           
+Training:  [------------------------]
+Test:                                [*]
+
+Training:  [----------------------------]
+Test:                                    [*]
+```
+
+- Training window grows with each iteration
+- Captures all historical information
+- Default: `initial_train_size=104` weeks (~2 years)
+
+#### Rolling Window
+
+```
+Training:  [----------]
+Test:                  [*]
+           
+Training:      [----------]
+Test:                      [*]
+
+Training:          [----------]
+Test:                          [*]
+```
+
+- Fixed-size training window
+- Adapts to recent patterns
+- Default: `rolling_window_size=104` weeks
+
+### 4. Variable Selection Methods
+
+#### LASSO (Least Absolute Shrinkage and Selection Operator)
+
+**Objective Function:**
 
 $$
 \min_{\beta} \left\{ \frac{1}{2n}\sum_{i=1}^{n}(y_i - \beta_0 - \mathbf{x}_i^T\boldsymbol{\beta})^2 + \lambda\sum_{j=1}^{p}|\beta_j| \right\}
 $$
 
-where:
-- $\lambda \geq 0$ is the regularization parameter
-- The L1 penalty $\sum_{j=1}^{p}|\beta_j|$ induces sparsity
-- As $\lambda$ increases, more coefficients are shrunk to exactly zero
-
-#### Implementation
+**Implementation:**
 
 ```python
-from sklearn.linear_model import LassoCV
+class LassoSelectionConfig:
+    n_splits: int = 5              # Cross-validation folds
+    alphas: list[float] | None     # Regularization parameters to try
+    max_iter: int = 10000
+    tol: float = 1e-4
 
-class HAR_LASSO:
+# Selection procedure
+def select_features_lasso(X, y, config):
     """
-    HAR model with LASSO variable selection.
+    1. Perform time-series cross-validation
+    2. Test multiple alpha values
+    3. Select alpha with best CV score
+    4. Identify features with non-zero coefficients
+    5. Return selected feature subset
     """
+    lasso_cv = LassoCV(
+        alphas=config.alphas,
+        cv=TimeSeriesSplit(n_splits=config.n_splits),
+        max_iter=config.max_iter
+    )
+    lasso_cv.fit(X, y)
     
-    def __init__(self, daily_lag=1, weekly_lag=5, monthly_lag=22, 
-                 cv=5, alphas=None):
-        self.daily_lag = daily_lag
-        self.weekly_lag = weekly_lag
-        self.monthly_lag = monthly_lag
-        
-        if alphas is None:
-            alphas = np.logspace(-4, 1, 100)
-        
-        self.model = LassoCV(cv=cv, alphas=alphas, random_state=42)
-        self.selected_features_ = None
-        
-    def fit(self, rv_series, additional_features=None):
-        """
-        Fit HAR-LASSO model.
-        
-        Parameters:
-        -----------
-        rv_series : pd.Series
-            Realized volatility time series
-        additional_features : pd.DataFrame, optional
-            Additional predictors for variable selection
-        """
-        # Prepare base HAR features
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']]
-        
-        # Add additional features if provided
-        if additional_features is not None:
-            X = pd.concat([X, additional_features.loc[X.index]], axis=1)
-        
-        y = data['RV_target']
-        
-        # Fit LASSO with cross-validation
-        self.model.fit(X, y)
-        
-        # Identify selected features (non-zero coefficients)
-        self.selected_features_ = X.columns[self.model.coef_ != 0].tolist()
-        
-        print(f"Optimal λ: {self.model.alpha_:.6f}")
-        print(f"Selected features: {self.selected_features_}")
-        
-        return self
-    
-    def predict(self, rv_series, additional_features=None):
-        """Generate predictions."""
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']]
-        
-        if additional_features is not None:
-            X = pd.concat([X, additional_features.loc[X.index]], axis=1)
-        
-        return self.model.predict(X)
+    selected = X.columns[lasso_cv.coef_ != 0].tolist()
+    return selected, lasso_cv.alpha_
 ```
 
-#### LASSO Properties
+**Refit Strategy:**
+- `refit_every_windows=4`: Reselect features every 4 walk-forward windows
+- Reduces computational cost while maintaining adaptivity
 
-1. **Automatic variable selection**: Sets irrelevant coefficients to exactly zero
-2. **Bias-variance tradeoff**: Introduces bias to reduce variance
-3. **Computational efficiency**: Convex optimization problem
-4. **Cross-validation**: Optimal $\lambda$ selected via CV
+#### BASR (Bayesian Adaptive Shrinkage Regression)
 
-### 2. BASR (Bayesian Adaptive Shrinkage Regression)
-
-BASR is a Bayesian approach that adaptively shrinks coefficients based on their posterior distributions. It uses hierarchical priors to achieve automatic variable selection.
-
-#### Model Specification
-
-The Bayesian HAR model with adaptive shrinkage:
+**Model Specification:**
 
 $$
 \begin{align}
 RV_t &\sim \mathcal{N}(\beta_0 + \mathbf{x}_t^T\boldsymbol{\beta}, \sigma^2) \\
 \beta_j &\sim \mathcal{N}(0, \tau_j^2) \\
-\tau_j^2 &\sim \text{InverseGamma}(a, b) \\
-\sigma^2 &\sim \text{InverseGamma}(c, d)
+\tau_j^2 &\sim \text{InverseGamma}(a, b)
 \end{align}
 $$
 
-where:
-- $\tau_j^2$ is the variance hyperparameter for coefficient $\beta_j$
-- The hierarchical prior allows adaptive shrinkage
-- Small $\tau_j^2$ implies strong shrinkage toward zero
-
-#### Horseshoe Prior
-
-A popular choice for BASR is the horseshoe prior:
-
-$$
-\begin{align}
-\beta_j &\sim \mathcal{N}(0, \lambda_j^2 \tau^2) \\
-\lambda_j &\sim \text{Cauchy}^+(0, 1) \\
-\tau &\sim \text{Cauchy}^+(0, 1)
-\end{align}
-$$
-
-The horseshoe prior provides:
-- Strong shrinkage for small signals
-- Minimal shrinkage for large signals
-- Heavy tails to accommodate outliers
-
-#### Implementation
+**Implementation:**
 
 ```python
-import pymc as pm
-import arviz as az
+class BSRSelectionConfig:
+    alpha: float = 0.05            # Significance level for selection
+    window_type: str = "expanding"
+    window_size: int | None = None
+    step: int = 1
 
-class HAR_BASR:
+# Selection procedure
+def select_features_bsr(X, y, config):
     """
-    HAR model with Bayesian Adaptive Shrinkage Regression.
+    1. Fit Bayesian regression with adaptive priors
+    2. Compute posterior inclusion probabilities
+    3. Select features with P(inclusion) > 1 - alpha
+    4. Return selected feature subset
     """
+    # Bayesian Subset Regression
+    model = BayesianSubsetRegression(alpha=config.alpha)
+    model.fit(X, y)
     
-    def __init__(self, daily_lag=1, weekly_lag=5, monthly_lag=22, 
-                 prior='horseshoe'):
-        self.daily_lag = daily_lag
-        self.weekly_lag = weekly_lag
-        self.monthly_lag = monthly_lag
-        self.prior = prior
-        self.trace = None
-        self.model = None
-        
-    def fit(self, rv_series, additional_features=None, 
-            draws=2000, tune=1000, chains=4):
-        """
-        Fit HAR-BASR model using MCMC.
-        
-        Parameters:
-        -----------
-        rv_series : pd.Series
-            Realized volatility time series
-        additional_features : pd.DataFrame, optional
-            Additional predictors
-        draws : int
-            Number of MCMC samples
-        tune : int
-            Number of tuning steps
-        chains : int
-            Number of MCMC chains
-        """
-        # Prepare features
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']].values
-        
-        if additional_features is not None:
-            X_add = additional_features.loc[data.index].values
-            X = np.hstack([X, X_add])
-        
-        y = data['RV_target'].values
-        n_features = X.shape[1]
-        
-        # Build Bayesian model
-        with pm.Model() as self.model:
-            # Horseshoe prior for adaptive shrinkage
-            if self.prior == 'horseshoe':
-                # Global shrinkage parameter
-                tau = pm.HalfCauchy('tau', beta=1)
-                
-                # Local shrinkage parameters
-                lambda_j = pm.HalfCauchy('lambda', beta=1, shape=n_features)
-                
-                # Coefficients with horseshoe prior
-                beta = pm.Normal('beta', mu=0, 
-                                sigma=lambda_j * tau, 
-                                shape=n_features)
-            
-            elif self.prior == 'laplace':
-                # Laplace prior (Bayesian LASSO)
-                scale = pm.HalfCauchy('scale', beta=1)
-                beta = pm.Laplace('beta', mu=0, b=scale, shape=n_features)
-            
-            # Intercept
-            beta_0 = pm.Normal('beta_0', mu=0, sigma=10)
-            
-            # Likelihood variance
-            sigma = pm.HalfNormal('sigma', sigma=1)
-            
-            # Linear predictor
-            mu = beta_0 + pm.math.dot(X, beta)
-            
-            # Likelihood
-            likelihood = pm.Normal('y', mu=mu, sigma=sigma, observed=y)
-            
-            # Sample from posterior
-            self.trace = pm.sample(draws=draws, tune=tune, 
-                                  chains=chains, return_inferencedata=True)
-        
-        return self
+    # Features with significant posterior probability
+    selected = [col for col, prob in model.inclusion_probs.items() 
+                if prob > (1 - config.alpha)]
     
-    def predict(self, rv_series, additional_features=None):
-        """
-        Generate posterior predictive samples.
-        
-        Returns:
-        --------
-        dict
-            Dictionary with 'mean', 'lower', 'upper' prediction intervals
-        """
-        data = prepare_har_features(
-            rv_series, 
-            self.daily_lag, 
-            self.weekly_lag, 
-            self.monthly_lag
-        )
-        
-        X = data[['RV_daily', 'RV_weekly', 'RV_monthly']].values
-        
-        if additional_features is not None:
-            X_add = additional_features.loc[data.index].values
-            X = np.hstack([X, X_add])
-        
-        # Posterior predictive
-        with self.model:
-            pm.set_data({'X': X})
-            posterior_pred = pm.sample_posterior_predictive(
-                self.trace, var_names=['y']
-            )
-        
-        # Extract predictions
-        y_pred = posterior_pred.posterior_predictive['y'].values
-        
-        return {
-            'mean': y_pred.mean(axis=(0, 1)),
-            'lower': np.percentile(y_pred, 2.5, axis=(0, 1)),
-            'upper': np.percentile(y_pred, 97.5, axis=(0, 1))
-        }
-    
-    def summary(self):
-        """Print posterior summary."""
-        return az.summary(self.trace, var_names=['beta_0', 'beta', 'sigma'])
+    return selected, model.inclusion_probs
 ```
 
-#### BASR Properties
+**Refit Strategy:**
+- `refit_every_windows=8`: Reselect features every 8 windows
+- More stable than LASSO, requires less frequent refitting
 
-1. **Adaptive shrinkage**: Different shrinkage for each coefficient
-2. **Uncertainty quantification**: Full posterior distributions
-3. **Automatic relevance determination**: Identifies important features
-4. **Robust to outliers**: Heavy-tailed priors
-5. **Interpretability**: Posterior inclusion probabilities
-
-### Comparison: LASSO vs. BASR
-
-| Aspect | LASSO | BASR |
-|--------|-------|------|
-| Framework | Frequentist | Bayesian |
-| Shrinkage | Uniform (same λ) | Adaptive (different τⱼ) |
-| Uncertainty | Bootstrap/asymptotic | Posterior distribution |
-| Computation | Fast (convex optimization) | Slower (MCMC) |
-| Selection | Hard thresholding | Soft (posterior probabilities) |
-| Tuning | Cross-validation | Prior specification |
-
-## Model Evaluation
-
-### In-Sample Metrics
+### 5. Model Training Pipeline
 
 ```python
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+def run_har_experiment(data, feature_config, run_config):
+    """
+    Complete HAR training pipeline.
+    
+    Steps:
+    1. Prepare features and target
+    2. Initialize walk-forward validator
+    3. For each window:
+       a. Extract training data
+       b. Perform feature selection (if enabled)
+       c. Apply transformations (log, standardization)
+       d. Fit OLS regression
+       e. Generate predictions
+       f. Store results
+    4. Aggregate predictions across windows
+    5. Compute evaluation metrics
+    """
+    
+    # Feature preparation
+    X, y = prepare_har_features(data, feature_config)
+    
+    # Walk-forward validation
+    wf_config = run_config.walk_forward
+    validator = WalkForwardValidator(
+        window_type=wf_config.window_type,
+        initial_train_size=wf_config.initial_train_size,
+        test_size=wf_config.test_size,
+        step=wf_config.step
+    )
+    
+    predictions = []
+    selected_features_history = []
+    
+    for window_idx, (train_idx, test_idx) in enumerate(validator.split(X)):
+        X_train, y_train = X.iloc[train_idx], y.iloc[train_idx]
+        X_test, y_test = X.iloc[test_idx], y.iloc[test_idx]
+        
+        # Feature selection (periodic refitting)
+        if should_refit_selection(window_idx, run_config.selection):
+            selected_features = select_features(
+                X_train, y_train, run_config.selection
+            )
+        
+        X_train_selected = X_train[selected_features]
+        X_test_selected = X_test[selected_features]
+        
+        # Apply transformations
+        if run_config.model.log_transform_rv_features:
+            X_train_selected = log_transform(X_train_selected)
+            X_test_selected = log_transform(X_test_selected)
+        
+        if run_config.model.target_transform == "log":
+            y_train = np.log(y_train)
+        
+        # Standardization
+        if run_config.model.standardize_features:
+            scaler = StandardScaler()
+            X_train_selected = scaler.fit_transform(X_train_selected)
+            X_test_selected = scaler.transform(X_test_selected)
+        
+        # Fit OLS
+        model = OLS(y_train, X_train_selected, 
+                   add_constant=run_config.model.add_constant)
+        results = model.fit()
+        
+        # Predict
+        y_pred = results.predict(X_test_selected)
+        
+        # Inverse transform
+        if run_config.model.target_transform == "log":
+            y_pred = np.exp(y_pred)
+        
+        # Apply floor
+        y_pred = np.maximum(y_pred, run_config.model.prediction_floor)
+        
+        predictions.append({
+            'window': window_idx,
+            'y_true': y_test,
+            'y_pred': y_pred,
+            'selected_features': selected_features
+        })
+    
+    return aggregate_results(predictions)
+```
 
-def evaluate_har_model(y_true, y_pred):
+## Grid Search for Hyperparameter Tuning
+
+### Grid Search Configuration
+
+```python
+@dataclass
+class HARGridSearchConfig:
+    enabled: bool = False
+    initial_train_sizes: list[int] | None = None    # [52, 104, 156]
+    test_sizes: list[int] | None = None             # [1, 2, 4]
+    steps: list[int] | None = None                  # [1, 2]
+    metric: str = "test_mse"                        # Optimization metric
+    max_candidates: int | None = None               # Limit search space
+```
+
+### Grid Search Procedure
+
+```python
+def grid_search_har(data, base_config, grid_config):
     """
-    Evaluate HAR model performance.
-    
-    Returns:
-    --------
-    dict
-        Dictionary of evaluation metrics
+    1. Generate all parameter combinations
+    2. For each combination:
+       a. Create run configuration
+       b. Train model with walk-forward validation
+       c. Compute validation metric
+    3. Select best configuration
+    4. Retrain with best parameters
     """
-    mse = mean_squared_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y_true, y_pred)
-    r2 = r2_score(y_true, y_pred)
     
-    # QLIKE (Quasi-Likelihood)
-    qlike = np.mean(y_true / y_pred - np.log(y_true / y_pred) - 1)
+    # Generate candidates
+    candidates = []
+    for train_size in grid_config.initial_train_sizes:
+        for test_size in grid_config.test_sizes:
+            for step in grid_config.steps:
+                candidates.append({
+                    'initial_train_size': train_size,
+                    'test_size': test_size,
+                    'step': step
+                })
     
+    # Evaluate each candidate
+    results = []
+    for candidate in candidates:
+        run_config = create_config_from_candidate(base_config, candidate)
+        result = run_har_experiment(data, feature_config, run_config)
+        metric_value = result.metrics['test'][grid_config.metric]
+        results.append((candidate, metric_value, result))
+    
+    # Select best
+    best_candidate, best_metric, best_result = min(
+        results, key=lambda x: x[1]  # Minimize metric
+    )
+    
+    return best_result, best_candidate
+```
+
+## Benchmark Execution
+
+### Multi-Horizon Multi-Model Benchmark
+
+```python
+def benchmark_multi_horizon(data, config):
+    """
+    Run comprehensive benchmark across:
+    - Multiple target horizons (1, 2, 4 weeks)
+    - Multiple feature sets (10 combinations)
+    - Multiple models (OLS, LASSO, BSR)
+    - Multiple windowing strategies (expanding, rolling)
+    
+    Total experiments per target: 10 feature sets × 6 models = 60 runs
+    """
+    
+    results = {}
+    
+    for horizon in config.target_horizons:
+        results[horizon] = {}
+        
+        # Build feature sets for this horizon
+        feature_sets = build_wheat_feature_sets(data)
+        
+        for feature_set_name, extra_cols in feature_sets.items():
+            results[horizon][feature_set_name] = {}
+            
+            for model_name, run_config in config.model_configs.items():
+                # Create feature config
+                feature_config = HARFeatureConfig(
+                    target_col=config.target_col,
+                    core_columns=config.core_columns,
+                    target_horizon=horizon,
+                    extra_feature_cols=extra_cols
+                )
+                
+                # Run experiment with caching
+                result = run_with_cache(
+                    data=data,
+                    feature_config=feature_config,
+                    run_config=run_config,
+                    cache_key=f"{horizon}_{feature_set_name}_{model_name}"
+                )
+                
+                results[horizon][feature_set_name][model_name] = result
+    
+    return results
+```
+
+### Default Model Configurations
+
+```python
+DEFAULT_MODELS = {
+    "ols_expanding": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="expanding",
+            initial_train_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(method="none"),
+        model=HARModelConfig(standardize_features=False)
+    ),
+    
+    "ols_rolling": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="rolling",
+            initial_train_size=104,
+            rolling_window_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(method="none"),
+        model=HARModelConfig(standardize_features=False)
+    ),
+    
+    "lasso_expanding": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="expanding",
+            initial_train_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(
+            method="lasso",
+            lasso=LassoSelectionConfig(n_splits=5),
+            refit_every_windows=4
+        ),
+        model=HARModelConfig(standardize_features=True)
+    ),
+    
+    "lasso_rolling": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="rolling",
+            initial_train_size=104,
+            rolling_window_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(
+            method="lasso",
+            lasso=LassoSelectionConfig(n_splits=5),
+            refit_every_windows=4
+        ),
+        model=HARModelConfig(standardize_features=True)
+    ),
+    
+    "bsr_expanding": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="expanding",
+            initial_train_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(
+            method="bsr",
+            bsr=BSRSelectionConfig(alpha=0.05),
+            refit_every_windows=8
+        ),
+        model=HARModelConfig(standardize_features=False)
+    ),
+    
+    "bsr_rolling": HARRunConfig(
+        walk_forward=HARWalkForwardConfig(
+            window_type="rolling",
+            initial_train_size=104,
+            rolling_window_size=104,
+            test_size=1,
+            step=1
+        ),
+        selection=HARSelectionConfig(
+            method="bsr",
+            bsr=BSRSelectionConfig(alpha=0.05),
+            refit_every_windows=8
+        ),
+        model=HARModelConfig(standardize_features=False)
+    )
+}
+```
+
+## Evaluation Metrics
+
+```python
+def compute_metrics(y_true, y_pred):
+    """
+    Compute comprehensive evaluation metrics.
+    """
     return {
-        'MSE': mse,
-        'RMSE': rmse,
-        'MAE': mae,
-        'R²': r2,
-        'QLIKE': qlike
+        'mse': mean_squared_error(y_true, y_pred),
+        'rmse': np.sqrt(mean_squared_error(y_true, y_pred)),
+        'mae': mean_absolute_error(y_true, y_pred),
+        'r2': r2_score(y_true, y_pred),
+        'r2log': r2_score(np.log(y_true), np.log(y_pred)),
+        'qlike': np.mean(y_true / y_pred - np.log(y_true / y_pred) - 1),
+        'mape': np.mean(np.abs((y_true - y_pred) / y_true)) * 100
     }
 ```
 
-### Out-of-Sample Forecasting
+## Caching System
 
 ```python
-def rolling_forecast(model, rv_series, window_size=252, horizon=1):
+def cache_key(model_name, feature_set_name, feature_config, run_config, data_signature):
     """
-    Perform rolling window forecasting.
-    
-    Parameters:
-    -----------
-    model : HAR model instance
-        Fitted HAR model
-    rv_series : pd.Series
-        Realized volatility series
-    window_size : int
-        Size of rolling window
-    horizon : int
-        Forecast horizon
-    
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame with forecasts and actuals
+    Generate unique cache key based on:
+    - Model configuration
+    - Feature set
+    - Data signature (hash of input data)
+    - All hyperparameters
     """
-    forecasts = []
-    actuals = []
-    dates = []
-    
-    for i in range(window_size, len(rv_series) - horizon):
-        # Training window
-        train_data = rv_series.iloc[i-window_size:i]
-        
-        # Fit model
-        model.fit(train_data)
-        
-        # Forecast
-        test_data = rv_series.iloc[i:i+horizon+22]  # Need extra for features
-        pred = model.predict(test_data)
-        
-        forecasts.append(pred[0])
-        actuals.append(rv_series.iloc[i+horizon])
-        dates.append(rv_series.index[i+horizon])
-    
-    return pd.DataFrame({
-        'forecast': forecasts,
-        'actual': actuals
-    }, index=dates)
+    config_dict = {
+        'model': model_name,
+        'features': feature_set_name,
+        'target_horizon': feature_config.target_horizon,
+        'window_type': run_config.walk_forward.window_type,
+        'initial_train_size': run_config.walk_forward.initial_train_size,
+        'selection_method': run_config.selection.method,
+        'data_sig': data_signature
+    }
+    return hashlib.md5(json.dumps(config_dict, sort_keys=True).encode()).hexdigest()
 ```
 
-## Extensions and Variations
+## Usage Example
 
-### HAR-RV-J (with Jumps)
+```python
+from src.benchmark.har import benchmark_multi_horizon
 
-$$
-RV_t = \beta_0 + \beta_d^c C_{t-1} + \beta_d^j J_{t-1} + \beta_w RV_{t-1}^{(w)} + \beta_m RV_{t-1}^{(m)} + \epsilon_t
-$$
+# Configuration
+config = WheatHARBenchmarkConfig(
+    target_col="wheat_weekly_rv",
+    target_horizons=[1, 2, 4],
+    core_columns=["wheat_weekly_rv", "wheat_monthly_rv", "wheat_seasonal_rv"],
+    model_names=["ols_expanding", "lasso_expanding", "bsr_expanding"],
+    feature_set_names=["har", "har_endo_exo", "har_endo_exo_climate_news_macro"],
+    use_cache=True,
+    cache_dir="cache/har"
+)
 
-where $C_t$ is the continuous component and $J_t$ is the jump component.
+# Run benchmark
+results = benchmark_multi_horizon(data, config)
 
-### HAR-RSV (with Signed Volatility)
+# Convert to DataFrame
+df = benchmark_multi_horizon_results_to_frame(results)
 
-$$
-RV_t = \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-1}^{(w)} + \beta_m RV_{t-1}^{(m)} + \beta_r r_{t-1} + \epsilon_t
-$$
-
-where $r_t$ is the return, capturing leverage effects.
-
-### HAR-GARCH
-
-Combines HAR structure with GARCH dynamics:
-
-$$
-\begin{align}
-RV_t &= \mu_t + \epsilon_t \\
-\mu_t &= \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-1}^{(w)} + \beta_m RV_{t-1}^{(m)} \\
-\epsilon_t &\sim \mathcal{N}(0, h_t) \\
-h_t &= \omega + \alpha \epsilon_{t-1}^2 + \beta h_{t-1}
-\end{align}
-$$
+# Results structure:
+# - target_horizon: 1, 2, 4
+# - model_type: ols_expanding, lasso_expanding, bsr_expanding
+# - feature_set: har, har_endo_exo, etc.
+# - test_mse, test_rmse, test_mae, test_r2, test_r2log
+# - n_selected_features
+# - lasso_best_alpha (if applicable)
+# - bsr_alpha (if applicable)
+```
 
 ## References
 
 1. Corsi, F. (2009). "A Simple Approximate Long-Memory Model of Realized Volatility." *Journal of Financial Econometrics*, 7(2), 174-196.
 
-2. Andersen, T. G., Bollerslev, T., & Diebold, F. X. (2007). "Roughing It Up: Including Jump Components in the Measurement, Modeling, and Forecasting of Return Volatility." *The Review of Economics and Statistics*, 89(4), 701-720.
+2. Tibshirani, R. (1996). "Regression Shrinkage and Selection via the Lasso." *Journal of the Royal Statistical Society: Series B*, 58(1), 267-288.
 
-3. Tibshirani, R. (1996). "Regression Shrinkage and Selection via the Lasso." *Journal of the Royal Statistical Society: Series B*, 58(1), 267-288.
-
-4. Carvalho, C. M., Polson, N. G., & Scott, J. G. (2010). "The Horseshoe Estimator for Sparse Signals." *Biometrika*, 97(2), 465-480.
-
-5. Audrino, F., & Knaus, S. D. (2016). "Lassoing the HAR Model: A Model Selection Perspective on Realized Volatility Dynamics." *Econometric Reviews*, 35(8-10), 1485-1521.
+3. George, E. I., & McCulloch, R. E. (1993). "Variable Selection via Gibbs Sampling." *Journal of the American Statistical Association*, 88(423), 881-889.
