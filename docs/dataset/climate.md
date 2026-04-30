@@ -278,8 +278,8 @@ Z_{s,m}(i) = \frac{\tilde{X}_{s,m}(i) - \mu_{s,m}}{\sigma_{s,m}}
 $$
 
 where:
-- $\mu_{s,m} = \frac{1}{n} \sum_{i=1}^{n} \tilde{X}_{s,m}(i)$ is the mean
-- $\sigma_{s,m} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\tilde{X}_{s,m}(i) - \mu_{s,m})^2}$ is the standard deviation
+- $\mu_{s,m} = \frac{1}{n} \sum_{i=1}^{n} \tilde{X}_{s,m}(i)$ is the mean  
+- $\sigma_{s,m} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} \left(\tilde{X}_{s,m}(i) - \mu_{s,m}\right)^2}$ is the standard deviation  
 - $n$ is the number of observations in month $m$ for state $s$
 
 **Step 5: Quantile-based extreme detection**
