@@ -88,7 +88,7 @@ In this codebase, the feature is built from **Google Trends daily interest** for
 
 The pipeline:
 
-1. Pulls daily search interest in monthly chunks (with retry + local cache)
+1. Pulls daily search interest in monthly chunks
 2. Concatenates all chunks into one daily series
 3. Standardizes the series as a z-score
 4. Resamples to weekly frequency (`W-MON`) using weekly mean
@@ -96,34 +96,7 @@ The pipeline:
 
 Implementation source:
 
-- `src/dataset/google_trend/climate_change.py:89`
-- `src/dataset/google_trend/climate_change.py:145`
-- `src/dataset/google_trend/climate_change.py:157`
-
-### Mathematical transformation
-
-Let \( G_t \) be daily Google Trends interest for `climate change`.  
-The standardized series is:
-
-\[
-Z_t = \frac{G_t - \mu_G}{\sigma_G}
-\]
-
-where \( \mu_G \) and \( \sigma_G \) are the sample mean and standard deviation over the retrieved daily window.
-
-Weekly feature value is then:
-
-\[
-\text{Text\_Climate\_Anomaly}_{w} = \frac{1}{|D_w|}\sum_{t \in D_w} Z_t
-\]
-
-where \(D_w\) is the set of days in week \(w\) (week ending Monday in this project).
-
-### Interpretation
-
-- Higher values: elevated climate-related public attention/news-search intensity
-- Lower values: below-normal climate narrative attention
-
-This feature is used jointly with sentiment (`frbsf_sentiment`) and policy uncertainty (`epu_index`) in HAR extended feature sets (e.g., `har_endo_exo_news`, `har_endo_exo_climate_news_macro`).
+- `src/dataset/google_trend/climate_change.py`
+- `src/dataset/google_trend/climate_change.py`
 
 ---
