@@ -271,7 +271,7 @@ $$
 
 **Step 4: Standardization**
 
-Compute the z-score for each observation within the monthly group:
+Compute the z-score for each observation within the monthly group using the detrended series (if detrending was applied) or the original series (if stationary):
 
 $$
 Z_{s,m}(i) = \frac{\tilde{X}_{s,m}(i) - \mu_{s,m}}{\sigma_{s,m}}
@@ -292,19 +292,33 @@ $$
 
 Define extreme bands based on variable-specific quantile rules (see below).
 
-**Step 6: Value selection**
+**Step 6: Value selection with trend restoration**
 
-For each extreme band $B$, the selected value is:
+For each extreme band $B$, first identify which observations fall within the band based on their z-scores:
 
 $$
-V_{s,m,B}(i) = 
+\text{InBand}_{s,m,B}(i) = 
 \begin{cases}
-X_{s,m}(i) & \text{if } Z_{s,m}(i) \in B \\
+1 & \text{if } Z_{s,m}(i) \in B \\
 0 & \text{otherwise}
 \end{cases}
 $$
 
-If detrending was applied, $X_{s,m}(i)$ is the original (non-detrended) value.
+Then, if detrending was applied, restore the trend before storing the value:
+
+$$
+V_{s,m,B}(i) = 
+\begin{cases}
+\tilde{X}_{s,m}(i) + (\alpha + \beta \cdot i) & \text{if } \text{InBand}_{s,m,B}(i) = 1 \text{ and detrending was applied} \\
+X_{s,m}(i) & \text{if } \text{InBand}_{s,m,B}(i) = 1 \text{ and no detrending} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+In other words:
+- Quantile detection is performed on the detrended z-scores
+- If an observation falls within an extreme band, the stored value is the original scale value with the trend restored
+- This ensures that the final features reflect the actual magnitude of the climate variable, not the detrended residuals
 
 **Step 7: Seasonal masking**
 
@@ -557,17 +571,35 @@ $$
 q_{0.95} = \inf \{z : P(Z_m \leq z) \geq 0.95\}
 $$
 
-Mark extreme values:
+Identify extreme observations based on z-scores:
 
 $$
-V_m^{\text{extreme}}(i) = 
+\text{IsExtreme}_m(i) = 
 \begin{cases}
-\text{CO2}_m(i) & \text{if } Z_m(i) \geq q_{0.95} \\
+1 & \text{if } Z_m(i) \geq q_{0.95} \\
 0 & \text{otherwise}
 \end{cases}
 $$
 
-**Step 5: Seasonal masking**
+**Step 5: Value selection with trend restoration**
+
+If detrending was applied, restore the trend before storing the value:
+
+$$
+V_m^{\text{extreme}}(i) = 
+\begin{cases}
+\tilde{\text{CO2}}_m(i) + (\alpha + \beta \cdot i) & \text{if } \text{IsExtreme}_m(i) = 1 \text{ and detrending was applied} \\
+\text{CO2}_m(i) & \text{if } \text{IsExtreme}_m(i) = 1 \text{ and no detrending} \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+In other words:
+- Extreme detection is performed on the detrended z-scores
+- If an observation is extreme, the stored value is the original scale CO2 value with the trend restored
+- This ensures that the final CO2 features reflect the actual atmospheric CO2 concentration, not the detrended residuals
+
+**Step 6: Seasonal masking**
 
 For crop $c$:
 
