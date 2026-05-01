@@ -65,7 +65,6 @@ Used columns:
 - the first non-date value column, currently `co2_molfrac_ppm`
 
 Notes:
-- The loader intentionally picks the first column that is not `date`, empty, or `Unnamed: 0`.
 - CO2 is treated as a national series, not a state-level dataset.
 
 ### 1.4 Palmer drought index files
