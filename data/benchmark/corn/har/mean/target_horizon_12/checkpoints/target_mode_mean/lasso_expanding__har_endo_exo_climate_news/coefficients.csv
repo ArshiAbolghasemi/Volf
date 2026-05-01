@@ -1,0 +1,14 @@
+,coefficient
+awnd_moderate_high_wind_in_planting,0.02004476443502219
+corn_monthly_rv,0.06245626990341536
+corn_seasonal_rv,-0.024464086753480385
+corn_weekly_rv,0.08801185251312167
+frbsf_sentiment,-0.01999054113955598
+pdsi_extreme_wet_in_harvesting,-0.027563701919207453
+soybeans_seasonal_lev,0.028870348412451702
+ssta_elino,-0.015263936802479247
+tmax_hot_in_harvesting,-0.026178906634164695
+tmax_hot_in_planting,0.025983083964995275
+tmax_very_hot_in_planting,0.014224820124019849
+wheat_seasonal_jumps,0.02565504155808946
+wheat_seasonal_rku,0.022988438050109694

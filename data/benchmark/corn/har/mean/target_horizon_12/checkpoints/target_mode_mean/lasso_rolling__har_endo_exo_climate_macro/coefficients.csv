@@ -1,0 +1,15 @@
+,coefficient
+Broad_Dollar_index,-0.056265624184685975
+DJIA_Index,0.07118263749187738
+awnd_extreme_high_wind_in_harvesting,-0.02162959878873842
+awnd_moderate_high_wind_in_planting,0.026285016146676957
+corn_monthly_rv,0.03084282316185888
+corn_seasonal_lev,0.01776789407123234
+corn_seasonal_rv,0.009684842539594209
+corn_weekly_rv,0.08662847184238537
+pdsi_extreme_wet_in_harvesting,-0.021244489238124525
+pdsi_extreme_wet_in_planting,0.050839672893377374
+ssta_elino,-0.03935414727720482
+tmax_hot_in_harvesting,-0.03353894884145614
+tmax_hot_in_planting,0.033661142232215086
+tmin_very_cold_in_planting,0.03091799023320474
