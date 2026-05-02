@@ -58,6 +58,8 @@ uv sync
 
 ### SHAP interpretation
 - `uv run python -m scripts.benchmark.shap --config config/wheat/shap_har_mean_top.json`
+- `uv run python -m scripts.benchmark.tree_shap --config config/wheat/shap_rf.json`
+- `uv run python -m scripts.benchmark.tree_shap --config config/wheat/shap_xgb.json`
 - Computes SHAP for selected best runs and exports top-10 feature-importance histogram.
 
 ## HAR mean benchmark snapshot (best by horizon)

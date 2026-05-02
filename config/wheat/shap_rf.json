@@ -1,0 +1,18 @@
+{
+  "benchmark_type": "rf",
+  "benchmark_config": "config/wheat/random_forest.json",
+  "output_subdir": "shap",
+  "jobs": [
+    {
+      "name": "rf_expanding_all_test",
+      "model_type": "rf_expanding",
+      "feature_set": "all",
+      "target_horizon": 1,
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0,
+      "max_background_samples": 200
+    }
+  ]
+}

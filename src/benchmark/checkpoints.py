@@ -174,13 +174,38 @@ def checkpoint_bundle_dir(
     )
     if canonical.exists():
         return canonical
-    legacy = (
+    return (
         checkpoint_root
         / f"target_horizon_{target_horizon}"
         / "checkpoints"
         / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
     )
-    return legacy
+
+
+def load_checkpoint_model_info(
+    *,
+    checkpoint_root: Path,
+    target_horizon: int,
+    target_mode: str,
+    model_type: str,
+    feature_set: str,
+) -> dict[str, Any]:
+    bundle_dir = checkpoint_bundle_dir(
+        checkpoint_root=checkpoint_root,
+        target_horizon=target_horizon,
+        target_mode=target_mode,
+        model_type=model_type,
+        feature_set=feature_set,
+    )
+    if not bundle_dir.exists():
+        msg = f"Checkpoint bundle not found: {bundle_dir}"
+        raise FileNotFoundError(msg)
+
+    model_info_path = bundle_dir / "model_info.json"
+    if not model_info_path.exists():
+        msg = f"Checkpoint bundle is incomplete (model_info missing): {bundle_dir}"
+        raise FileNotFoundError(msg)
+    return json.loads(model_info_path.read_text(encoding="utf-8"))
 
 
 def load_har_checkpoint_result(

@@ -124,85 +124,109 @@ def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path
     return raw_path if raw_path.is_absolute() else (DATA_DIR / "benchmark" / raw_path)
 
 
+def _default_benchmark_config_from_raw(raw: dict[str, Any]) -> WheatHARBenchmarkConfig:
+    return WheatHARBenchmarkConfig(
+        csv_path=str(raw.get("csv_path", DATA_DIR / "ag" / "v4.csv")),
+        target_col=str(raw.get("target_col", "wheat_weekly_rv")),
+        target_horizon=int(raw.get("target_horizon", 1)),
+        target_horizons=(
+            [int(v) for v in raw["target_horizons"]]
+            if isinstance(raw.get("target_horizons"), list)
+            else None
+        ),
+        target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
+        use_cache=bool(raw.get("use_cache", True)),
+        cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
+        cache_overwrite=bool(raw.get("cache_overwrite", False)),
+        parallel_jobs=int(raw.get("parallel_jobs", 1)),
+    )
+
+
+def _load_or_build_benchmark_config(raw: dict[str, Any]) -> WheatHARBenchmarkConfig:
+    benchmark_config_path = raw.get("benchmark_config")
+    if benchmark_config_path:
+        return _load_benchmark_config_from_json(str(benchmark_config_path))
+    return _default_benchmark_config_from_raw(raw)
+
+
+def _build_pairs_from_template(
+    *,
+    template: dict[str, Any],
+    benchmark_cfg: WheatHARBenchmarkConfig,
+) -> list[ClarkWestPairConfig]:
+    horizons = template.get("horizons") or benchmark_cfg.target_horizons
+    model_types = template.get("model_types")
+    feature_pairs = template.get("feature_pairs")
+    if not isinstance(horizons, list) or not horizons:
+        msg = "pair_template.horizons must be a non-empty list."
+        raise ValueError(msg)
+    if not isinstance(model_types, list) or not model_types:
+        msg = "pair_template.model_types must be a non-empty list."
+        raise ValueError(msg)
+    if not isinstance(feature_pairs, list) or not feature_pairs:
+        msg = "pair_template.feature_pairs must be a non-empty list."
+        raise ValueError(msg)
+
+    pairs: list[ClarkWestPairConfig] = []
+    for horizon in horizons:
+        for model_type in model_types:
+            for feature_pair in feature_pairs:
+                if not isinstance(feature_pair, dict):
+                    continue
+                base_fs = feature_pair.get("base_feature_set")
+                aug_fs = feature_pair.get("augmented_feature_set")
+                if not isinstance(base_fs, str) or not isinstance(aug_fs, str):
+                    continue
+                pair_name = feature_pair.get("name")
+                if not isinstance(pair_name, str) or not pair_name.strip():
+                    pair_name = f"{base_fs}->{aug_fs}"
+                pair_hac = feature_pair.get("hac_maxlags")
+                pairs.append(
+                    ClarkWestPairConfig(
+                        model_type=str(model_type),
+                        base_feature_set=base_fs,
+                        augmented_feature_set=aug_fs,
+                        target_horizon=int(horizon),
+                        name=f"{model_type}:{pair_name}:h{int(horizon)}",
+                        hac_maxlags=(
+                            None if pair_hac is None else int(cast("int", pair_hac))
+                        ),
+                    )
+                )
+    return pairs
+
+
+def _load_pairs(
+    raw: dict[str, Any],
+    *,
+    benchmark_cfg: WheatHARBenchmarkConfig,
+) -> list[ClarkWestPairConfig]:
+    pairs_raw = raw.get("pairs")
+    if isinstance(pairs_raw, list) and pairs_raw:
+        return [ClarkWestPairConfig(**pair) for pair in pairs_raw]
+    if isinstance(raw.get("pair_template"), dict):
+        return _build_pairs_from_template(
+            template=cast("dict[str, Any]", raw["pair_template"]),
+            benchmark_cfg=benchmark_cfg,
+        )
+    msg = "Clark-West config must include non-empty 'pairs' or 'pair_template'."
+    raise ValueError(msg)
+
+
 def _load_clark_west_config(
     path: str,
 ) -> tuple[WheatHARBenchmarkConfig, ClarkWestConfig, Path, Path]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
-    benchmark_config_path = raw.get("benchmark_config")
-    if benchmark_config_path:
-        benchmark_cfg = _load_benchmark_config_from_json(str(benchmark_config_path))
-    else:
-        benchmark_cfg = WheatHARBenchmarkConfig(
-            csv_path=str(raw.get("csv_path", DATA_DIR / "ag" / "v4.csv")),
-            target_col=str(raw.get("target_col", "wheat_weekly_rv")),
-            target_horizon=int(raw.get("target_horizon", 1)),
-            target_horizons=(
-                [int(v) for v in raw["target_horizons"]]
-                if isinstance(raw.get("target_horizons"), list)
-                else None
-            ),
-            target_mode=normalize_target_mode(str(raw.get("target_mode", "point"))),
-            use_cache=bool(raw.get("use_cache", True)),
-            cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
-            cache_overwrite=bool(raw.get("cache_overwrite", False)),
-            parallel_jobs=int(raw.get("parallel_jobs", 1)),
-        )
-
+    benchmark_cfg = _load_or_build_benchmark_config(raw)
     if isinstance(raw.get("benchmark_overrides"), dict):
         overrides = raw["benchmark_overrides"]
         for key, value in overrides.items():
             if hasattr(benchmark_cfg, key):
                 setattr(benchmark_cfg, key, value)
 
-    pairs_raw = raw.get("pairs")
-    pairs: list[ClarkWestPairConfig] = []
-    if isinstance(pairs_raw, list) and pairs_raw:
-        pairs = [ClarkWestPairConfig(**pair) for pair in pairs_raw]
-    elif isinstance(raw.get("pair_template"), dict):
-        template = cast("dict[str, Any]", raw["pair_template"])
-        horizons = template.get("horizons") or benchmark_cfg.target_horizons
-        model_types = template.get("model_types")
-        feature_pairs = template.get("feature_pairs")
-        if not isinstance(horizons, list) or not horizons:
-            msg = "pair_template.horizons must be a non-empty list."
-            raise ValueError(msg)
-        if not isinstance(model_types, list) or not model_types:
-            msg = "pair_template.model_types must be a non-empty list."
-            raise ValueError(msg)
-        if not isinstance(feature_pairs, list) or not feature_pairs:
-            msg = "pair_template.feature_pairs must be a non-empty list."
-            raise ValueError(msg)
-        for horizon in horizons:
-            for model_type in model_types:
-                for feature_pair in feature_pairs:
-                    if not isinstance(feature_pair, dict):
-                        continue
-                    base_fs = feature_pair.get("base_feature_set")
-                    aug_fs = feature_pair.get("augmented_feature_set")
-                    if not isinstance(base_fs, str) or not isinstance(aug_fs, str):
-                        continue
-                    pair_name = feature_pair.get("name")
-                    if not isinstance(pair_name, str) or not pair_name.strip():
-                        pair_name = f"{base_fs}->{aug_fs}"
-                    pair_hac = feature_pair.get("hac_maxlags")
-                    pairs.append(
-                        ClarkWestPairConfig(
-                            model_type=str(model_type),
-                            base_feature_set=base_fs,
-                            augmented_feature_set=aug_fs,
-                            target_horizon=int(horizon),
-                            name=f"{model_type}:{pair_name}:h{int(horizon)}",
-                            hac_maxlags=(
-                                None if pair_hac is None else int(cast("int", pair_hac))
-                            ),
-                        )
-                    )
-    else:
-        msg = "Clark-West config must include non-empty 'pairs' or 'pair_template'."
-        raise ValueError(msg)
-
+    pairs = _load_pairs(raw, benchmark_cfg=benchmark_cfg)
     if not pairs:
         msg = "Clark-West config produced an empty pair list."
         raise ValueError(msg)
