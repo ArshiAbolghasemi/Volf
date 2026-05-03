@@ -1,0 +1,30 @@
+{
+  "best_alpha": 0.0018370847207996904,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.171327     0.059558    0.024950\n1   0.159780     0.058221    0.025115\n2   0.149012     0.057059    0.025371\n3   0.138969     0.055816    0.025797\n4   0.129603     0.053136    0.024128\n..       ...          ...         ...\n95  0.000226     0.024836    0.006234\n96  0.000211     0.024836    0.006235\n97  0.000197     0.024837    0.006236\n98  0.000184     0.024837    0.006237\n99  0.000171     0.024837    0.006238\n\n[100 rows x 3 columns]",
+  "dropped_features": [],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_rv"
+  ],
+  "lasso_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 3,
+  "n_samples_used": 824,
+  "n_selected_by_lasso": 2,
+  "n_selected_total": 3,
+  "n_windows": 65,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_rv": 1.0
+  },
+  "target_col": "RV_target"
+}

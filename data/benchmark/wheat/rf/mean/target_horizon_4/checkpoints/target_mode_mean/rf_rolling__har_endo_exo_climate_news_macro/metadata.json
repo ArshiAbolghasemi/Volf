@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/rf/mean/target_horizon_4/checkpoints/target_mode_mean/rf_rolling__har_endo_exo_climate_news_macro",
+  "feature_set": "har_endo_exo_climate_news_macro",
+  "model_family": "rf",
+  "model_type": "rf_rolling",
+  "saved_at_utc": "2026-05-02T12:17:51.289376+00:00",
+  "target_horizon": 4,
+  "target_mode": "mean"
+}

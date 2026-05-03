@@ -1,0 +1,14 @@
+,coefficient
+corn_weekly_rv,0.013590324986097788
+soybeans_monthly_rku,-0.012809667268302644
+soybeans_monthly_rv,0.04268167760163945
+soybeans_monthly_rvb,0.021633555402792944
+soybeans_monthly_rvg,-0.00925863385878712
+soybeans_seasonal_lev,0.014411421606657824
+soybeans_seasonal_rv,-0.0110606433782403
+soybeans_weekly_rku,-0.024640301567006827
+soybeans_weekly_rv,0.1255258011194918
+wheat_monthly_lev,-0.009623327308029811
+wheat_seasonal_jumps,0.012060265016929219
+wheat_seasonal_lev,-0.012502144123744608
+wheat_seasonal_rv,0.0037312427103816936
