@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
-import pandas as pd  # noqa: TC002
+if TYPE_CHECKING:
+    import pandas as pd
 
 DEFAULT_TARGET = "wheat_weekly_rv"
 DEFAULT_CORE_COLUMNS = ["wheat_weekly_rv", "wheat_monthly_rv", "wheat_seasonal_rv"]

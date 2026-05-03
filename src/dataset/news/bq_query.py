@@ -19,7 +19,7 @@ def commodity_query(start_date: str, end_date: str, commodity: str) -> str:
         )
     GROUP BY date
     ORDER BY date
-    """  # noqa: S608
+    """
 
 
 def agriculture_query(start_date: str, end_date: str) -> str:
@@ -40,7 +40,7 @@ def agriculture_query(start_date: str, end_date: str) -> str:
         )
     GROUP BY date
     ORDER BY date
-    """  # noqa: S608
+    """
 
 
 def total_news_query(start_date: str, end_date: str) -> str:
@@ -56,4 +56,4 @@ def total_news_query(start_date: str, end_date: str) -> str:
             BETWEEN '{start_date}' AND '{end_date}'
     GROUP BY date
     ORDER BY date
-    """  # noqa: S608
+    """

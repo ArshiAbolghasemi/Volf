@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
-import pandas as pd  # noqa: TC002
+if TYPE_CHECKING:
+    import pandas as pd
 
-from src.variable_selection import (  # noqa: TC001
-    BSRSelectionConfig,
-    LassoSelectionConfig,
-)
+    from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 
 
 @dataclass

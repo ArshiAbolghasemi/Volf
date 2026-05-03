@@ -186,6 +186,7 @@ def calculate_gdelt_news_features(
     """Calculate GDELT news features for the week for wheat, corn, and soybeans.
 
     Args:
+    ----
         week_start: Monday of the week
         wheat_news_data: DataFrame with daily wheat news data
         corn_news_data: DataFrame with daily corn news data
@@ -194,6 +195,7 @@ def calculate_gdelt_news_features(
         total_news_data: DataFrame with daily total news volume
 
     Returns:
+    -------
         Dictionary of GDELT news features for all three commodities
 
     """
@@ -272,12 +274,14 @@ def _calculate_commodity_features(
     """Calculate news features for a specific commodity.
 
     Args:
+    ----
         commodity: Name of commodity (wheat, corn, soybeans)
         week_start: Monday of the week
         week_end: Sunday of the week
         news_data: DataFrame with daily commodity news data
 
     Returns:
+    -------
         Dictionary of news features for the commodity
 
     """

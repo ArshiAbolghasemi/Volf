@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Any
-
-import pandas as pd  # noqa: TC002
+from typing import TYPE_CHECKING, Any
 
 from src.variable_selection import (
     BSRSelectionConfig,
@@ -12,7 +10,10 @@ from src.variable_selection import (
     lasso_time_series_feature_selection,
 )
 
-from .types import HARSelectionConfig  # noqa: TC001
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from .types import HARSelectionConfig
 
 
 def select_har_features(

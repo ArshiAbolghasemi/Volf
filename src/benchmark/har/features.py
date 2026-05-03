@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pandas as pd  # noqa: TC002
+from typing import TYPE_CHECKING
 
 from src.benchmark.utils import (
     build_target_feature_sets as _build_target_feature_sets_common,
@@ -15,6 +15,9 @@ from .types import (
     DEFAULT_STEP,
     DEFAULT_TEST_SIZE,
 )
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def existing_columns(data: pd.DataFrame, columns: list[str]) -> list[str]:

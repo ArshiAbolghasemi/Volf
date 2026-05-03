@@ -3,12 +3,14 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict
-from pathlib import Path  # noqa: TC003
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pandas as pd
 
 from src.model import XGBExperimentResult, XGBFeatureConfig, XGBRunConfig
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def dataset_signature(data: pd.DataFrame) -> str:

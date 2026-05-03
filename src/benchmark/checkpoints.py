@@ -17,13 +17,13 @@ def _safe_name(value: str) -> str:
 
 
 def _jsonable(value: Any) -> Any:
-    if isinstance(value, (str, int, float, bool)) or value is None:
+    if isinstance(value, str | int | float | bool) or value is None:
         out: Any = value
     elif isinstance(value, Path):
         out = str(value)
     elif isinstance(value, dict):
         out = {str(k): _jsonable(v) for k, v in value.items()}
-    elif isinstance(value, (list, tuple, set)):
+    elif isinstance(value, list | tuple | set):
         out = [_jsonable(v) for v in value]
     elif isinstance(value, pd.Series):
         out = {str(k): _jsonable(v) for k, v in value.to_dict().items()}
