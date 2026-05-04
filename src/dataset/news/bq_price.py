@@ -2,8 +2,9 @@ import argparse
 import logging
 from dataclasses import dataclass
 
-from dataset.news.bq_query import agriculture_query, commodity_query, total_news_query
 from google.cloud import bigquery
+
+from dataset.news.bq_query import agriculture_query, commodity_query, total_news_query
 
 logging.basicConfig(
     level=logging.INFO,
