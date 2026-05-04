@@ -171,10 +171,44 @@ def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path
     return raw_path if raw_path.is_absolute() else (DATA_DIR / "benchmark" / raw_path)
 
 
+def _infer_crop_name(
+    benchmark_cfg: WheatRFBenchmarkConfig | WheatXGBBenchmarkConfig,
+) -> str:
+    csv_stem = Path(benchmark_cfg.csv_path).stem.strip().lower()
+    if csv_stem:
+        return csv_stem
+    target_col = benchmark_cfg.target_col.strip().lower()
+    return target_col.split("_", 1)[0]
+
+
+def _resolve_family_root(
+    *,
+    crop: str,
+    family: str,
+    target_mode: str,
+    raw_root: str | None,
+) -> Path:
+    if raw_root is not None and str(raw_root).strip():
+        return _resolve_output_root(str(raw_root), default_subpath="")
+
+    candidates = [
+        DATA_DIR / "benchmark" / crop / family / target_mode,
+        DATA_DIR / "benchmark" / crop / target_mode,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
 def _load_tree_shap_config(
     path: str,
 ) -> tuple[
-    str, WheatRFBenchmarkConfig | WheatXGBBenchmarkConfig, TreeShapConfig, Path, Path
+    str,
+    WheatRFBenchmarkConfig | WheatXGBBenchmarkConfig,
+    TreeShapConfig,
+    str | None,
+    str | None,
 ]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
@@ -203,15 +237,13 @@ def _load_tree_shap_config(
         jobs=[TreeShapJobConfig(**job) for job in jobs_raw],
         output_subdir=str(raw.get("output_subdir", "shap")),
     )
-    output_root = _resolve_output_root(
+    return (
+        benchmark_type,
+        benchmark_cfg,
+        shap_cfg,
         cast("str | None", raw.get("output_root")),
-        default_subpath=f"{benchmark_type}/{benchmark_cfg.target_mode}",
-    )
-    checkpoint_root = _resolve_output_root(
         cast("str | None", raw.get("checkpoint_root")),
-        default_subpath=f"{benchmark_type}/{benchmark_cfg.target_mode}",
     )
-    return benchmark_type, benchmark_cfg, shap_cfg, output_root, checkpoint_root
 
 
 def main() -> None:
@@ -221,7 +253,7 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    benchmark_type, benchmark_cfg, shap_cfg, output_root, checkpoint_root = (
+    benchmark_type, benchmark_cfg, shap_cfg, output_root_raw, checkpoint_root_raw = (
         _load_tree_shap_config(args.config)
     )
 
@@ -235,6 +267,7 @@ def main() -> None:
     if not core_columns:
         msg = "No valid core columns found in data for SHAP run."
         raise ValueError(msg)
+    crop = _infer_crop_name(benchmark_cfg)
 
     if benchmark_type == "rf":
         model_run_configs = benchmark_cfg.run_configs or default_rf_run_configs()
@@ -256,15 +289,27 @@ def main() -> None:
         )
 
     required_jobs = {
-        (int(job.target_horizon), job.model_type, job.feature_set) for job in shap_cfg.jobs
+        (
+            int(job.target_horizon),
+            str(job.target_mode),
+            job.model_type,
+            job.feature_set,
+        )
+        for job in shap_cfg.jobs
     }
-    resolved_model_info: dict[tuple[int, str, str], dict[str, Any]] = {}
-    for horizon, model_type, feature_set in sorted(required_jobs):
-        resolved_model_info[(horizon, model_type, feature_set)] = (
+    resolved_model_info: dict[tuple[int, str, str, str], dict[str, Any]] = {}
+    for horizon, target_mode, model_type, feature_set in sorted(required_jobs):
+        checkpoint_root = _resolve_family_root(
+            crop=crop,
+            family=benchmark_type,
+            target_mode=target_mode,
+            raw_root=checkpoint_root_raw,
+        )
+        resolved_model_info[(horizon, target_mode, model_type, feature_set)] = (
             load_checkpoint_model_info(
                 checkpoint_root=checkpoint_root,
                 target_horizon=horizon,
-                target_mode=benchmark_cfg.target_mode,
+                target_mode=target_mode,
                 model_type=model_type,
                 feature_set=feature_set,
             )
@@ -279,12 +324,28 @@ def main() -> None:
             raise ValueError(msg)
 
         horizon = int(job.target_horizon)
-        model_info = resolved_model_info[(horizon, job.model_type, job.feature_set)]
+        checkpoint_root = _resolve_family_root(
+            crop=crop,
+            family=benchmark_type,
+            target_mode=job.target_mode,
+            raw_root=checkpoint_root_raw,
+        )
+        output_root = _resolve_family_root(
+            crop=crop,
+            family=benchmark_type,
+            target_mode=job.target_mode,
+            raw_root=output_root_raw,
+        )
+        model_info = resolved_model_info[
+            (horizon, job.target_mode, job.model_type, job.feature_set)
+        ]
 
         logger.info(
-            "Computing tree SHAP for type=%s horizon=%d model=%s feature_set=%s split=%s",
+            "Computing tree SHAP for type=%s horizon=%d target_mode=%s "
+            "model=%s feature_set=%s split=%s",
             benchmark_type,
             horizon,
+            job.target_mode,
             job.model_type,
             job.feature_set,
             job.split,
@@ -299,7 +360,7 @@ def main() -> None:
                 target_col=benchmark_cfg.target_col,
                 core_columns=core_columns,
                 target_horizon=horizon,
-                target_mode=benchmark_cfg.target_mode,
+                target_mode=job.target_mode,
                 extra_feature_cols=feature_sets[job.feature_set],
             )
             shap_result = run_rf_shap_for_job(
@@ -317,7 +378,7 @@ def main() -> None:
                 target_col=benchmark_cfg.target_col,
                 core_columns=core_columns,
                 target_horizon=horizon,
-                target_mode=benchmark_cfg.target_mode,
+                target_mode=job.target_mode,
                 extra_feature_cols=feature_sets[job.feature_set],
             )
             shap_result = run_xgb_shap_for_job(

@@ -1,0 +1,55 @@
+{
+  "benchmark_config": "config/wheat/random_forest_mean.json",
+  "benchmark_type": "rf",
+  "output_subdir": "shap",
+  "jobs": [
+    {
+      "name": "h4_mean_rf_rolling_har_endo_exo_climate_news",
+      "model_type": "rf_rolling",
+      "feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 4,
+      "target_mode": "mean",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0,
+      "max_background_samples": 200
+    },
+    {
+      "name": "h8_mean_rf_rolling_har_endo_exo_news",
+      "model_type": "rf_rolling",
+      "feature_set": "har_endo_exo_news",
+      "target_horizon": 8,
+      "target_mode": "mean",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0,
+      "max_background_samples": 200
+    },
+    {
+      "name": "h12_mean_rf_rolling_har_endo_exo_news",
+      "model_type": "rf_rolling",
+      "feature_set": "har_endo_exo_news",
+      "target_horizon": 12,
+      "target_mode": "mean",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0,
+      "max_background_samples": 200
+    },
+    {
+      "name": "h16_mean_rf_rolling_har_endo_exo_climate_news",
+      "model_type": "rf_rolling",
+      "feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "target_mode": "mean",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0,
+      "max_background_samples": 200
+    }
+  ]
+}

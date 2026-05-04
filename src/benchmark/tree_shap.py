@@ -42,6 +42,7 @@ class TreeShapJobConfig:
     model_type: str
     feature_set: str
     target_horizon: int
+    target_mode: Literal["point", "mean"] = "point"
     name: str | None = None
     split: Literal["test", "train"] = "test"
     include_features: list[str] | None = None
@@ -198,6 +199,20 @@ def _pick_report_features(shap_values: pd.DataFrame, job: TreeShapJobConfig) -> 
             return selected
     mean_abs = shap_values.abs().mean().sort_values(ascending=False)
     return cast("list[str]", mean_abs.head(max(job.top_n_features, 1)).index.tolist())
+
+
+def _build_summary_frame(shap_values: pd.DataFrame) -> pd.DataFrame:
+    if shap_values.empty:
+        return pd.DataFrame(columns=["feature", "mean_abs_shap", "mean_shap"])
+
+    all_features = shap_values.abs().mean().sort_values(ascending=False).index.tolist()
+    return pd.DataFrame(
+        {
+            "feature": all_features,
+            "mean_abs_shap": [float(shap_values[f].abs().mean()) for f in all_features],
+            "mean_shap": [float(shap_values[f].mean()) for f in all_features],
+        }
+    )
 
 
 def _fit_rf(
@@ -389,15 +404,7 @@ def _run_tree_shap_common(  # noqa: PLR0915
         else pd.DataFrame(index=feature_df.index)
     )
 
-    summary = pd.DataFrame(
-        {
-            "feature": report_features,
-            "mean_abs_shap": [
-                float(shap_selected[f].abs().mean()) for f in report_features
-            ],
-            "mean_shap": [float(shap_selected[f].mean()) for f in report_features],
-        }
-    ).sort_values("mean_abs_shap", ascending=False)
+    summary = _build_summary_frame(shap_df)
 
     shap_out = shap_selected.copy()
     if date_series is not None:

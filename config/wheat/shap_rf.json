@@ -4,10 +4,11 @@
   "output_subdir": "shap",
   "jobs": [
     {
-      "name": "rf_expanding_all_test",
-      "model_type": "rf_expanding",
-      "feature_set": "all",
+      "name": "wheat_rf_h1_point_example",
+      "model_type": "rf_rolling",
+      "feature_set": "har_endo_exo_climate_news",
       "target_horizon": 1,
+      "target_mode": "point",
       "split": "test",
       "top_n_features": 20,
       "dependence_top_n": 3,

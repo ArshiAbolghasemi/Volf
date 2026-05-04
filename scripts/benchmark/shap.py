@@ -135,9 +135,37 @@ def _resolve_output_root(raw_value: str | None, *, default_subpath: str) -> Path
     return raw_path if raw_path.is_absolute() else (DATA_DIR / "benchmark" / raw_path)
 
 
+def _infer_crop_name(benchmark_cfg: WheatHARBenchmarkConfig) -> str:
+    csv_stem = Path(benchmark_cfg.csv_path).stem.strip().lower()
+    if csv_stem:
+        return csv_stem
+    target_col = benchmark_cfg.target_col.strip().lower()
+    return target_col.split("_", 1)[0]
+
+
+def _resolve_family_root(
+    *,
+    crop: str,
+    family: str,
+    target_mode: str,
+    raw_root: str | None,
+) -> Path:
+    if raw_root is not None and str(raw_root).strip():
+        return _resolve_output_root(str(raw_root), default_subpath="")
+
+    candidates = [
+        DATA_DIR / "benchmark" / crop / family / target_mode,
+        DATA_DIR / "benchmark" / crop / target_mode,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
 def _load_shap_config(
     path: str,
-) -> tuple[WheatHARBenchmarkConfig, ShapConfig, Path, Path]:
+) -> tuple[WheatHARBenchmarkConfig, ShapConfig, str | None, str | None]:
     with Path(path).open(encoding="utf-8") as f:
         raw = json.load(f)
 
@@ -157,15 +185,12 @@ def _load_shap_config(
         jobs=[ShapJobConfig(**job) for job in jobs_raw],
         output_subdir=str(raw.get("output_subdir", "shap")),
     )
-    output_root = _resolve_output_root(
+    return (
+        benchmark_cfg,
+        shap_cfg,
         cast("str | None", raw.get("output_root")),
-        default_subpath=f"har/{benchmark_cfg.target_mode}",
-    )
-    checkpoint_root = _resolve_output_root(
         cast("str | None", raw.get("checkpoint_root")),
-        default_subpath=f"har/{benchmark_cfg.target_mode}",
     )
-    return benchmark_cfg, shap_cfg, output_root, checkpoint_root
 
 
 def main() -> None:
@@ -176,7 +201,9 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    benchmark_cfg, shap_cfg, output_root, checkpoint_root = _load_shap_config(args.config)
+    benchmark_cfg, shap_cfg, output_root_raw, checkpoint_root_raw = _load_shap_config(
+        args.config
+    )
 
     data = pd.read_csv(benchmark_cfg.csv_path)
     if "Date" in data.columns:
@@ -192,37 +219,54 @@ def main() -> None:
         raise ValueError(msg)
 
     feature_sets = build_wheat_feature_sets(data, core_columns=core_columns)
+    crop = _infer_crop_name(benchmark_cfg)
 
     required_jobs = {
-        (int(job.target_horizon), job.model_type, job.feature_set) for job in shap_cfg.jobs
+        (
+            int(job.target_horizon),
+            str(job.target_mode),
+            job.model_type,
+            job.feature_set,
+        )
+        for job in shap_cfg.jobs
     }
     logger.info(
         "Loading HAR checkpoints for SHAP resolution: %d unique jobs",
         len(required_jobs),
     )
-    resolved_model_info: dict[tuple[int, str, str], dict[str, Any]] = {}
-    for horizon, model_type, feature_set in sorted(required_jobs):
+    resolved_model_info: dict[tuple[int, str, str, str], dict[str, Any]] = {}
+    for horizon, target_mode, model_type, feature_set in sorted(required_jobs):
         if model_type not in model_run_configs:
             msg = f"model_type '{model_type}' not found in benchmark run configs."
             raise ValueError(msg)
         if feature_set not in feature_sets:
             msg = f"feature_set '{feature_set}' not found in available feature sets."
             raise ValueError(msg)
+        checkpoint_root = _resolve_family_root(
+            crop=crop,
+            family="har",
+            target_mode=target_mode,
+            raw_root=checkpoint_root_raw,
+        )
 
         logger.info(
-            "Loading SHAP config resolution checkpoint: horizon=%d model=%s feature_set=%s",
+            "Loading SHAP config resolution checkpoint: "
+            "horizon=%d target_mode=%s model=%s feature_set=%s",
             horizon,
+            target_mode,
             model_type,
             feature_set,
         )
         result = load_har_checkpoint_result(
             checkpoint_root=checkpoint_root,
             target_horizon=horizon,
-            target_mode=benchmark_cfg.target_mode,
+            target_mode=target_mode,
             model_type=model_type,
             feature_set=feature_set,
         )
-        resolved_model_info[(horizon, model_type, feature_set)] = result.model_info
+        resolved_model_info[(horizon, target_mode, model_type, feature_set)] = (
+            result.model_info
+        )
 
     for job in shap_cfg.jobs:
         if job.model_type not in model_run_configs:
@@ -233,11 +277,24 @@ def main() -> None:
             raise ValueError(msg)
 
         horizon = int(job.target_horizon)
-        key = (horizon, job.model_type, job.feature_set)
+        checkpoint_root = _resolve_family_root(
+            crop=crop,
+            family="har",
+            target_mode=job.target_mode,
+            raw_root=checkpoint_root_raw,
+        )
+        output_root = _resolve_family_root(
+            crop=crop,
+            family="har",
+            target_mode=job.target_mode,
+            raw_root=output_root_raw,
+        )
+        key = (horizon, job.target_mode, job.model_type, job.feature_set)
         if key not in resolved_model_info:
             msg = (
                 f"Missing benchmark result for horizon={horizon}, "
-                f"model={job.model_type}, feature_set={job.feature_set}."
+                f"target_mode={job.target_mode}, model={job.model_type}, "
+                f"feature_set={job.feature_set}."
             )
             raise ValueError(msg)
         run_cfg = model_run_configs[job.model_type]
@@ -251,13 +308,14 @@ def main() -> None:
             target_col=benchmark_cfg.target_col,
             core_columns=core_columns,
             target_horizon=horizon,
-            target_mode=benchmark_cfg.target_mode,
+            target_mode=job.target_mode,
             extra_feature_cols=feature_sets[job.feature_set],
         )
 
         logger.info(
-            "Computing SHAP for horizon=%d model=%s feature_set=%s split=%s",
+            "Computing SHAP for horizon=%d target_mode=%s model=%s feature_set=%s split=%s",
             horizon,
+            job.target_mode,
             job.model_type,
             job.feature_set,
             job.split,

@@ -1,0 +1,17 @@
+{
+  "benchmark_config": "config/wheat/har.json",
+  "output_subdir": "shap",
+  "jobs": [
+    {
+      "name": "h1_point_lasso_rolling_har_endo_exo_climate_news_macro",
+      "model_type": "lasso_rolling",
+      "feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "target_mode": "point",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0
+    }
+  ]
+}
