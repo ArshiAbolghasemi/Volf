@@ -274,7 +274,6 @@ def main() -> None:
         feature_sets = build_rf_feature_sets(
             data,
             core_columns=core_columns,
-            core_columns_by_target=benchmark_cfg.core_columns_by_target,
             target_col=benchmark_cfg.target_col,
             climate_columns=benchmark_cfg.climate_columns,
         )
@@ -283,7 +282,6 @@ def main() -> None:
         feature_sets = build_xgb_feature_sets(
             data,
             core_columns=core_columns,
-            core_columns_by_target=benchmark_cfg.core_columns_by_target,
             target_col=benchmark_cfg.target_col,
             climate_columns=benchmark_cfg.climate_columns,
         )
