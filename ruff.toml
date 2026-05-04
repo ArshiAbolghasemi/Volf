@@ -28,6 +28,7 @@ exclude = [
     "*.ipynb",
     "prompt_inventory.py",
     ".history",
+    "./src/dataset/news/bq_query.py",
 ]
 
 # Same as Black.
