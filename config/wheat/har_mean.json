@@ -2,6 +2,7 @@
   "csv_path": "data/ag/wheat.csv",
   "target_col": "wheat_weekly_rv",
   "target_horizons": [
+    1,
     4,
     8,
     12,
@@ -93,138 +94,6 @@
       },
       "selection": {
         "method": "none"
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": false,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
-    "lasso_expanding": {
-      "walk_forward": {
-        "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": null
-      },
-      "selection": {
-        "method": "lasso",
-        "refit_every_windows": 4,
-        "lasso": {
-          "n_splits": 5,
-          "alphas": 100,
-          "max_iter": 200000,
-          "tol": 0.0001,
-          "eps": 0.001,
-          "retry_on_convergence_warning": true,
-          "retry_max_iter_multiplier": 5,
-          "retry_eps": 0.01,
-          "coef_threshold": 1e-10,
-          "random_state": 42,
-          "n_jobs": -1
-        }
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": true,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
-    "lasso_rolling": {
-      "walk_forward": {
-        "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
-      },
-      "selection": {
-        "method": "lasso",
-        "refit_every_windows": 4,
-        "lasso": {
-          "n_splits": 5,
-          "alphas": 100,
-          "max_iter": 200000,
-          "tol": 0.0001,
-          "eps": 0.001,
-          "retry_on_convergence_warning": true,
-          "retry_max_iter_multiplier": 5,
-          "retry_eps": 0.01,
-          "coef_threshold": 1e-10,
-          "random_state": 42,
-          "n_jobs": -1
-        }
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": true,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
-    "bsr_expanding": {
-      "walk_forward": {
-        "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": null
-      },
-      "selection": {
-        "method": "bsr",
-        "refit_every_windows": 8,
-        "bsr": {
-          "alpha": 0.05,
-          "add_constant": true,
-          "hac_maxlags": null,
-          "window_type": "expanding",
-          "window_size": null,
-          "step": 1,
-          "start_train_size": 52,
-          "min_features": 0,
-          "selection_threshold": 0.5
-        }
-      },
-      "model": {
-        "add_constant": true,
-        "standardize_features": false,
-        "target_transform": "log",
-        "prediction_floor": 1e-10,
-        "log_transform_rv_features": true,
-        "feature_floor": 1e-10
-      }
-    },
-    "bsr_rolling": {
-      "walk_forward": {
-        "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
-      },
-      "selection": {
-        "method": "bsr",
-        "refit_every_windows": 8,
-        "bsr": {
-          "alpha": 0.05,
-          "add_constant": true,
-          "hac_maxlags": null,
-          "window_type": "rolling",
-          "window_size": 104,
-          "step": 1,
-          "start_train_size": 52,
-          "min_features": 0,
-          "selection_threshold": 0.5
-        }
       },
       "model": {
         "add_constant": true,
