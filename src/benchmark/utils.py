@@ -33,22 +33,6 @@ CLIMATE_COLUMNS = [
     "spi_7d_very_dry_in_harvesting",
     "spi_7d_extreme_dry_in_planting",
     "spi_7d_extreme_dry_in_harvesting",
-    "spi_1m_very_wet_in_planting",
-    "spi_1m_very_wet_in_harvesting",
-    "spi_1m_extreme_wet_in_planting",
-    "spi_1m_extreme_wet_in_harvesting",
-    "spi_1m_very_dry_in_planting",
-    "spi_1m_very_dry_in_harvesting",
-    "spi_1m_extreme_dry_in_planting",
-    "spi_1m_extreme_dry_in_harvesting",
-    "spi_3m_very_wet_in_planting",
-    "spi_3m_very_wet_in_harvesting",
-    "spi_3m_extreme_wet_in_planting",
-    "spi_3m_extreme_wet_in_harvesting",
-    "spi_3m_very_dry_in_planting",
-    "spi_3m_very_dry_in_harvesting",
-    "spi_3m_extreme_dry_in_planting",
-    "spi_3m_extreme_dry_in_harvesting",
     "pdsi_very_wet_in_planting",
     "pdsi_very_wet_in_harvesting",
     "pdsi_extreme_wet_in_planting",
@@ -113,9 +97,35 @@ def infer_target_prefix(target_col: str) -> str:
     return target_col.split("_", 1)[0]
 
 
+def benchmark_crop_dir_name(target_col: str) -> str:
+    prefix = infer_target_prefix(target_col)
+    if prefix == "soybeans":
+        return "soybean"
+    return prefix
+
+
 def default_core_columns_for_target(target_col: str) -> list[str]:
     prefix = infer_target_prefix(target_col)
     return [f"{prefix}_weekly_rv", f"{prefix}_monthly_rv", f"{prefix}_seasonal_rv"]
+
+
+def default_endo_columns_for_target(target_col: str) -> list[str]:
+    prefix = infer_target_prefix(target_col)
+    return [
+        f"{prefix}_weekly_rvb",
+        f"{prefix}_weekly_rvg",
+        f"{prefix}_weekly_jumps",
+    ]
+
+
+def default_exo_columns_for_target(target_col: str) -> list[str]:
+    target_prefix = infer_target_prefix(target_col)
+    crop_prefixes = ("wheat", "corn", "soybeans")
+    return [
+        f"{crop_prefix}_weekly_rv"
+        for crop_prefix in crop_prefixes
+        if crop_prefix != target_prefix
+    ]
 
 
 def build_target_feature_sets(
@@ -127,26 +137,8 @@ def build_target_feature_sets(
 ) -> dict[str, list[str]]:
     default_core = default_core_columns_for_target(target_col)
     core = core_columns or existing_columns(data, default_core)
-    core_set = set(core)
-
-    target_prefix = infer_target_prefix(target_col)
-    commodity_prefixes = ("wheat_", "corn_", "soybeans_")
-
-    endo = sorted(
-        [
-            col
-            for col in data.columns
-            if col.startswith(f"{target_prefix}_") and col not in core_set
-        ]
-    )
-    exo = sorted(
-        [
-            col
-            for col in data.columns
-            if col.startswith(commodity_prefixes)
-            and not col.startswith(f"{target_prefix}_")
-        ]
-    )
+    endo = existing_columns(data, default_endo_columns_for_target(target_col))
+    exo = existing_columns(data, default_exo_columns_for_target(target_col))
     climate = existing_columns(data, climate_columns or CLIMATE_COLUMNS)
     news = existing_columns(data, NEWS_BASE_COLUMNS)
     macro = existing_columns(data, MACRO_COLUMNS)
