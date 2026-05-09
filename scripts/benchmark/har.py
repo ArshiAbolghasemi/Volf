@@ -14,7 +14,7 @@ from src.benchmark.har import (
     run_wheat_har_benchmark,
     run_wheat_har_benchmark_multi_horizon,
 )
-from src.benchmark.utils import normalize_target_mode
+from src.benchmark.utils import benchmark_crop_dir_name, normalize_target_mode
 from src.model import (
     HARModelConfig,
     HARRunConfig,
@@ -191,8 +191,8 @@ def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
     return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
-def _target_mode_output_dir(mode: str) -> Path:
-    return DATA_DIR / "benchmark" / "har" / mode
+def _target_mode_output_dir(*, target_col: str, mode: str) -> Path:
+    return DATA_DIR / "benchmark" / benchmark_crop_dir_name(target_col) / "har" / mode
 
 
 def main(  # noqa: C901, PLR0912, PLR0915
@@ -247,7 +247,7 @@ def main(  # noqa: C901, PLR0912, PLR0915
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
-    mode_output_root = _target_mode_output_dir(cfg.target_mode)
+    mode_output_root = _target_mode_output_dir(target_col=cfg.target_col, mode=cfg.target_mode)
     if output_path.parent == (DATA_DIR / "benchmark"):
         output_path = mode_output_root / output_path.name
 

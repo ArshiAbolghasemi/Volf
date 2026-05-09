@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from src.benchmark.checkpoints import save_best_result_checkpoints
-from src.benchmark.utils import normalize_target_mode
+from src.benchmark.utils import benchmark_crop_dir_name, normalize_target_mode
 from src.benchmark.xgb import (
     WheatXGBBenchmarkConfig,
     XGBGridSearchConfig,
@@ -105,8 +105,8 @@ def _parse_target_horizons_arg(value: str | None) -> list[int] | None:
     return sorted({int(token.strip()) for token in value.split(",") if token.strip()})
 
 
-def _target_mode_output_dir(mode: str) -> Path:
-    return DATA_DIR / "benchmark" / "xgb" / mode
+def _target_mode_output_dir(*, target_col: str, mode: str) -> Path:
+    return DATA_DIR / "benchmark" / benchmark_crop_dir_name(target_col) / "xgb" / mode
 
 
 def _build_run_config_from_dict(cfg: dict[str, Any]) -> XGBRunConfig:
@@ -208,7 +208,7 @@ def main(  # noqa: C901, PLR0912, PLR0915
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
-    mode_output_root = _target_mode_output_dir(cfg.target_mode)
+    mode_output_root = _target_mode_output_dir(target_col=cfg.target_col, mode=cfg.target_mode)
     if output_path.parent == (DATA_DIR / "benchmark"):
         output_path = mode_output_root / output_path.name
 

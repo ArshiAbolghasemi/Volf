@@ -72,7 +72,6 @@ def _write_checkpoint_for_result(  # noqa: PLR0913
         checkpoint_root
         / f"target_horizon_{target_horizon}"
         / "checkpoints"
-        / f"target_mode_{_safe_name(target_mode)}"
         / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
     )
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -169,11 +168,19 @@ def checkpoint_bundle_dir(
         checkpoint_root
         / f"target_horizon_{target_horizon}"
         / "checkpoints"
-        / f"target_mode_{_safe_name(target_mode)}"
         / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
     )
     if canonical.exists():
         return canonical
+    legacy = (
+        checkpoint_root
+        / f"target_horizon_{target_horizon}"
+        / "checkpoints"
+        / f"target_mode_{_safe_name(target_mode)}"
+        / f"{_safe_name(model_type)}__{_safe_name(feature_set)}"
+    )
+    if legacy.exists():
+        return legacy
     return (
         checkpoint_root
         / f"target_horizon_{target_horizon}"
