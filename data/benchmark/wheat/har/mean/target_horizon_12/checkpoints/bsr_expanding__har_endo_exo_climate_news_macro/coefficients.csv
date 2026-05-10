@@ -1,0 +1,13 @@
+,coefficient
+wheat_weekly_rv,0.4879804285055206
+wheat_monthly_rv,0.26824710795895806
+wheat_seasonal_rv,-0.16907414828280543
+wheat_weekly_rvb,-15.399990532686683
+ssta_lanina,-0.11176591903638278
+tmin_very_cold_in_planting,0.05288823999300035
+awnd_moderate_high_wind_in_harvesting,0.10802220003269394
+pdsi_extreme_wet_in_planting,-0.08126176940301158
+frbsf_sentiment,-0.2254189259989507
+epu_index,-0.00020656352499555592
+WTI_Index,0.09874236616356913
+Broad_Dollar_index,0.0020591142311689884

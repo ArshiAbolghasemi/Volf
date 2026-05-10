@@ -1,0 +1,16 @@
+,coefficient
+corn_weekly_rv,0.3315998116301271
+corn_monthly_rv,0.03572602272445036
+corn_seasonal_rv,-0.0929302218006406
+corn_weekly_jumps,-546.1782344683568
+ssta_elino,-0.04686606046865255
+ssta_lanina,-0.1036369508688083
+SOI_index,-0.06127537668323728
+tmax_hot_in_planting,0.02377169002696708
+tmax_very_hot_in_planting,0.019902130111423548
+tmax_very_hot_in_harvesting,-0.014892176955499244
+tmin_very_cold_in_planting,0.10166209733305193
+awnd_moderate_high_wind_in_planting,0.15209020933149908
+pdsi_extreme_wet_in_harvesting,-0.226764110462709
+Text_Climate_Anomaly,-0.03906303092973366
+Broad_Dollar_index,-0.024229373154393632

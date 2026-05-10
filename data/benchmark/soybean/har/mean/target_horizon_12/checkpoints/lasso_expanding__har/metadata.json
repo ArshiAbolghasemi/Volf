@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/soybean/har/mean/target_horizon_12/checkpoints/lasso_expanding__har",
+  "feature_set": "har",
+  "model_family": "har",
+  "model_type": "lasso_expanding",
+  "saved_at_utc": "2026-05-10T10:59:23.811446+00:00",
+  "target_horizon": 12,
+  "target_mode": "mean"
+}

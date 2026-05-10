@@ -1,0 +1,8 @@
+soybeans_weekly_rv
+soybeans_monthly_rv
+soybeans_seasonal_rv
+corn_weekly_rv
+wheat_weekly_rv
+soybeans_weekly_rvb
+soybeans_weekly_rvg
+soybeans_weekly_jumps

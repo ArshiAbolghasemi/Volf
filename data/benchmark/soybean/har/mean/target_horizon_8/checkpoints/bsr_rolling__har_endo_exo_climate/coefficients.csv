@@ -1,0 +1,12 @@
+,coefficient
+soybeans_weekly_rv,0.3167387425328829
+soybeans_monthly_rv,0.1087626605325881
+soybeans_seasonal_rv,-0.09265275898690142
+soybeans_weekly_jumps,-539.6133353062291
+corn_weekly_rv,0.11849193165380145
+SOI_index,0.0616519307784677
+tmax_hot_in_planting,0.013299308496808868
+tmax_very_hot_in_planting,0.017874923408459975
+tmin_very_cold_in_planting,0.04253004344404348
+pdsi_extreme_wet_in_planting,-0.13073621449435868
+pdsi_extreme_wet_in_harvesting,-0.15485108547551296

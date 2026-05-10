@@ -1,0 +1,21 @@
+{
+  "final_selected_union": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_rvb",
+    "corn_weekly_rvg",
+    "corn_weekly_jumps"
+  ],
+  "method": "none",
+  "n_windows": 71,
+  "reused_selection": true,
+  "selection_frequency": {
+    "corn_monthly_rv": 1.0,
+    "corn_seasonal_rv": 1.0,
+    "corn_weekly_jumps": 1.0,
+    "corn_weekly_rv": 1.0,
+    "corn_weekly_rvb": 1.0,
+    "corn_weekly_rvg": 1.0
+  }
+}

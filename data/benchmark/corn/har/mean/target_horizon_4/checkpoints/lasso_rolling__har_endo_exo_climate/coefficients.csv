@@ -1,0 +1,17 @@
+,coefficient
+NAO_index,-0.03932281605415313
+awnd_extreme_high_wind_in_harvesting,-0.017194418347188406
+awnd_moderate_high_wind_in_harvesting,-0.007041460707585712
+corn_monthly_rv,0.0505878418508958
+corn_seasonal_rv,-0.014292891478845587
+corn_weekly_jumps,-0.03230199140824325
+corn_weekly_rv,0.13296479886885693
+pdsi_extreme_wet_in_harvesting,-0.009847947771099957
+pdsi_extreme_wet_in_planting,0.019001304527933582
+soybeans_weekly_rv,0.039988482905010975
+ssta_elino,-0.024565333771083192
+tmax_hot_in_harvesting,-0.02509329472127415
+tmax_very_hot_in_harvesting,-0.015235668466355823
+tmax_very_hot_in_planting,0.015404235908021785
+tmin_cold_in_harvesting,0.00949284936042874
+tmin_very_cold_in_planting,0.011225366743208065

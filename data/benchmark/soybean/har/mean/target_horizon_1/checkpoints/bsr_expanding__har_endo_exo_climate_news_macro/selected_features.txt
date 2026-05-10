@@ -1,0 +1,8 @@
+soybeans_weekly_rv
+soybeans_monthly_rv
+soybeans_seasonal_rv
+ssta_elino
+SOI_index
+DJIA_Index
+soybeans_weekly_jumps
+tmin_cold_in_harvesting

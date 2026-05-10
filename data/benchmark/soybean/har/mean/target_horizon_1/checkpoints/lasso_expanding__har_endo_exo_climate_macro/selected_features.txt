@@ -1,0 +1,13 @@
+soybeans_monthly_rv
+soybeans_seasonal_rv
+soybeans_weekly_rv
+soybeans_weekly_rvg
+corn_weekly_rv
+DJIA_Index
+tmin_very_cold_in_harvesting
+Broad_Dollar_index
+WTI_Index
+awnd_extreme_high_wind_in_harvesting
+soybeans_weekly_jumps
+tmin_cold_in_harvesting
+tmin_very_cold_in_planting

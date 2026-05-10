@@ -1,0 +1,15 @@
+,coefficient
+NAO_index,-0.017988341674805605
+WTI_Index,0.03214614263244241
+awnd_extreme_high_wind_in_planting,-0.01266324447269301
+pdsi_extreme_wet_in_harvesting,-0.017086325173552908
+pdsi_extreme_wet_in_planting,-0.014894081140416295
+soybeans_weekly_rv,0.026684068698819646
+ssta_lanina,-0.018281517029404185
+tmax_very_hot_in_planting,-0.014252618136346075
+tmin_cold_in_planting,0.007280230470775889
+tmin_very_cold_in_planting,0.01639918874481546
+wheat_monthly_rv,-0.008551076423480616
+wheat_seasonal_rv,0.0153102255441332
+wheat_weekly_jumps,0.012381020866685383
+wheat_weekly_rv,0.12947157902991524

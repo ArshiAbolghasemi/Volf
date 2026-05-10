@@ -1,0 +1,14 @@
+Broad_Dollar_index
+DJIA_Index
+Stock_Uncertainty
+corn_monthly_rv
+corn_seasonal_rv
+corn_weekly_rv
+epu_index
+frbsf_sentiment
+soybeans_weekly_rv
+wheat_weekly_rv
+Text_Climate_Anomaly
+corn_weekly_jumps
+corn_weekly_rvg
+corn_weekly_rvb

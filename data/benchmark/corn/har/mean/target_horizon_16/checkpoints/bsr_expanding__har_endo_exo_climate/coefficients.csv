@@ -1,0 +1,16 @@
+,coefficient
+corn_weekly_rv,0.38141121407915907
+corn_monthly_rv,0.19750396527633962
+corn_seasonal_rv,-0.03983710517361452
+corn_weekly_jumps,-385.5705602772289
+wheat_weekly_rv,-0.07603048404667834
+ssta_lanina,-0.09265817165431381
+tmax_hot_in_planting,0.02315970858962616
+tmax_hot_in_harvesting,-0.02532534742927879
+tmax_very_hot_in_planting,0.01042245175231413
+tmin_cold_in_harvesting,0.03184909431672528
+tmin_very_cold_in_planting,0.050801009565158456
+awnd_moderate_high_wind_in_planting,0.15421158778510302
+awnd_extreme_high_wind_in_harvesting,-0.07000336977504401
+pdsi_extreme_wet_in_planting,0.11724270984535126
+pdsi_extreme_wet_in_harvesting,-0.10616176555685128

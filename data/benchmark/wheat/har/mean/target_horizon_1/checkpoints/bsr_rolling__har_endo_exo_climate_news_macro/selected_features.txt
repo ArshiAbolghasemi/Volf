@@ -1,0 +1,11 @@
+wheat_weekly_rv
+wheat_monthly_rv
+wheat_seasonal_rv
+tmin_cold_in_harvesting
+wheat_weekly_rvb
+tmax_very_hot_in_harvesting
+pdsi_extreme_wet_in_planting
+Text_Climate_Anomaly
+wheat_weekly_jumps
+soybeans_weekly_rv
+tmin_very_cold_in_harvesting

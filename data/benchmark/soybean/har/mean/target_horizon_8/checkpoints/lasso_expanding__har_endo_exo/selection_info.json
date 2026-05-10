@@ -1,0 +1,45 @@
+{
+  "best_alpha": 0.003349829590078833,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.145006     0.052681    0.023101\n1   0.135233     0.051473    0.023281\n2   0.126119     0.050290    0.023589\n3   0.117619     0.049255    0.023902\n4   0.109692     0.047765    0.023228\n..       ...          ...         ...\n95  0.000192     0.028466    0.008894\n96  0.000179     0.028467    0.008894\n97  0.000167     0.028467    0.008895\n98  0.000155     0.028468    0.008895\n99  0.000145     0.028469    0.008896\n\n[100 rows x 3 columns]",
+  "dropped_features": [],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_rv",
+    "soybeans_weekly_rvg",
+    "corn_weekly_rv",
+    "soybeans_weekly_rvb",
+    "wheat_weekly_rv",
+    "soybeans_weekly_jumps"
+  ],
+  "lasso_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_weekly_rvb",
+    "soybeans_weekly_rvg",
+    "soybeans_weekly_jumps",
+    "wheat_weekly_rv",
+    "corn_weekly_rv"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 8,
+  "n_samples_used": 808,
+  "n_selected_by_lasso": 7,
+  "n_selected_total": 8,
+  "n_windows": 128,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "corn_weekly_rv": 0.90625,
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_jumps": 0.15625,
+    "soybeans_weekly_rv": 1.0,
+    "soybeans_weekly_rvb": 0.40625,
+    "soybeans_weekly_rvg": 0.84375,
+    "wheat_weekly_rv": 0.59375
+  },
+  "target_col": "RV_target"
+}

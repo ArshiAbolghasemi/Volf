@@ -1,0 +1,40 @@
+{
+  "best_alpha": 0.0001656243053542132,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.165624     0.076685    0.027196\n1   0.154462     0.075363    0.028168\n2   0.144052     0.074225    0.029052\n3   0.134343     0.073236    0.029851\n4   0.125289     0.072343    0.030594\n..       ...          ...         ...\n95  0.000219     0.035377    0.004995\n96  0.000204     0.035372    0.004989\n97  0.000190     0.035366    0.004985\n98  0.000178     0.035360    0.004982\n99  0.000166     0.035354    0.004979\n\n[100 rows x 3 columns]",
+  "dropped_features": [],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_rv",
+    "corn_weekly_rvb",
+    "corn_weekly_jumps",
+    "corn_weekly_rvg"
+  ],
+  "lasso_selected_features": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_rvb",
+    "corn_weekly_rvg",
+    "corn_weekly_jumps"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 6,
+  "n_samples_used": 804,
+  "n_selected_by_lasso": 6,
+  "n_selected_total": 6,
+  "n_windows": 71,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "corn_monthly_rv": 1.0,
+    "corn_seasonal_rv": 1.0,
+    "corn_weekly_jumps": 0.8873239436619719,
+    "corn_weekly_rv": 1.0,
+    "corn_weekly_rvb": 0.9436619718309859,
+    "corn_weekly_rvg": 0.5492957746478874
+  },
+  "target_col": "RV_target"
+}

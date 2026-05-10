@@ -1,0 +1,13 @@
+,coefficient
+wheat_weekly_rv,0.5815418019268801
+wheat_monthly_rv,0.06815290568598031
+wheat_seasonal_rv,-0.030056772624665717
+wheat_weekly_rvb,-2.766413474635236
+wheat_weekly_rvg,-5.958648574337076
+wheat_weekly_jumps,9.5513514965578
+corn_weekly_rv,-0.18577219229949413
+soybeans_weekly_rv,0.011579430623421094
+DJIA_Index,0.20615858674345683
+WTI_Index,0.0919598031453461
+Broad_Dollar_index,-0.01225975506105551
+Stock_Uncertainty,0.0003216118419081717

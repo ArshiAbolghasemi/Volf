@@ -1,0 +1,67 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 3,
+  "final_selected_features": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv"
+  ],
+  "final_selected_union": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "tmin_cold_in_harvesting",
+    "wheat_weekly_rvg",
+    "ssta_elino",
+    "SOI_index",
+    "tmax_very_hot_in_harvesting",
+    "Text_Climate_Anomaly",
+    "corn_weekly_rv",
+    "soybeans_weekly_rv",
+    "NAO_index",
+    "tmax_hot_in_planting",
+    "tmax_hot_in_harvesting",
+    "tmax_very_hot_in_planting",
+    "wheat_weekly_jumps"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 72,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "wheat_weekly_rv",
+      "wheat_monthly_rv",
+      "wheat_seasonal_rv"
+    ]
+  ],
+  "selection_frequency": {
+    "NAO_index": 0.1111111111111111,
+    "SOI_index": 0.1111111111111111,
+    "Text_Climate_Anomaly": 0.1111111111111111,
+    "corn_weekly_rv": 0.1111111111111111,
+    "soybeans_weekly_rv": 0.1111111111111111,
+    "ssta_elino": 0.1111111111111111,
+    "tmax_hot_in_harvesting": 0.1111111111111111,
+    "tmax_hot_in_planting": 0.1111111111111111,
+    "tmax_very_hot_in_harvesting": 0.2222222222222222,
+    "tmax_very_hot_in_planting": 0.1111111111111111,
+    "tmin_cold_in_harvesting": 0.3333333333333333,
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_jumps": 0.1111111111111111,
+    "wheat_weekly_rv": 1.0,
+    "wheat_weekly_rvg": 0.4444444444444444
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 28,
+  "warnings": [],
+  "window_size": 104,
+  "window_type": "full"
+}

@@ -1,0 +1,12 @@
+DJIA_Index
+corn_weekly_rv
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rv
+wheat_weekly_rvg
+soybeans_weekly_rv
+Broad_Dollar_index
+Stock_Uncertainty
+Text_Climate_Anomaly
+WTI_Index
+wheat_weekly_jumps

@@ -1,0 +1,16 @@
+wheat_weekly_rv
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rvb
+ssta_lanina
+pdsi_extreme_wet_in_harvesting
+wheat_weekly_rvg
+ssta_elino
+tmax_very_hot_in_harvesting
+corn_weekly_rv
+awnd_moderate_high_wind_in_harvesting
+tmax_hot_in_planting
+tmax_hot_in_harvesting
+tmax_very_hot_in_planting
+tmin_very_cold_in_planting
+pdsi_extreme_wet_in_planting

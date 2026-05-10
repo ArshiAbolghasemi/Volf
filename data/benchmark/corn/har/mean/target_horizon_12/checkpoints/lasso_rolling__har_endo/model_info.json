@@ -1,0 +1,63 @@
+{
+  "bsr_config": null,
+  "core_columns": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv"
+  ],
+  "extra_feature_cols": [
+    "corn_weekly_rvb",
+    "corn_weekly_rvg",
+    "corn_weekly_jumps"
+  ],
+  "grid_search_best_candidate_idx": 11,
+  "grid_search_metric": "test_r2",
+  "grid_search_metric_value": 0.32518789207003795,
+  "grid_search_n_candidates": 18,
+  "initial_train_size": 260,
+  "lasso_config": {
+    "alphas": 100,
+    "coef_threshold": 1e-10,
+    "core_columns": null,
+    "eps": 0.001,
+    "max_iter": 200000,
+    "n_jobs": -1,
+    "n_splits": 5,
+    "progress_bar": false,
+    "random_state": 42,
+    "retry_eps": 0.01,
+    "retry_max_iter_multiplier": 5,
+    "retry_on_convergence_warning": true,
+    "tol": 0.0001
+  },
+  "mean_log_target_inverse_applied": true,
+  "model_add_constant": true,
+  "model_feature_floor": 1e-10,
+  "model_log_transform_rv_features": true,
+  "model_prediction_floor": 1e-10,
+  "model_standardize_features": true,
+  "model_target_transform": "log",
+  "model_target_transform_effective": "none",
+  "n_windows": 70,
+  "rolling_window_size": 260,
+  "selection_method": "lasso",
+  "selection_refit_every_windows": 4,
+  "step": 8,
+  "target_col_model": "RV_target",
+  "target_col_raw": "corn_weekly_rv",
+  "target_floor": 1e-10,
+  "target_horizon": 12,
+  "target_mode": "mean",
+  "test_size": 4,
+  "transformed_feature_columns": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv"
+  ],
+  "walk_forward_initial_train_size": 260,
+  "walk_forward_rolling_window_size": 260,
+  "walk_forward_step": 8,
+  "walk_forward_test_size": 4,
+  "walk_forward_window_type": "rolling",
+  "window_type": "rolling"
+}
