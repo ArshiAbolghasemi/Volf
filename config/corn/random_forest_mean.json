@@ -2,6 +2,7 @@
   "csv_path": "data/ag/corn.csv",
   "target_col": "corn_weekly_rv",
   "target_horizons": [
+    1,
     4,
     8,
     12,
@@ -47,10 +48,6 @@
     "awnd_extreme_high_wind_in_harvesting",
     "spi_7d_in_planting",
     "spi_7d_in_harvesting",
-    "spi_1m_in_planting",
-    "spi_1m_in_harvesting",
-    "spi_3m_in_planting",
-    "spi_3m_in_harvesting",
     "pdsi_extreme_dry_in_planting",
     "pdsi_extreme_dry_in_harvesting",
     "pdsi_dry_in_planting",
