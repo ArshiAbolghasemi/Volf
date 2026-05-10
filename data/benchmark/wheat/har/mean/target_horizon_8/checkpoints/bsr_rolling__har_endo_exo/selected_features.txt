@@ -1,5 +1,0 @@
-wheat_weekly_rv
-wheat_monthly_rv
-wheat_seasonal_rv
-corn_weekly_rv
-soybeans_weekly_rv

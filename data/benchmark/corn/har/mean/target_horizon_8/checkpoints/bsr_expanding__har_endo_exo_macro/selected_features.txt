@@ -1,9 +1,0 @@
-corn_weekly_rv
-corn_monthly_rv
-corn_seasonal_rv
-corn_weekly_jumps
-wheat_weekly_rv
-DJIA_Index
-Stock_Uncertainty
-soybeans_weekly_rv
-Broad_Dollar_index

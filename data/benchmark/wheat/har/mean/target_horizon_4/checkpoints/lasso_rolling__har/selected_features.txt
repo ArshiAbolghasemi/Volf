@@ -1,3 +1,0 @@
-wheat_monthly_rv
-wheat_seasonal_rv
-wheat_weekly_rv
