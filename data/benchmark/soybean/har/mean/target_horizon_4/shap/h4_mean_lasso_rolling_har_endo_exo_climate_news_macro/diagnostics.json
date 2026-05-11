@@ -1,0 +1,37 @@
+{
+  "n_windows":51,
+  "n_obs_shap":51,
+  "target_horizon":4,
+  "model_type":"lasso_rolling",
+  "feature_set":"har_endo_exo_climate_news_macro",
+  "split":"test",
+  "selected_features_report":[
+    "soybeans_weekly_rv",
+    "epu_index",
+    "DJIA_Index",
+    "corn_weekly_rv",
+    "Stock_Uncertainty",
+    "Broad_Dollar_index",
+    "pdsi_extreme_wet_in_planting",
+    "wheat_monthly_rv",
+    "pdsi_extreme_drought_in_planting",
+    "wheat_weekly_rvg",
+    "pdsi_very_wet_in_planting",
+    "pdsi_very_wet_in_harvesting",
+    "SOI_index",
+    "WTI_Index",
+    "frbsf_sentiment",
+    "Text_Climate_Anomaly",
+    "ssta_elino",
+    "tmax_hot_in_planting",
+    "wheat_weekly_rv",
+    "spi_7d_very_dry_in_planting"
+  ],
+  "transformed_feature_columns":[
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "corn_weekly_rv",
+    "soybeans_weekly_rv"
+  ]
+}
