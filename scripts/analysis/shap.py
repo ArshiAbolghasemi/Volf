@@ -23,6 +23,8 @@ FAMILY_CHOICES = ("har", "rf", "xgb")
 CROP_CHOICES = ("wheat", "corn", "soybean")
 MODE_CHOICES = ("mean",)
 TRACKED_GROUPS = ("news", "macro", "climate")
+CLIMATE_REFERENCE_HORIZON = 16
+CLIMATE_TOP_N_FEATURES = 10
 
 
 @dataclass(frozen=True)
@@ -207,6 +209,36 @@ def _resolve_feature_order(
     return [name for name, _ in ordered[: max(top_n_features, 1)]]
 
 
+def _resolve_climate_feature_order_from_reference_horizon(
+    records_and_frames: list[tuple[ShapSummaryRecord, pd.DataFrame]],
+    *,
+    allowed_features: set[str],
+) -> list[str]:
+    reference_frames = [
+        frame
+        for record, frame in records_and_frames
+        if record.target_horizon == CLIMATE_REFERENCE_HORIZON
+    ]
+    if reference_frames:
+        return _resolve_feature_order(
+            reference_frames,
+            explicit_features=None,
+            top_n_features=CLIMATE_TOP_N_FEATURES,
+            allowed_features=allowed_features,
+        )
+
+    logger.warning(
+        "No SHAP summary found for climate reference horizon h%d; falling back to all horizons",
+        CLIMATE_REFERENCE_HORIZON,
+    )
+    return _resolve_feature_order(
+        [frame for _, frame in records_and_frames],
+        explicit_features=None,
+        top_n_features=CLIMATE_TOP_N_FEATURES,
+        allowed_features=allowed_features,
+    )
+
+
 def _build_mode_horizon_frame(
     records_and_frames: list[tuple[ShapSummaryRecord, pd.DataFrame]],
     *,
@@ -262,12 +294,18 @@ def _plot_group_horizon_lines(
     feature_groups = get_feature_group_columns()
     for group_name in TRACKED_GROUPS:
         allowed_features = set(feature_groups[group_name])
-        feature_order = _resolve_feature_order(
-            [frame for _, frame in records_and_frames],
-            explicit_features=explicit_features,
-            top_n_features=top_n_features,
-            allowed_features=allowed_features,
-        )
+        if group_name == "climate" and explicit_features is None:
+            feature_order = _resolve_climate_feature_order_from_reference_horizon(
+                records_and_frames,
+                allowed_features=allowed_features,
+            )
+        else:
+            feature_order = _resolve_feature_order(
+                [frame for _, frame in records_and_frames],
+                explicit_features=explicit_features,
+                top_n_features=top_n_features,
+                allowed_features=allowed_features,
+            )
         if not feature_order:
             logger.info(
                 "No %s features found for crop=%s family=%s",
