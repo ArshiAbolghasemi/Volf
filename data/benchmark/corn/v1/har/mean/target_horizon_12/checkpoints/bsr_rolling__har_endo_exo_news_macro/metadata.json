@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/har/mean/target_horizon_12/checkpoints/target_mode_mean/bsr_rolling__har_endo_exo_news_macro",
-  "feature_set": "har_endo_exo_news_macro",
-  "model_family": "har",
-  "model_type": "bsr_rolling",
-  "saved_at_utc": "2026-05-01T05:40:05.515532+00:00",
-  "target_horizon": 12,
-  "target_mode": "mean"
-}

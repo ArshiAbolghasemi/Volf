@@ -1,3 +1,0 @@
-soybeans_monthly_rv
-soybeans_seasonal_rv
-soybeans_weekly_rv

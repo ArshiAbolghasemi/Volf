@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/har/mean/target_horizon_8/checkpoints/target_mode_mean/lasso_expanding__har_endo_exo_climate_macro",
-  "feature_set": "har_endo_exo_climate_macro",
-  "model_family": "har",
-  "model_type": "lasso_expanding",
-  "saved_at_utc": "2026-04-28T19:10:56.564550+00:00",
-  "target_horizon": 8,
-  "target_mode": "mean"
-}

@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/arshia/Projects/Personal/Volf/data/benchmark/har/mean/target_horizon_1/checkpoints/target_mode_mean/ols_expanding__har_endo",
-  "feature_set": "har_endo",
-  "model_family": "har",
-  "model_type": "ols_expanding",
-  "saved_at_utc": "2026-05-05T10:34:09.062091+00:00",
-  "target_horizon": 1,
-  "target_mode": "mean"
-}

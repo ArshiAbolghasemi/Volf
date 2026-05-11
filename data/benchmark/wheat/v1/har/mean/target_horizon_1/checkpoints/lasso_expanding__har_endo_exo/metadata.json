@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/har/point/target_horizon_1/checkpoints/target_mode_point/lasso_expanding__har_endo_exo",
-  "feature_set": "har_endo_exo",
-  "model_family": "har",
-  "model_type": "lasso_expanding",
-  "saved_at_utc": "2026-05-02T12:44:54.493642+00:00",
-  "target_horizon": 1,
-  "target_mode": "point"
-}

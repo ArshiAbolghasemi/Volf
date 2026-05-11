@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/rf/mean/target_horizon_8/checkpoints/target_mode_mean/rf_rolling__har_endo",
-  "feature_set": "har_endo",
-  "model_family": "rf",
-  "model_type": "rf_rolling",
-  "saved_at_utc": "2026-05-02T12:17:53.413296+00:00",
-  "target_horizon": 8,
-  "target_mode": "mean"
-}

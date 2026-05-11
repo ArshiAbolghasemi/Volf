@@ -1,3 +1,0 @@
-corn_weekly_rv
-corn_monthly_rv
-corn_seasonal_rv

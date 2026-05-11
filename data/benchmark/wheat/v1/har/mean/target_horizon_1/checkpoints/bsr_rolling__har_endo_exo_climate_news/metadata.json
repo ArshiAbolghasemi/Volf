@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/local/QCRI/amokhtari/Volf/data/benchmark/har/point/target_horizon_1/checkpoints/target_mode_point/bsr_rolling__har_endo_exo_climate_news",
-  "feature_set": "har_endo_exo_climate_news",
-  "model_family": "har",
-  "model_type": "bsr_rolling",
-  "saved_at_utc": "2026-05-02T12:44:53.488966+00:00",
-  "target_horizon": 1,
-  "target_mode": "point"
-}
