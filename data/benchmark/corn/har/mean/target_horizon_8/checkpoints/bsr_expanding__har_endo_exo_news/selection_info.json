@@ -1,0 +1,57 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 6,
+  "final_selected_features": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_jumps",
+    "frbsf_sentiment",
+    "epu_index"
+  ],
+  "final_selected_union": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "wheat_weekly_rv",
+    "frbsf_sentiment",
+    "epu_index",
+    "corn_weekly_jumps",
+    "Text_Climate_Anomaly"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 64,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "corn_weekly_rv",
+      "corn_monthly_rv",
+      "corn_seasonal_rv",
+      "corn_weekly_jumps",
+      "frbsf_sentiment",
+      "epu_index"
+    ]
+  ],
+  "selection_frequency": {
+    "Text_Climate_Anomaly": 0.25,
+    "corn_monthly_rv": 1.0,
+    "corn_seasonal_rv": 1.0,
+    "corn_weekly_jumps": 0.875,
+    "corn_weekly_rv": 1.0,
+    "epu_index": 1.0,
+    "frbsf_sentiment": 1.0,
+    "wheat_weekly_rv": 0.75
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 5,
+  "warnings": [],
+  "window_size": null,
+  "window_type": "full"
+}

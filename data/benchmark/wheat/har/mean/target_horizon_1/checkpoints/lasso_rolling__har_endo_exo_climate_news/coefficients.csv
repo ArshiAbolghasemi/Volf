@@ -1,0 +1,12 @@
+,coefficient
+awnd_extreme_high_wind_in_harvesting,-0.021508035576622536
+pdsi_extreme_wet_in_planting,-0.010924163438169598
+pdsi_very_wet_in_planting,-0.0015234322904834965
+soybeans_weekly_rv,0.006073256707300606
+tmax_very_hot_in_harvesting,0.01753566382598709
+tmin_cold_in_planting,0.014089208924128321
+tmin_very_cold_in_harvesting,-0.019595628088945716
+wheat_monthly_rv,0.014988647432690315
+wheat_seasonal_rv,0.021066249576309558
+wheat_weekly_jumps,0.037092080808425784
+wheat_weekly_rv,0.1564852050944332

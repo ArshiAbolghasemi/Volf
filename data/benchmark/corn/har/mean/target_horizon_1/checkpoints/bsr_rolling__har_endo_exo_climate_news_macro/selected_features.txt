@@ -1,0 +1,17 @@
+corn_weekly_rv
+corn_monthly_rv
+corn_seasonal_rv
+corn_weekly_jumps
+DJIA_Index
+corn_weekly_rvb
+NAO_index
+tmax_hot_in_harvesting
+tmax_very_hot_in_planting
+spi_7d_very_dry_in_harvesting
+pdsi_extreme_drought_in_harvesting
+pdsi_extreme_wet_in_planting
+tmax_very_hot_in_harvesting
+spi_7d_very_dry_in_planting
+awnd_extreme_high_wind_in_planting
+spi_7d_very_wet_in_planting
+Text_Climate_Anomaly

@@ -1,0 +1,14 @@
+,coefficient
+corn_weekly_rv,0.38604678893442335
+corn_monthly_rv,0.2224505228606694
+corn_seasonal_rv,-0.17925804834307946
+wheat_weekly_rv,-0.22712214111077622
+ssta_lanina,-0.12114986228065999
+spi_7d_very_wet_in_planting,0.7458159070594824
+spi_7d_very_dry_in_planting,-0.9171158941705055
+spi_7d_very_dry_in_harvesting,0.5321333017521219
+pdsi_extreme_wet_in_harvesting,-0.21232963685082062
+pdsi_extreme_drought_in_planting,-1.1158691212251797
+pdsi_severe_drought_in_planting,-23.405244098400708
+pdsi_severe_drought_in_harvesting,0.907078832114514
+co2_extreme_in_harvesting,-0.0002203318954390695

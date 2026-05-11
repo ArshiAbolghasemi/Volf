@@ -1,0 +1,16 @@
+,coefficient
+Text_Climate_Anomaly,-0.06529026226888998
+co2_extreme_in_harvesting,-0.014817354307134836
+epu_index,-0.037921215127223226
+pdsi_extreme_drought_in_planting,-0.014967225519850948
+pdsi_extreme_wet_in_harvesting,-0.0014265247239025614
+pdsi_extreme_wet_in_planting,-0.01405394730910986
+pdsi_severe_drought_in_harvesting,0.026558740136675793
+spi_7d_extreme_wet_in_planting,0.00906983734425515
+ssta_lanina,-0.060355944390427456
+tmin_cold_in_planting,0.008368427263149847
+tmin_very_cold_in_planting,0.01295474568203997
+wheat_monthly_rv,0.022310025026652115
+wheat_seasonal_rv,-0.005127031226528085
+wheat_weekly_rv,0.04355263964954853
+wheat_weekly_rvb,0.015346316482588523

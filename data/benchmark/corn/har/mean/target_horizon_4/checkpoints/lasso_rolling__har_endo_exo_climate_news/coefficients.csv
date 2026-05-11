@@ -1,0 +1,14 @@
+,coefficient
+NAO_index,-0.0171835034815876
+Text_Climate_Anomaly,-0.05983549337725769
+corn_monthly_rv,0.04637886415081944
+corn_seasonal_rv,0.013971301794883373
+corn_weekly_rv,0.10764348158522385
+pdsi_extreme_wet_in_harvesting,0.006786386612717743
+pdsi_extreme_wet_in_planting,0.021636958142326856
+pdsi_severe_drought_in_harvesting,0.01854067197908224
+pdsi_severe_drought_in_planting,-0.02162110020977294
+soybeans_weekly_rv,0.027743703407258014
+spi_7d_very_dry_in_harvesting,0.013858202236284478
+spi_7d_very_dry_in_planting,-0.018863876940900387
+ssta_elino,-0.015030100778260844

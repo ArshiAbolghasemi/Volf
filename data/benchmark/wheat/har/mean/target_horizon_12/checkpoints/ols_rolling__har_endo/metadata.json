@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/wheat/har/mean/target_horizon_12/checkpoints/ols_rolling__har_endo",
+  "feature_set": "har_endo",
+  "model_family": "har",
+  "model_type": "ols_rolling",
+  "saved_at_utc": "2026-05-11T16:21:09.171763+00:00",
+  "target_horizon": 12,
+  "target_mode": "mean"
+}

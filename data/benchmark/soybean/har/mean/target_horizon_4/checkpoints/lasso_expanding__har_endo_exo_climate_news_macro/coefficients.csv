@@ -1,0 +1,11 @@
+,coefficient
+WTI_Index,0.02489235764494141
+corn_weekly_rv,0.01594149177243276
+soybeans_monthly_rv,0.053124788863023825
+soybeans_seasonal_rv,-0.0033935655584296093
+soybeans_weekly_rv,0.09207352966045682
+soybeans_weekly_rvg,0.023475240761545807
+tmax_hot_in_planting,0.013286135677961358
+tmax_very_hot_in_planting,0.012755678345904454
+tmin_very_cold_in_harvesting,0.02174028621371201
+tmin_very_cold_in_planting,0.02249700699961804

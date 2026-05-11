@@ -1,0 +1,10 @@
+,coefficient
+wheat_weekly_rv,0.5897040970511422
+wheat_monthly_rv,0.0058166902546709365
+wheat_seasonal_rv,0.15524182686913413
+wheat_weekly_jumps,586.4596605613574
+corn_weekly_rv,0.08533758076984105
+tmin_very_cold_in_harvesting,-0.03944183936319587
+spi_7d_very_wet_in_harvesting,-0.524139712757093
+spi_7d_extreme_wet_in_planting,0.5648930487526376
+pdsi_extreme_wet_in_planting,-0.09327276538165749

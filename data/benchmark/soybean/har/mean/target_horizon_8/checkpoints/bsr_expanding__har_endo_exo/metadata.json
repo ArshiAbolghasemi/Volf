@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/soybean/har/mean/target_horizon_8/checkpoints/bsr_expanding__har_endo_exo",
+  "feature_set": "har_endo_exo",
+  "model_family": "har",
+  "model_type": "bsr_expanding",
+  "saved_at_utc": "2026-05-11T16:44:57.127028+00:00",
+  "target_horizon": 8,
+  "target_mode": "mean"
+}

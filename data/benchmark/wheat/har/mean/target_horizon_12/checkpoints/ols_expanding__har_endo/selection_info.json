@@ -1,0 +1,21 @@
+{
+  "final_selected_union": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_rvb",
+    "wheat_weekly_rvg",
+    "wheat_weekly_jumps"
+  ],
+  "method": "none",
+  "n_windows": 153,
+  "reused_selection": true,
+  "selection_frequency": {
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_jumps": 1.0,
+    "wheat_weekly_rv": 1.0,
+    "wheat_weekly_rvb": 1.0,
+    "wheat_weekly_rvg": 1.0
+  }
+}

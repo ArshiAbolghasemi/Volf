@@ -1,0 +1,16 @@
+DJIA_Index
+corn_monthly_rv
+corn_seasonal_rv
+corn_weekly_rv
+corn_weekly_rvb
+ssta_elino
+NAO_index
+pdsi_extreme_drought_in_harvesting
+pdsi_extreme_wet_in_harvesting
+tmax_hot_in_harvesting
+tmax_hot_in_planting
+tmin_very_cold_in_harvesting
+wheat_weekly_rv
+pdsi_very_wet_in_planting
+pdsi_extreme_wet_in_planting
+Broad_Dollar_index

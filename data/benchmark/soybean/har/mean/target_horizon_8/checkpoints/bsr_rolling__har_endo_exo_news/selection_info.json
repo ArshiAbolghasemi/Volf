@@ -1,0 +1,63 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 6,
+  "final_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_jumps",
+    "frbsf_sentiment",
+    "Text_Climate_Anomaly"
+  ],
+  "final_selected_union": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "corn_weekly_rv",
+    "Text_Climate_Anomaly",
+    "soybeans_weekly_jumps",
+    "frbsf_sentiment",
+    "epu_index",
+    "soybeans_weekly_rvb",
+    "soybeans_weekly_rvg",
+    "wheat_weekly_rv"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 71,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "soybeans_weekly_rv",
+      "soybeans_monthly_rv",
+      "soybeans_seasonal_rv",
+      "soybeans_weekly_jumps",
+      "frbsf_sentiment",
+      "Text_Climate_Anomaly"
+    ]
+  ],
+  "selection_frequency": {
+    "Text_Climate_Anomaly": 0.43661971830985913,
+    "corn_weekly_rv": 0.11267605633802817,
+    "epu_index": 0.4507042253521127,
+    "frbsf_sentiment": 0.5492957746478874,
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_jumps": 0.5492957746478874,
+    "soybeans_weekly_rv": 1.0,
+    "soybeans_weekly_rvb": 0.11267605633802817,
+    "soybeans_weekly_rvg": 0.11267605633802817,
+    "wheat_weekly_rv": 0.3380281690140845
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 5,
+  "warnings": [],
+  "window_size": 104,
+  "window_type": "full"
+}

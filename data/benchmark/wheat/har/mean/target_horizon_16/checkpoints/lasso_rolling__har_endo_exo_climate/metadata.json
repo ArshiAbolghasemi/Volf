@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/wheat/har/mean/target_horizon_16/checkpoints/lasso_rolling__har_endo_exo_climate",
+  "feature_set": "har_endo_exo_climate",
+  "model_family": "har",
+  "model_type": "lasso_rolling",
+  "saved_at_utc": "2026-05-11T16:21:09.929742+00:00",
+  "target_horizon": 16,
+  "target_mode": "mean"
+}

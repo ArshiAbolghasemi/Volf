@@ -1,0 +1,12 @@
+,coefficient
+wheat_weekly_rv,0.5560193229025375
+wheat_monthly_rv,0.2768791883767213
+wheat_seasonal_rv,-0.121259794141024
+wheat_weekly_rvb,-3.534536482475538
+wheat_weekly_rvg,-7.351182889167362
+wheat_weekly_jumps,-22.79510448882911
+corn_weekly_rv,-0.08663027950525701
+soybeans_weekly_rv,-0.04703129163343622
+frbsf_sentiment,-0.12915285752185657
+Text_Climate_Anomaly,0.0005259585616836718
+epu_index,-0.0001848856993860588

@@ -1,0 +1,53 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 5,
+  "final_selected_features": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_jumps",
+    "Broad_Dollar_index"
+  ],
+  "final_selected_union": [
+    "corn_weekly_rv",
+    "corn_monthly_rv",
+    "corn_seasonal_rv",
+    "corn_weekly_jumps",
+    "DJIA_Index",
+    "corn_weekly_rvb",
+    "Broad_Dollar_index"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 52,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "corn_weekly_rv",
+      "corn_monthly_rv",
+      "corn_seasonal_rv",
+      "corn_weekly_jumps",
+      "Broad_Dollar_index"
+    ]
+  ],
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.07692307692307693,
+    "DJIA_Index": 0.6153846153846154,
+    "corn_monthly_rv": 1.0,
+    "corn_seasonal_rv": 1.0,
+    "corn_weekly_jumps": 1.0,
+    "corn_weekly_rv": 1.0,
+    "corn_weekly_rvb": 0.3076923076923077
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 7,
+  "warnings": [],
+  "window_size": null,
+  "window_type": "full"
+}

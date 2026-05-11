@@ -1,0 +1,10 @@
+DJIA_Index
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rv
+Text_Climate_Anomaly
+epu_index
+frbsf_sentiment
+Broad_Dollar_index
+corn_weekly_rv
+WTI_Index

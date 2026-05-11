@@ -1,0 +1,15 @@
+,coefficient
+wheat_weekly_rv,0.45566436835721136
+wheat_monthly_rv,0.2814415331058594
+wheat_seasonal_rv,-0.12278102910385118
+wheat_weekly_rvg,-10.09071640205163
+soybeans_weekly_rv,-0.08375653675746426
+ssta_lanina,-0.10622581977386536
+SOI_index,0.015233140523582097
+tmax_hot_in_planting,-0.008019196148491586
+tmax_very_hot_in_planting,0.007593175199726569
+tmin_very_cold_in_planting,0.05205912569480386
+tmin_very_cold_in_harvesting,-0.027453324682797903
+spi_7d_extreme_dry_in_planting,0.20359195053484047
+pdsi_very_wet_in_harvesting,0.1379428207054712
+pdsi_extreme_wet_in_planting,-0.07792099153119791

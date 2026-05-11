@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/corn/har/mean/target_horizon_1/checkpoints/bsr_expanding__har_endo_exo_news",
+  "feature_set": "har_endo_exo_news",
+  "model_family": "har",
+  "model_type": "bsr_expanding",
+  "saved_at_utc": "2026-05-11T16:34:30.509267+00:00",
+  "target_horizon": 1,
+  "target_mode": "mean"
+}

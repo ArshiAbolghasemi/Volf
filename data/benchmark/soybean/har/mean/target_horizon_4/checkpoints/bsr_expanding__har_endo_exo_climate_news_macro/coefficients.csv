@@ -1,0 +1,17 @@
+,coefficient
+soybeans_weekly_rv,0.4521415988592324
+soybeans_monthly_rv,0.23764770360115556
+soybeans_seasonal_rv,-0.03912220389785816
+soybeans_weekly_jumps,-633.0220689126872
+wheat_weekly_rv,-0.06347388472200943
+corn_weekly_rv,0.09901457173424466
+ssta_lanina,-0.03337887275316703
+tmax_hot_in_planting,0.01308363711492469
+tmax_hot_in_harvesting,-0.008542298673877048
+tmin_very_cold_in_planting,0.041361394158188396
+tmin_very_cold_in_harvesting,0.0639041991969139
+spi_7d_very_dry_in_harvesting,-0.2706678727835208
+pdsi_very_wet_in_planting,0.1185437082428538
+pdsi_extreme_wet_in_planting,-0.15336245561981307
+pdsi_extreme_drought_in_planting,-0.6051342980684096
+WTI_Index,0.060231451959136956

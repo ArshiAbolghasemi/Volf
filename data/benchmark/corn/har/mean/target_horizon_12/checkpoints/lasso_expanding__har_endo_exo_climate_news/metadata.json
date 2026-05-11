@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/corn/har/mean/target_horizon_12/checkpoints/lasso_expanding__har_endo_exo_climate_news",
+  "feature_set": "har_endo_exo_climate_news",
+  "model_family": "har",
+  "model_type": "lasso_expanding",
+  "saved_at_utc": "2026-05-11T16:34:32.872358+00:00",
+  "target_horizon": 12,
+  "target_mode": "mean"
+}

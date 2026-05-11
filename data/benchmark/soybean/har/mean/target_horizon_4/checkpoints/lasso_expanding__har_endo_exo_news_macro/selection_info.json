@@ -1,0 +1,59 @@
+{
+  "best_alpha": 0.0061112802977108,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.174051     0.060653    0.025260\n1   0.162321     0.058813    0.025762\n2   0.151381     0.057036    0.026392\n3   0.141179     0.055447    0.027029\n4   0.131664     0.052599    0.025676\n..       ...          ...         ...\n95  0.000230     0.042424    0.023151\n96  0.000215     0.042768    0.023602\n97  0.000200     0.043092    0.024029\n98  0.000187     0.043397    0.024431\n99  0.000174     0.043685    0.024811\n\n[100 rows x 3 columns]",
+  "dropped_features": [
+    "epu_index",
+    "frbsf_sentiment",
+    "soybeans_weekly_rvb",
+    "wheat_weekly_rv"
+  ],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "DJIA_Index",
+    "corn_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_rv",
+    "soybeans_weekly_rvg",
+    "WTI_Index",
+    "Broad_Dollar_index",
+    "Stock_Uncertainty",
+    "Text_Climate_Anomaly",
+    "soybeans_weekly_jumps"
+  ],
+  "lasso_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_weekly_rvg",
+    "soybeans_weekly_jumps",
+    "corn_weekly_rv",
+    "Text_Climate_Anomaly",
+    "DJIA_Index",
+    "WTI_Index",
+    "Broad_Dollar_index",
+    "Stock_Uncertainty"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 15,
+  "n_samples_used": 696,
+  "n_selected_by_lasso": 10,
+  "n_selected_total": 11,
+  "n_windows": 51,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.37254901960784315,
+    "DJIA_Index": 0.8431372549019608,
+    "Stock_Uncertainty": 0.29411764705882354,
+    "Text_Climate_Anomaly": 0.21568627450980393,
+    "WTI_Index": 0.45098039215686275,
+    "corn_weekly_rv": 0.8431372549019608,
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_jumps": 0.21568627450980393,
+    "soybeans_weekly_rv": 1.0,
+    "soybeans_weekly_rvg": 0.9215686274509803
+  },
+  "target_col": "RV_target"
+}

@@ -1,0 +1,59 @@
+{
+  "best_alpha": 0.01927299047063296,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.179741     0.064770    0.080541\n1   0.167627     0.064338    0.080773\n2   0.156329     0.063966    0.080976\n3   0.145793     0.063647    0.081152\n4   0.135967     0.063372    0.081304\n..       ...          ...         ...\n95  0.000238     0.076382    0.073393\n96  0.000222     0.076601    0.073584\n97  0.000207     0.076921    0.073937\n98  0.000193     0.077305    0.074392\n99  0.000180     0.077665    0.074819\n\n[100 rows x 3 columns]",
+  "dropped_features": [
+    "Broad_Dollar_index",
+    "DJIA_Index",
+    "Stock_Uncertainty",
+    "Text_Climate_Anomaly",
+    "corn_weekly_rv",
+    "epu_index",
+    "frbsf_sentiment",
+    "wheat_weekly_jumps",
+    "wheat_weekly_rvb",
+    "wheat_weekly_rvg"
+  ],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "DJIA_Index",
+    "Stock_Uncertainty",
+    "Text_Climate_Anomaly",
+    "corn_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_rv",
+    "wheat_weekly_rvg",
+    "Broad_Dollar_index",
+    "WTI_Index",
+    "soybeans_weekly_rv"
+  ],
+  "lasso_selected_features": [
+    "wheat_weekly_rv",
+    "wheat_seasonal_rv",
+    "soybeans_weekly_rv",
+    "WTI_Index"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 15,
+  "n_samples_used": 260,
+  "n_selected_by_lasso": 4,
+  "n_selected_total": 5,
+  "n_windows": 58,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.20689655172413793,
+    "DJIA_Index": 0.6206896551724138,
+    "Stock_Uncertainty": 0.13793103448275862,
+    "Text_Climate_Anomaly": 0.27586206896551724,
+    "WTI_Index": 0.3103448275862069,
+    "corn_weekly_rv": 0.13793103448275862,
+    "soybeans_weekly_rv": 0.4482758620689655,
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_rv": 1.0,
+    "wheat_weekly_rvg": 0.06896551724137931
+  },
+  "target_col": "RV_target"
+}

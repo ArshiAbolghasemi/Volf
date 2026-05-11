@@ -1,0 +1,53 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 5,
+  "final_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_rvg",
+    "wheat_weekly_rv"
+  ],
+  "final_selected_union": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "soybeans_weekly_rvb",
+    "soybeans_weekly_rvg",
+    "wheat_weekly_rv",
+    "corn_weekly_rv"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 126,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "soybeans_weekly_rv",
+      "soybeans_monthly_rv",
+      "soybeans_seasonal_rv",
+      "soybeans_weekly_rvg",
+      "wheat_weekly_rv"
+    ]
+  ],
+  "selection_frequency": {
+    "corn_weekly_rv": 0.31746031746031744,
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_rv": 1.0,
+    "soybeans_weekly_rvb": 0.6349206349206349,
+    "soybeans_weekly_rvg": 0.9365079365079365,
+    "wheat_weekly_rv": 0.6825396825396826
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 3,
+  "warnings": [],
+  "window_size": null,
+  "window_type": "full"
+}

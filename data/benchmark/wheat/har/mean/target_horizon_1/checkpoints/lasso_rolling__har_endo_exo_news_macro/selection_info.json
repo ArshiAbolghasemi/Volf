@@ -1,0 +1,61 @@
+{
+  "best_alpha": 0.014226924607747769,
+  "convergence_warning_count": 0,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.216237     0.080126    0.094832\n1   0.201663     0.079513    0.095176\n2   0.188072     0.078986    0.095476\n3   0.175396     0.078534    0.095737\n4   0.163575     0.078147    0.095962\n..       ...          ...         ...\n95  0.000286     0.039462    0.030992\n96  0.000267     0.039518    0.030850\n97  0.000249     0.039591    0.030718\n98  0.000232     0.039677    0.030598\n99  0.000216     0.039773    0.030487\n\n[100 rows x 3 columns]",
+  "dropped_features": [
+    "Broad_Dollar_index",
+    "DJIA_Index",
+    "Stock_Uncertainty",
+    "Text_Climate_Anomaly",
+    "corn_weekly_rv",
+    "epu_index",
+    "frbsf_sentiment",
+    "wheat_weekly_rvb",
+    "wheat_weekly_rvg"
+  ],
+  "final_eps": 0.001,
+  "final_max_iter": 200000,
+  "final_selected_union": [
+    "DJIA_Index",
+    "corn_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_rv",
+    "wheat_weekly_rvg",
+    "soybeans_weekly_rv",
+    "Broad_Dollar_index",
+    "Stock_Uncertainty",
+    "Text_Climate_Anomaly",
+    "WTI_Index",
+    "wheat_weekly_jumps"
+  ],
+  "lasso_selected_features": [
+    "wheat_weekly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_jumps",
+    "soybeans_weekly_rv",
+    "WTI_Index"
+  ],
+  "method": "lasso",
+  "n_candidate_features": 15,
+  "n_samples_used": 260,
+  "n_selected_by_lasso": 5,
+  "n_selected_total": 6,
+  "n_windows": 58,
+  "retried_after_warning": false,
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.20689655172413793,
+    "DJIA_Index": 0.41379310344827586,
+    "Stock_Uncertainty": 0.13793103448275862,
+    "Text_Climate_Anomaly": 0.13793103448275862,
+    "WTI_Index": 0.2413793103448276,
+    "corn_weekly_rv": 0.13793103448275862,
+    "soybeans_weekly_rv": 0.5862068965517241,
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_jumps": 0.2413793103448276,
+    "wheat_weekly_rv": 1.0,
+    "wheat_weekly_rvg": 0.6896551724137931
+  },
+  "target_col": "RV_target"
+}

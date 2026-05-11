@@ -1,0 +1,8 @@
+corn_weekly_rv
+corn_monthly_rv
+corn_seasonal_rv
+corn_weekly_rvg
+corn_weekly_jumps
+DJIA_Index
+Stock_Uncertainty
+Broad_Dollar_index

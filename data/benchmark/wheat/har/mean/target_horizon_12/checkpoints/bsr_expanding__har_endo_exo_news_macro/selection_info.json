@@ -1,0 +1,71 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 9,
+  "final_selected_features": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "wheat_weekly_rvb",
+    "wheat_weekly_rvg",
+    "soybeans_weekly_rv",
+    "frbsf_sentiment",
+    "WTI_Index",
+    "Broad_Dollar_index"
+  ],
+  "final_selected_union": [
+    "wheat_weekly_rv",
+    "wheat_monthly_rv",
+    "wheat_seasonal_rv",
+    "soybeans_weekly_rv",
+    "epu_index",
+    "DJIA_Index",
+    "WTI_Index",
+    "wheat_weekly_rvb",
+    "wheat_weekly_rvg",
+    "frbsf_sentiment",
+    "Text_Climate_Anomaly",
+    "Broad_Dollar_index"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 113,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "wheat_weekly_rv",
+      "wheat_monthly_rv",
+      "wheat_seasonal_rv",
+      "wheat_weekly_rvb",
+      "wheat_weekly_rvg",
+      "soybeans_weekly_rv",
+      "frbsf_sentiment",
+      "WTI_Index",
+      "Broad_Dollar_index"
+    ]
+  ],
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.4336283185840708,
+    "DJIA_Index": 0.7079646017699115,
+    "Text_Climate_Anomaly": 0.4247787610619469,
+    "WTI_Index": 0.36283185840707965,
+    "epu_index": 0.49557522123893805,
+    "frbsf_sentiment": 0.4336283185840708,
+    "soybeans_weekly_rv": 1.0,
+    "wheat_monthly_rv": 1.0,
+    "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_rv": 1.0,
+    "wheat_weekly_rvb": 0.7168141592920354,
+    "wheat_weekly_rvg": 0.2920353982300885
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 6,
+  "warnings": [],
+  "window_size": null,
+  "window_type": "full"
+}

@@ -1,0 +1,55 @@
+{
+  "add_constant": true,
+  "alpha": 0.05,
+  "failures_count": 0,
+  "final_n_selected": 5,
+  "final_selected_features": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "corn_weekly_rv",
+    "WTI_Index"
+  ],
+  "final_selected_union": [
+    "soybeans_weekly_rv",
+    "soybeans_monthly_rv",
+    "soybeans_seasonal_rv",
+    "DJIA_Index",
+    "WTI_Index",
+    "Broad_Dollar_index",
+    "corn_weekly_rv",
+    "Stock_Uncertainty"
+  ],
+  "hac_maxlags": null,
+  "method": "bsr",
+  "mode": "backward_elimination_pvalue_ts",
+  "n_windows": 51,
+  "n_windows_run": 1,
+  "n_windows_successful": 1,
+  "per_window_selected": [
+    [
+      "soybeans_weekly_rv",
+      "soybeans_monthly_rv",
+      "soybeans_seasonal_rv",
+      "corn_weekly_rv",
+      "WTI_Index"
+    ]
+  ],
+  "selection_frequency": {
+    "Broad_Dollar_index": 0.47058823529411764,
+    "DJIA_Index": 0.6274509803921569,
+    "Stock_Uncertainty": 0.1568627450980392,
+    "WTI_Index": 0.5294117647058824,
+    "corn_weekly_rv": 0.37254901960784315,
+    "soybeans_monthly_rv": 1.0,
+    "soybeans_seasonal_rv": 1.0,
+    "soybeans_weekly_rv": 1.0
+  },
+  "selection_threshold": 0.5,
+  "start_train_size": 52,
+  "step": 1,
+  "total_dropped_features": 7,
+  "warnings": [],
+  "window_size": null,
+  "window_type": "full"
+}

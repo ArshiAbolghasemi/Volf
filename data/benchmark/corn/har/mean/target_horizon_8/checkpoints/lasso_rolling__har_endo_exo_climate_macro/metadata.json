@@ -1,0 +1,9 @@
+{
+  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/corn/har/mean/target_horizon_8/checkpoints/lasso_rolling__har_endo_exo_climate_macro",
+  "feature_set": "har_endo_exo_climate_macro",
+  "model_family": "har",
+  "model_type": "lasso_rolling",
+  "saved_at_utc": "2026-05-11T16:34:32.241738+00:00",
+  "target_horizon": 8,
+  "target_mode": "mean"
+}

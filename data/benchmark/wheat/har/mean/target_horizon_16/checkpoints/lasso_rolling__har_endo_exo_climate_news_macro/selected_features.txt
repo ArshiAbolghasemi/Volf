@@ -1,0 +1,17 @@
+DJIA_Index
+pdsi_extreme_wet_in_harvesting
+pdsi_severe_drought_in_planting
+ssta_lanina
+wheat_monthly_rv
+wheat_seasonal_rv
+wheat_weekly_rv
+Text_Climate_Anomaly
+Broad_Dollar_index
+spi_7d_very_dry_in_planting
+SOI_index
+pdsi_extreme_drought_in_planting
+pdsi_extreme_wet_in_planting
+tmin_very_cold_in_planting
+NAO_index
+WTI_Index
+pdsi_severe_drought_in_harvesting

@@ -1,0 +1,16 @@
+,coefficient
+soybeans_weekly_rv,0.04051826522777202
+soybeans_monthly_rv,-0.1489065877416872
+soybeans_seasonal_rv,0.06923898526557831
+soybeans_weekly_rvb,1.799390463707752
+soybeans_weekly_rvg,14.408127958820714
+soybeans_weekly_jumps,-81.52865654371999
+wheat_weekly_rv,0.19551142959729897
+corn_weekly_rv,-0.03403328454999838
+frbsf_sentiment,-0.013151077095891028
+Text_Climate_Anomaly,0.007457628169189034
+epu_index,0.0009039060166140837
+DJIA_Index,0.4599876845979902
+WTI_Index,0.18011609629208625
+Broad_Dollar_index,-0.022772335830694428
+Stock_Uncertainty,-5.4317978827926605e-05

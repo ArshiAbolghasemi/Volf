@@ -1,0 +1,17 @@
+corn_monthly_rv
+corn_seasonal_rv
+corn_weekly_rv
+corn_weekly_rvb
+frbsf_sentiment
+wheat_weekly_rv
+NAO_index
+ssta_elino
+pdsi_extreme_wet_in_harvesting
+tmax_hot_in_planting
+tmin_very_cold_in_harvesting
+pdsi_extreme_drought_in_harvesting
+tmax_hot_in_harvesting
+pdsi_very_wet_in_planting
+pdsi_extreme_wet_in_planting
+soybeans_weekly_rv
+corn_weekly_jumps

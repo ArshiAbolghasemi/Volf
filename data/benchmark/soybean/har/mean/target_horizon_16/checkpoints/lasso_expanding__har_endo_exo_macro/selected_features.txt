@@ -1,0 +1,11 @@
+DJIA_Index
+soybeans_monthly_rv
+soybeans_seasonal_rv
+soybeans_weekly_rv
+soybeans_weekly_rvb
+soybeans_weekly_rvg
+wheat_weekly_rv
+Stock_Uncertainty
+WTI_Index
+Broad_Dollar_index
+corn_weekly_rv

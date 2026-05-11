@@ -1,0 +1,5 @@
+wheat_weekly_rv
+wheat_monthly_rv
+wheat_seasonal_rv
+DJIA_Index
+wheat_weekly_jumps
