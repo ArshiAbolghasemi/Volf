@@ -29,7 +29,7 @@ def main() -> None:
         value_name="NAO_index",
     )
 
-    long_df["Month"] = long_df["Month"].map(lambda m: MONTH_NUM.get(m))
+    long_df["Month"] = long_df["Month"].map(MONTH_NUM.get)
 
     long_df["Date"] = pd.to_datetime(
         long_df[["Year", "Month"]].assign(day=1),

@@ -228,7 +228,8 @@ def _resolve_climate_feature_order_from_reference_horizon(
         )
 
     logger.warning(
-        "No SHAP summary found for climate reference horizon h%d; falling back to all horizons",
+        "No SHAP summary found for climate reference horizon h%d; "
+        "falling back to all horizons",
         CLIMATE_REFERENCE_HORIZON,
     )
     return _resolve_feature_order(
@@ -277,7 +278,7 @@ def _build_mode_horizon_frame(
     return pd.DataFrame(rows)
 
 
-def _plot_group_horizon_lines(
+def _plot_group_horizon_lines(  # noqa: PLR0913
     *,
     crop: str,
     family: str,
@@ -371,7 +372,7 @@ def _plot_group_horizon_lines(
         )
         axis.set_xlabel("horizon")
         axis.set_ylabel("mean |SHAP|")
-        axis.grid(True, linestyle="--", alpha=0.3)
+        axis.grid(visible=True, linestyle="--", alpha=0.3)
         axis.set_xticks(tick_positions["plot_order"].astype(int).to_list())
         axis.set_xticklabels(
             tick_positions["horizon_label"].to_list(), rotation=30, ha="right"
@@ -388,7 +389,7 @@ def _plot_group_horizon_lines(
     return saved_paths, trend_rows
 
 
-def _write_metadata(
+def _write_metadata(  # noqa: PLR0913
     *,
     crop: str,
     family: str,

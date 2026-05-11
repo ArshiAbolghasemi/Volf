@@ -29,7 +29,7 @@ def main() -> None:
         value_name="SOI_index",
     )
 
-    long_df["MONTH"] = long_df["MONTH"].map(lambda m: MONTH_NUM.get(m))
+    long_df["Month"] = long_df["Month"].map(MONTH_NUM.get)
 
     long_df["Date"] = pd.to_datetime(
         long_df[["YEAR", "MONTH"]].assign(day=1),

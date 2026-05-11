@@ -247,7 +247,9 @@ def main(  # noqa: C901, PLR0912, PLR0915
         summary = benchmark_results_to_frame(results)
 
     output_path = Path(args.output)
-    mode_output_root = _target_mode_output_dir(target_col=cfg.target_col, mode=cfg.target_mode)
+    mode_output_root = _target_mode_output_dir(
+        target_col=cfg.target_col, mode=cfg.target_mode
+    )
     if output_path.parent == (DATA_DIR / "benchmark"):
         output_path = mode_output_root / output_path.name
 

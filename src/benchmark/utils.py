@@ -136,7 +136,7 @@ def build_target_feature_sets(
     climate_columns: list[str] | None = None,
 ) -> dict[str, list[str]]:
     default_core = default_core_columns_for_target(target_col)
-    core = core_columns or existing_columns(data, default_core)
+    _ = core_columns or existing_columns(data, default_core)
     endo = existing_columns(data, default_endo_columns_for_target(target_col))
     exo = existing_columns(data, default_exo_columns_for_target(target_col))
     climate = existing_columns(data, climate_columns or CLIMATE_COLUMNS)
