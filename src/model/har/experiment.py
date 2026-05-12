@@ -40,6 +40,7 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
     y: pd.Series,
     core_columns: list[str],
     run_config: HARRunConfig | None = None,
+    row_dates: pd.Series | None = None,
 ) -> HARExperimentResult:
     logger.info("Starting HAR walk-forward experiment")
     cfg = run_config or HARRunConfig()
@@ -71,6 +72,7 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
     selection_counts: dict[str, int] = {}
     last_coefficients = pd.Series(dtype=float, name="coefficient")
     last_selection_info: dict[str, Any] = {}
+    per_window_selection: list[dict[str, Any]] = []
 
     window_rows: list[dict[str, Any]] = []
     cached_selected_features: list[str] | None = None
@@ -98,6 +100,10 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
         y_train = y.iloc[train_start:train_end]
         x_test = x.iloc[test_start:test_end]
         y_test = y.iloc[test_start:test_end]
+        date_train = (
+            row_dates.iloc[train_start:train_end] if row_dates is not None else None
+        )
+        date_test = row_dates.iloc[test_start:test_end] if row_dates is not None else None
 
         refit_every = max(selection_cfg.refit_every_windows, 1)
         should_refit = selection_cfg.method != "none" and (
@@ -139,6 +145,53 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
             if feat not in selected_union:
                 selected_union.append(feat)
             selection_counts[feat] = selection_counts.get(feat, 0) + 1
+
+        def _format_date(value: Any) -> str | None:
+            if value is None or pd.isna(value):
+                return None
+            timestamp = pd.to_datetime(value, errors="coerce")
+            if pd.isna(timestamp):
+                return str(value)
+            return timestamp.isoformat()
+
+        per_window_selection.append(
+            {
+                "window_id": window_id,
+                "selection_method": selection_cfg.method,
+                "selection_reused": not should_refit,
+                "selected_features": list(selected_features),
+                "n_selected": len(selected_features),
+                "train_start": train_start,
+                "train_end": train_end,
+                "test_start": test_start,
+                "test_end": test_end,
+                "train_start_date": (
+                    _format_date(date_train.iloc[0])
+                    if date_train is not None and not date_train.empty
+                    else None
+                ),
+                "train_end_date": (
+                    _format_date(date_train.iloc[-1])
+                    if date_train is not None and not date_train.empty
+                    else None
+                ),
+                "test_start_date": (
+                    _format_date(date_test.iloc[0])
+                    if date_test is not None and not date_test.empty
+                    else None
+                ),
+                "test_end_date": (
+                    _format_date(date_test.iloc[-1])
+                    if date_test is not None and not date_test.empty
+                    else None
+                ),
+                "test_dates": (
+                    [_format_date(value) for value in date_test.tolist()]
+                    if date_test is not None
+                    else []
+                ),
+            }
+        )
 
         x_train_sel = cast("pd.DataFrame", x_train[selected_features])
         x_test_sel = cast("pd.DataFrame", x_test[selected_features])
@@ -230,6 +283,7 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
         "selection_frequency": selection_frequency,
         "final_selected_union": selected_union,
         "n_windows": len(windows),
+        "per_window_selection": per_window_selection,
     }
 
     logger.info("Train metrics: %s", metrics["train"])
@@ -269,6 +323,11 @@ def run_har_experiment_from_dataset(
         target_transform=model_cfg.target_transform,
     )
     x, y = split_design_matrix_xy(design, target_col)
+    aligned_dates: pd.Series | None = None
+    if "date" in data.columns:
+        source_dates = pd.to_datetime(data["date"], errors="coerce")
+        aligned_dates = source_dates.loc[x.index].reset_index(drop=True)
+        aligned_dates.index = x.index
 
     effective_run_config = run_config
     if feature_config.target_mode == "mean" and model_cfg.target_transform != "none":
@@ -287,6 +346,7 @@ def run_har_experiment_from_dataset(
         y=y,
         core_columns=core_columns,
         run_config=effective_run_config,
+        row_dates=aligned_dates,
     )
 
     mean_log_target = (
