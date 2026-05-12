@@ -238,6 +238,26 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
                 "train_end": train_end,
                 "test_start": test_start,
                 "test_end": test_end,
+                "train_start_date": (
+                    _format_date(date_train.iloc[0])
+                    if date_train is not None and not date_train.empty
+                    else None
+                ),
+                "train_end_date": (
+                    _format_date(date_train.iloc[-1])
+                    if date_train is not None and not date_train.empty
+                    else None
+                ),
+                "test_start_date": (
+                    _format_date(date_test.iloc[0])
+                    if date_test is not None and not date_test.empty
+                    else None
+                ),
+                "test_end_date": (
+                    _format_date(date_test.iloc[-1])
+                    if date_test is not None and not date_test.empty
+                    else None
+                ),
                 "n_train": len(y_train),
                 "n_test": len(y_test),
                 "n_selected": len(selected_features),

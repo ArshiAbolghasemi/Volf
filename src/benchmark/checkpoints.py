@@ -58,6 +58,32 @@ def _write_series(path: Path, series: pd.Series, value_name: str) -> None:
     series.to_frame(name=value_name).to_csv(path, index=True)
 
 
+def _write_per_window_selection(path: Path, rows: list[dict[str, Any]]) -> None:
+    if not rows:
+        pd.DataFrame().to_csv(path, index=False)
+        return
+
+    normalized_rows: list[dict[str, Any]] = []
+    for row in rows:
+        base_row = dict(row)
+        selected_features = base_row.pop("selected_features", [])
+        test_dates = base_row.get("test_dates")
+        if isinstance(test_dates, list):
+            base_row["test_dates"] = "|".join(str(item) for item in test_dates)
+
+        if isinstance(selected_features, list) and selected_features:
+            for feature in selected_features:
+                normalized = dict(base_row)
+                normalized["selected_feature"] = str(feature)
+                normalized_rows.append(normalized)
+        else:
+            normalized = dict(base_row)
+            normalized["selected_feature"] = None
+            normalized_rows.append(normalized)
+
+    pd.DataFrame(normalized_rows).to_csv(path, index=False)
+
+
 def _write_checkpoint_for_result(  # noqa: PLR0913
     *,
     checkpoint_root: Path,
@@ -94,7 +120,18 @@ def _write_checkpoint_for_result(  # noqa: PLR0913
 
     selection_info = getattr(result, "selection_info", None)
     if isinstance(selection_info, dict):
+        cv_path = selection_info.get("cv_path")
+        per_window_selection = selection_info.get("per_window_selection")
+
         _write_json(checkpoint_dir / "selection_info.json", selection_info)
+
+        if isinstance(cv_path, pd.DataFrame):
+            cv_path.to_csv(checkpoint_dir / "cv_path.csv", index=False)
+        if isinstance(per_window_selection, list):
+            _write_per_window_selection(
+                checkpoint_dir / "per_window_selection.csv",
+                per_window_selection,
+            )
 
     selected_features = list(getattr(result, "selected_features", []))
     (checkpoint_dir / "selected_features.txt").write_text(
