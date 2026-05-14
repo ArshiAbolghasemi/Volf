@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -333,6 +334,40 @@ def _run_single_horizon(  # noqa: PLR0913
     return best_result
 
 
+def _run_benchmark_task(  # noqa: PLR0913
+    *,
+    data: pd.DataFrame,
+    cfg: WheatRFBenchmarkConfig,
+    core: list[str],
+    data_signature_value: str,
+    horizon: int,
+    model_name: str,
+    run_cfg: RFRunConfig,
+    feature_set_name: str,
+    extra_cols: list[str],
+) -> tuple[int, str, str, RFExperimentResult]:
+    effective_run_cfg = run_cfg
+    if cfg.parallel_jobs > 1:
+        model_cfg = run_cfg.model or RFModelConfig()
+        # Avoid CPU oversubscription when multiple RF tasks run concurrently.
+        effective_run_cfg = replace(
+            run_cfg,
+            model=replace(model_cfg, n_jobs=1),
+        )
+    result = _run_single_horizon(
+        data=data,
+        cfg=cfg,
+        core=core,
+        horizon=horizon,
+        model_name=model_name,
+        run_cfg=effective_run_cfg,
+        feature_set_name=feature_set_name,
+        extra_cols=extra_cols,
+        data_signature_value=data_signature_value,
+    )
+    return horizon, model_name, feature_set_name, result
+
+
 def run_wheat_rf_benchmark_multi_horizon(
     *,
     config: WheatRFBenchmarkConfig | None = None,
@@ -362,25 +397,59 @@ def run_wheat_rf_benchmark_multi_horizon(
     target_horizons = resolve_target_horizons(cfg)
     data_signature_value = dataset_signature(data)
 
-    results_by_horizon: dict[int, dict[str, dict[str, RFExperimentResult]]] = {}
+    results_by_horizon: dict[int, dict[str, dict[str, RFExperimentResult]]] = {
+        horizon: {model_name: {} for model_name in model_run_configs}
+        for horizon in target_horizons
+    }
+
+    tasks: list[tuple[int, str, RFRunConfig, str, list[str]]] = []
     for horizon in target_horizons:
-        horizon_results: dict[str, dict[str, RFExperimentResult]] = {}
         for model_name, run_cfg in model_run_configs.items():
-            feature_results: dict[str, RFExperimentResult] = {}
             for feature_set_name, extra_cols in feature_sets.items():
-                feature_results[feature_set_name] = _run_single_horizon(
+                tasks.append((horizon, model_name, run_cfg, feature_set_name, extra_cols))
+
+    logger.info(
+        "Dispatching %d RF benchmark tasks with parallel_jobs=%d",
+        len(tasks),
+        cfg.parallel_jobs,
+    )
+
+    if cfg.parallel_jobs <= 1:
+        for horizon, model_name, run_cfg, feature_set_name, extra_cols in tasks:
+            h, m, f, result = _run_benchmark_task(
+                data=data,
+                cfg=cfg,
+                core=core,
+                data_signature_value=data_signature_value,
+                horizon=horizon,
+                model_name=model_name,
+                run_cfg=run_cfg,
+                feature_set_name=feature_set_name,
+                extra_cols=extra_cols,
+            )
+            results_by_horizon[h][m][f] = result
+    else:
+        with ThreadPoolExecutor(max_workers=cfg.parallel_jobs) as executor:
+            futures = [
+                executor.submit(
+                    _run_benchmark_task,
                     data=data,
                     cfg=cfg,
                     core=core,
+                    data_signature_value=data_signature_value,
                     horizon=horizon,
                     model_name=model_name,
                     run_cfg=run_cfg,
                     feature_set_name=feature_set_name,
                     extra_cols=extra_cols,
-                    data_signature_value=data_signature_value,
                 )
-            horizon_results[model_name] = feature_results
-        results_by_horizon[horizon] = horizon_results
+                for horizon, model_name, run_cfg, feature_set_name, extra_cols in tasks
+            ]
+            for future in as_completed(futures):
+                h, m, f, result = future.result()
+                results_by_horizon[h][m][f] = result
+
+    logger.info("Wheat RF benchmark finished. horizons=%d", len(results_by_horizon))
     return results_by_horizon
 
 

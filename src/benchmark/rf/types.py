@@ -45,6 +45,7 @@ class WheatRFBenchmarkConfig:
     use_cache: bool = True
     cache_dir: str = ".cache/benchmark"
     cache_overwrite: bool = False
+    parallel_jobs: int = 1
 
 
 def resolve_target_horizons(cfg: WheatRFBenchmarkConfig) -> list[int]:

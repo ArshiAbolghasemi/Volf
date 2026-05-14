@@ -96,6 +96,12 @@ def parse_args(
         action="store_true",
         help="Overwrite existing cache entries and retrain",
     )
+    parser.add_argument(
+        "--parallel_jobs",
+        type=int,
+        default=None,
+        help="Number of concurrent benchmark tasks",
+    )
     return parser.parse_args()
 
 
@@ -155,6 +161,7 @@ def _load_config_from_json(path: str) -> WheatRFBenchmarkConfig:
         use_cache=bool(raw.get("use_cache", True)),
         cache_dir=str(raw.get("cache_dir", ".cache/benchmark")),
         cache_overwrite=bool(raw.get("cache_overwrite", False)),
+        parallel_jobs=int(raw.get("parallel_jobs", 1)),
     )
 
 
@@ -184,12 +191,15 @@ def main(  # noqa: C901, PLR0912, PLR0915
             use_cache=bool(args.use_cache),
             cache_dir=args.cache_dir,
             cache_overwrite=bool(args.cache_overwrite),
+            parallel_jobs=int(args.parallel_jobs) if args.parallel_jobs is not None else 1,
         )
         logger.info("Using default/CLI RF benchmark config")
     if args.config:
         cfg.use_cache = bool(args.use_cache)
         cfg.cache_dir = args.cache_dir
         cfg.cache_overwrite = bool(args.cache_overwrite)
+        if args.parallel_jobs is not None:
+            cfg.parallel_jobs = int(args.parallel_jobs)
 
     cli_horizons = _parse_target_horizons_arg(args.target_horizons)
     if cli_horizons is not None:
