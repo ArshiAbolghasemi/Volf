@@ -71,7 +71,10 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             ),
             selection=HARSelectionConfig(
                 method="lasso",
-                lasso=LassoSelectionConfig(n_splits=5),
+                lasso=LassoSelectionConfig(
+                    n_splits=5,
+                    max_train_size=DEFAULT_ROLLING_WINDOW_SIZE,
+                ),
                 refit_every_windows=4,
             ),
             model=HARModelConfig(standardize_features=True),
@@ -86,7 +89,10 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             ),
             selection=HARSelectionConfig(
                 method="lasso",
-                lasso=LassoSelectionConfig(n_splits=5),
+                lasso=LassoSelectionConfig(
+                    n_splits=5,
+                    max_train_size=DEFAULT_ROLLING_WINDOW_SIZE,
+                ),
                 refit_every_windows=4,
             ),
             model=HARModelConfig(standardize_features=True),

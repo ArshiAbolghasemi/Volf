@@ -115,6 +115,7 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
                 y_train=y_train,
                 core_columns=core_columns,
                 config=selection_cfg,
+                walk_forward_config=wf_cfg,
             )
             cached_selected_features = selected_features
             cached_selection_info = selection_info

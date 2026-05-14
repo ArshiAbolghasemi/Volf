@@ -27,6 +27,7 @@ class LassoSelectionResult:
 class LassoSelectionConfig:
     core_columns: list[str] | None = None
     n_splits: int = 5
+    max_train_size: int | None = None
     alphas: np.ndarray | int = 100
     max_iter: int = 50_000
     tol: float = 1e-4
@@ -46,7 +47,10 @@ def _build_lasso_pipeline(
     max_iter: int | None = None,
     eps: float | None = None,
 ) -> Pipeline:
-    cv = TimeSeriesSplit(n_splits=cfg.n_splits)
+    cv = TimeSeriesSplit(
+        n_splits=cfg.n_splits,
+        max_train_size=cfg.max_train_size,
+    )
     if isinstance(cfg.alphas, int):
         lasso_alphas: np.ndarray | None = None
         lasso_n_alphas = int(cfg.alphas)
@@ -173,6 +177,9 @@ def lasso_time_series_feature_selection(
     if cfg.n_splits < MIN_SPLITS:
         msg = f"n_splits must be >= {MIN_SPLITS}."
         raise ValueError(msg)
+    if cfg.max_train_size is not None and cfg.max_train_size <= 0:
+        msg = "max_train_size must be > 0 when provided."
+        raise ValueError(msg)
 
     if cfg.core_columns:
         _validate_forced_features(feature_cols, cfg.core_columns)
@@ -231,6 +238,7 @@ def lasso_time_series_feature_selection(
         "n_selected_by_lasso": len(lasso_selected),
         "n_selected_total": len(selected_features),
         "best_alpha": float(lasso.alpha_),
+        "cv_max_train_size": cfg.max_train_size,
         "lasso_selected_features": lasso_selected,
         "dropped_features": dropped_features,
         "convergence_warning_count": convergence_warning_count,

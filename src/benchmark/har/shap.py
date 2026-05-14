@@ -211,6 +211,7 @@ def run_linear_shap_for_job(  # noqa: PLR0915
                 y_train=y_train,
                 core_columns=core_columns,
                 config=selection_cfg,
+                walk_forward_config=wf_cfg,
             )
             cached_selected_features = selected_features
         else:

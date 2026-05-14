@@ -13,7 +13,18 @@ from src.variable_selection import (
 if TYPE_CHECKING:
     import pandas as pd
 
-    from .types import HARSelectionConfig
+    from .types import HARSelectionConfig, HARWalkForwardConfig
+
+
+def _resolve_lasso_max_train_size(
+    lasso_cfg: LassoSelectionConfig,
+    walk_forward_config: HARWalkForwardConfig | None,
+) -> int | None:
+    if lasso_cfg.max_train_size is not None or walk_forward_config is None:
+        return lasso_cfg.max_train_size
+    if walk_forward_config.rolling_window_size is not None:
+        return walk_forward_config.rolling_window_size
+    return walk_forward_config.initial_train_size
 
 
 def select_har_features(
@@ -21,6 +32,7 @@ def select_har_features(
     y_train: pd.Series,
     core_columns: list[str],
     config: HARSelectionConfig,
+    walk_forward_config: HARWalkForwardConfig | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
     missing_core = [col for col in core_columns if col not in x_train.columns]
     if missing_core:
@@ -36,6 +48,10 @@ def select_har_features(
         lasso_cfg = replace(
             lasso_cfg,
             core_columns=core_columns,
+            max_train_size=_resolve_lasso_max_train_size(
+                lasso_cfg,
+                walk_forward_config,
+            ),
             progress_bar=False,
         )
         lasso_result = lasso_time_series_feature_selection(
