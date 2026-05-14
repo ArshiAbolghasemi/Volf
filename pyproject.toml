@@ -5,7 +5,7 @@ authors = [
     {name = "Arshia Abolghasemi", email = "arshiabolghasemi@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10,<=3.12"
+requires-python = ">=3.10,<=3.13"
 license = {text = "MIT"}
 
 dependencies = [
