@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any, Literal, cast
 
@@ -9,7 +10,7 @@ import numpy as np
 import pandas as pd
 import shap
 from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
+from xgboost import XGBRegressor, XGBRFRegressor
 
 from src.model import (
     RFFeatureConfig,
@@ -97,6 +98,8 @@ def resolve_rf_run_config_for_shap_job(
     model_cfg = replace(
         model_base,
         n_estimators=int(model_info.get("rf_n_estimators", model_base.n_estimators)),
+        backend=str(model_info.get("rf_backend", model_base.backend)),
+        device=str(model_info.get("rf_device", model_base.device)),
         criterion=str(model_info.get("rf_criterion", model_base.criterion)),
         max_depth=model_info.get("rf_max_depth", model_base.max_depth),
         min_samples_split=int(
@@ -219,17 +222,72 @@ def _fit_rf(
     x_train: pd.DataFrame,
     y_train: pd.Series,
     model_cfg: RFModelConfig,
-) -> RandomForestRegressor:
-    model = RandomForestRegressor(
+) -> Any:
+    if model_cfg.backend == "sklearn":
+        if model_cfg.device != "cpu":
+            msg = (
+                "sklearn RandomForestRegressor is CPU-only. "
+                "Use backend='xgboost_rf' with device='cuda' for GPU RF runs."
+            )
+            raise ValueError(msg)
+        model = RandomForestRegressor(
+            n_estimators=model_cfg.n_estimators,
+            criterion=model_cfg.criterion,
+            max_depth=model_cfg.max_depth,
+            min_samples_split=model_cfg.min_samples_split,
+            min_samples_leaf=model_cfg.min_samples_leaf,
+            max_features=model_cfg.max_features,  # type: ignore[arg-type]
+            bootstrap=model_cfg.bootstrap,
+            random_state=model_cfg.random_state,
+            n_jobs=model_cfg.n_jobs,
+        )
+        model.fit(x_train, y_train)
+        return model
+
+    if model_cfg.backend != "xgboost_rf":
+        msg = f"Unsupported RF backend: {model_cfg.backend}"
+        raise ValueError(msg)
+
+    n_features = x_train.shape[1]
+    if model_cfg.max_features is None:
+        colsample_bynode = 1.0
+    elif isinstance(model_cfg.max_features, str):
+        if model_cfg.max_features == "sqrt":
+            colsample_bynode = min(
+                max(math.sqrt(n_features) / n_features, 1.0 / n_features),
+                1.0,
+            )
+        elif model_cfg.max_features == "log2":
+            colsample_bynode = min(
+                max(math.log2(max(n_features, 2)) / n_features, 1.0 / n_features),
+                1.0,
+            )
+        else:
+            msg = (
+                f"Unsupported max_features string "
+                f"for XGBRF backend: {model_cfg.max_features}"
+            )
+            raise ValueError(msg)
+    elif isinstance(model_cfg.max_features, int):
+        colsample_bynode = min(
+            max(model_cfg.max_features / n_features, 1.0 / n_features), 1.0
+        )
+    else:
+        colsample_bynode = min(max(float(model_cfg.max_features), 1.0 / n_features), 1.0)
+
+    model = XGBRFRegressor(
         n_estimators=model_cfg.n_estimators,
-        criterion=model_cfg.criterion,
-        max_depth=model_cfg.max_depth,
-        min_samples_split=model_cfg.min_samples_split,
-        min_samples_leaf=model_cfg.min_samples_leaf,
-        max_features=model_cfg.max_features,  # type: ignore[arg-type]
-        bootstrap=model_cfg.bootstrap,
+        max_depth=6 if model_cfg.max_depth is None else int(model_cfg.max_depth),
+        subsample=0.8 if model_cfg.bootstrap else 1.0,
+        colsample_bynode=colsample_bynode,
+        min_child_weight=float(model_cfg.min_samples_leaf),
+        reg_lambda=0.0,
+        learning_rate=1.0,
+        objective="reg:squarederror",
         random_state=model_cfg.random_state,
         n_jobs=model_cfg.n_jobs,
+        tree_method="hist",
+        device=model_cfg.device,
     )
     model.fit(x_train, y_train)
     return model

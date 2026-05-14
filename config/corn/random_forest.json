@@ -81,7 +81,9 @@
         "random_state": 42,
         "n_jobs": -1,
         "target_transform": "log",
-        "log_transform_rv_features": true
+        "log_transform_rv_features": true,
+        "backend": "xgboost_rf",
+        "device": "cuda"
       }
     },
     "rf_rolling": {
@@ -102,7 +104,9 @@
         "random_state": 42,
         "n_jobs": -1,
         "target_transform": "log",
-        "log_transform_rv_features": true
+        "log_transform_rv_features": true,
+        "backend": "xgboost_rf",
+        "device": "cuda"
       }
     }
   },

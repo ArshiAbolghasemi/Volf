@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import time
 from dataclasses import replace
 from typing import Any, cast
@@ -8,6 +9,7 @@ from typing import Any, cast
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from tqdm.auto import tqdm
+from xgboost import XGBRFRegressor
 
 from src.metrics import evaluate_statistical_metrics
 from src.model.common.preprocessing import (
@@ -33,21 +35,75 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
+def _resolve_xgbrf_colsample(
+    max_features: Any,
+    n_features: int,
+) -> float:
+    if n_features <= 0:
+        return 1.0
+    if max_features is None:
+        return 1.0
+    if isinstance(max_features, str):
+        if max_features == "sqrt":
+            return min(max(math.sqrt(n_features) / n_features, 1.0 / n_features), 1.0)
+        if max_features == "log2":
+            return min(
+                max(math.log2(max(n_features, 2)) / n_features, 1.0 / n_features), 1.0
+            )
+        msg = f"Unsupported max_features string for XGBRF backend: {max_features}"
+        raise ValueError(msg)
+    if isinstance(max_features, int):
+        return min(max(max_features / n_features, 1.0 / n_features), 1.0)
+    return min(max(float(max_features), 1.0 / n_features), 1.0)
+
+
 def _fit_random_forest(
     x_train: pd.DataFrame,
     y_train: pd.Series,
     model_cfg: RFModelConfig,
-) -> RandomForestRegressor:
-    model = RandomForestRegressor(
+) -> Any:
+    if model_cfg.backend == "sklearn":
+        if model_cfg.device != "cpu":
+            msg = (
+                "sklearn RandomForestRegressor is CPU-only. "
+                "Use backend='xgboost_rf' with device='cuda' for GPU training."
+            )
+            raise ValueError(msg)
+        model = RandomForestRegressor(
+            n_estimators=model_cfg.n_estimators,
+            criterion=model_cfg.criterion,
+            max_depth=model_cfg.max_depth,
+            min_samples_split=model_cfg.min_samples_split,
+            min_samples_leaf=model_cfg.min_samples_leaf,
+            max_features=model_cfg.max_features,  # type: ignore[arg-type]
+            bootstrap=model_cfg.bootstrap,
+            random_state=model_cfg.random_state,
+            n_jobs=model_cfg.n_jobs,
+        )
+        model.fit(x_train, y_train)
+        return model
+
+    if model_cfg.backend != "xgboost_rf":
+        msg = f"Unsupported RF backend: {model_cfg.backend}"
+        raise ValueError(msg)
+
+    colsample_bynode = _resolve_xgbrf_colsample(
+        model_cfg.max_features,
+        x_train.shape[1],
+    )
+    model = XGBRFRegressor(
         n_estimators=model_cfg.n_estimators,
-        criterion=model_cfg.criterion,
-        max_depth=model_cfg.max_depth,
-        min_samples_split=model_cfg.min_samples_split,
-        min_samples_leaf=model_cfg.min_samples_leaf,
-        max_features=model_cfg.max_features,  # type: ignore[arg-type]
-        bootstrap=model_cfg.bootstrap,
+        max_depth=6 if model_cfg.max_depth is None else int(model_cfg.max_depth),
+        subsample=0.8 if model_cfg.bootstrap else 1.0,
+        colsample_bynode=colsample_bynode,
+        min_child_weight=float(model_cfg.min_samples_leaf),
+        reg_lambda=0.0,
+        learning_rate=1.0,
+        objective="reg:squarederror",
         random_state=model_cfg.random_state,
         n_jobs=model_cfg.n_jobs,
+        tree_method="hist",
+        device=model_cfg.device,
     )
     model.fit(x_train, y_train)
     return model
@@ -170,6 +226,8 @@ def run_rf_experiment_from_xy(
         "rolling_window_size": wf_cfg.rolling_window_size,
         "n_windows": len(windows),
         "rf_n_estimators": model_cfg.n_estimators,
+        "rf_backend": model_cfg.backend,
+        "rf_device": model_cfg.device,
         "rf_criterion": model_cfg.criterion,
         "rf_max_depth": model_cfg.max_depth,
         "rf_min_samples_split": model_cfg.min_samples_split,

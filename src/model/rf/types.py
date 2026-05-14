@@ -31,6 +31,8 @@ class RFWalkForwardConfig:
 @dataclass
 class RFModelConfig:
     n_estimators: int = 400
+    backend: Literal["sklearn", "xgboost_rf"] = "sklearn"
+    device: Literal["cpu", "cuda"] = "cpu"
     criterion: Literal[
         "squared_error",
         "absolute_error",
