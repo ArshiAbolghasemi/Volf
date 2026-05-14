@@ -3,7 +3,7 @@
   "feature_set": "har_endo_exo_news_macro",
   "model_family": "har",
   "model_type": "ols_rolling",
-  "saved_at_utc": "2026-05-11T16:34:33.401805+00:00",
+  "saved_at_utc": "2026-05-13T22:03:24.261208+00:00",
   "target_horizon": 12,
   "target_mode": "mean"
 }

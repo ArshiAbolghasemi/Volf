@@ -3,7 +3,7 @@
   "feature_set": "har",
   "model_family": "har",
   "model_type": "lasso_rolling",
-  "saved_at_utc": "2026-05-11T16:44:59.334409+00:00",
+  "saved_at_utc": "2026-05-13T21:17:02.638121+00:00",
   "target_horizon": 16,
   "target_mode": "mean"
 }
