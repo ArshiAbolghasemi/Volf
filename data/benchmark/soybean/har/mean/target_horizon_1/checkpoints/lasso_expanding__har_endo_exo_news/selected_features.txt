@@ -6,5 +6,5 @@ soybeans_weekly_rv
 soybeans_weekly_rvg
 frbsf_sentiment
 soybeans_weekly_jumps
-wheat_weekly_rv
 epu_index
+wheat_weekly_rv

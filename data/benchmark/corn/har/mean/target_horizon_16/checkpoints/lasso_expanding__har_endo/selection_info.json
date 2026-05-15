@@ -1,8 +1,12 @@
 {
-  "best_alpha": 0.00012240611241503963,
+  "best_alpha": 0.005298668399901237,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.122406     0.063183    0.025279\n1   0.114156     0.062590    0.025737\n2   0.106463     0.062087    0.026134\n3   0.099287     0.061663    0.026476\n4   0.092596     0.061293    0.026776\n..       ...          ...         ...\n95  0.000162     0.042186    0.009923\n96  0.000151     0.042182    0.009917\n97  0.000141     0.042178    0.009912\n98  0.000131     0.042175    0.009907\n99  0.000122     0.042172    0.009903\n\n[100 rows x 3 columns]",
-  "dropped_features": [],
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.122406     0.061138    0.017372\n1   0.114156     0.060901    0.017676\n2   0.106463     0.060703    0.017935\n3   0.099287     0.060538    0.018155\n4   0.092596     0.060401    0.018339\n..       ...          ...         ...\n95  0.000162     0.048891    0.013992\n96  0.000151     0.048896    0.013998\n97  0.000141     0.048900    0.014003\n98  0.000131     0.048905    0.014009\n99  0.000122     0.048909    0.014014\n\n[100 rows x 3 columns]",
+  "dropped_features": [
+    "corn_weekly_rvb",
+    "corn_weekly_rvg"
+  ],
   "final_eps": 0.001,
   "final_max_iter": 200000,
   "final_selected_union": [
@@ -17,15 +21,13 @@
     "corn_weekly_rv",
     "corn_monthly_rv",
     "corn_seasonal_rv",
-    "corn_weekly_rvb",
-    "corn_weekly_rvg",
     "corn_weekly_jumps"
   ],
   "method": "lasso",
   "n_candidate_features": 6,
   "n_samples_used": 804,
-  "n_selected_by_lasso": 6,
-  "n_selected_total": 6,
+  "n_selected_by_lasso": 4,
+  "n_selected_total": 4,
   "n_windows": 70,
   "per_window_selection": [
     {
@@ -40,12 +42,10 @@
       "selection_reused": false,
       "test_dates": [
         "2014-04-07T00:00:00",
-        "2014-04-14T00:00:00",
-        "2014-04-21T00:00:00",
-        "2014-04-28T00:00:00"
+        "2014-04-14T00:00:00"
       ],
-      "test_end": 264,
-      "test_end_date": "2014-04-28T00:00:00",
+      "test_end": 262,
+      "test_end_date": "2014-04-14T00:00:00",
       "test_start": 260,
       "test_start_date": "2014-04-07T00:00:00",
       "train_end": 260,
@@ -66,12 +66,10 @@
       "selection_reused": true,
       "test_dates": [
         "2014-06-02T00:00:00",
-        "2014-06-09T00:00:00",
-        "2014-06-16T00:00:00",
-        "2014-06-23T00:00:00"
+        "2014-06-09T00:00:00"
       ],
-      "test_end": 272,
-      "test_end_date": "2014-06-23T00:00:00",
+      "test_end": 270,
+      "test_end_date": "2014-06-09T00:00:00",
       "test_start": 268,
       "test_start_date": "2014-06-02T00:00:00",
       "train_end": 268,
@@ -92,12 +90,10 @@
       "selection_reused": true,
       "test_dates": [
         "2014-07-28T00:00:00",
-        "2014-08-04T00:00:00",
-        "2014-08-11T00:00:00",
-        "2014-08-18T00:00:00"
+        "2014-08-04T00:00:00"
       ],
-      "test_end": 280,
-      "test_end_date": "2014-08-18T00:00:00",
+      "test_end": 278,
+      "test_end_date": "2014-08-04T00:00:00",
       "test_start": 276,
       "test_start_date": "2014-07-28T00:00:00",
       "train_end": 276,
@@ -118,12 +114,10 @@
       "selection_reused": true,
       "test_dates": [
         "2014-09-22T00:00:00",
-        "2014-09-29T00:00:00",
-        "2014-10-06T00:00:00",
-        "2014-10-13T00:00:00"
+        "2014-09-29T00:00:00"
       ],
-      "test_end": 288,
-      "test_end_date": "2014-10-13T00:00:00",
+      "test_end": 286,
+      "test_end_date": "2014-09-29T00:00:00",
       "test_start": 284,
       "test_start_date": "2014-09-22T00:00:00",
       "train_end": 284,
@@ -144,12 +138,10 @@
       "selection_reused": false,
       "test_dates": [
         "2014-11-17T00:00:00",
-        "2014-11-24T00:00:00",
-        "2014-12-01T00:00:00",
-        "2014-12-08T00:00:00"
+        "2014-11-24T00:00:00"
       ],
-      "test_end": 296,
-      "test_end_date": "2014-12-08T00:00:00",
+      "test_end": 294,
+      "test_end_date": "2014-11-24T00:00:00",
       "test_start": 292,
       "test_start_date": "2014-11-17T00:00:00",
       "train_end": 292,
@@ -170,12 +162,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-01-12T00:00:00",
-        "2015-01-19T00:00:00",
-        "2015-01-26T00:00:00",
-        "2015-02-02T00:00:00"
+        "2015-01-19T00:00:00"
       ],
-      "test_end": 304,
-      "test_end_date": "2015-02-02T00:00:00",
+      "test_end": 302,
+      "test_end_date": "2015-01-19T00:00:00",
       "test_start": 300,
       "test_start_date": "2015-01-12T00:00:00",
       "train_end": 300,
@@ -196,12 +186,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-03-09T00:00:00",
-        "2015-03-16T00:00:00",
-        "2015-03-23T00:00:00",
-        "2015-03-30T00:00:00"
+        "2015-03-16T00:00:00"
       ],
-      "test_end": 312,
-      "test_end_date": "2015-03-30T00:00:00",
+      "test_end": 310,
+      "test_end_date": "2015-03-16T00:00:00",
       "test_start": 308,
       "test_start_date": "2015-03-09T00:00:00",
       "train_end": 308,
@@ -222,12 +210,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-05-04T00:00:00",
-        "2015-05-11T00:00:00",
-        "2015-05-18T00:00:00",
-        "2015-05-25T00:00:00"
+        "2015-05-11T00:00:00"
       ],
-      "test_end": 320,
-      "test_end_date": "2015-05-25T00:00:00",
+      "test_end": 318,
+      "test_end_date": "2015-05-11T00:00:00",
       "test_start": 316,
       "test_start_date": "2015-05-04T00:00:00",
       "train_end": 316,
@@ -248,12 +234,10 @@
       "selection_reused": false,
       "test_dates": [
         "2015-06-29T00:00:00",
-        "2015-07-06T00:00:00",
-        "2015-07-13T00:00:00",
-        "2015-07-20T00:00:00"
+        "2015-07-06T00:00:00"
       ],
-      "test_end": 328,
-      "test_end_date": "2015-07-20T00:00:00",
+      "test_end": 326,
+      "test_end_date": "2015-07-06T00:00:00",
       "test_start": 324,
       "test_start_date": "2015-06-29T00:00:00",
       "train_end": 324,
@@ -274,12 +258,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-08-24T00:00:00",
-        "2015-08-31T00:00:00",
-        "2015-09-07T00:00:00",
-        "2015-09-14T00:00:00"
+        "2015-08-31T00:00:00"
       ],
-      "test_end": 336,
-      "test_end_date": "2015-09-14T00:00:00",
+      "test_end": 334,
+      "test_end_date": "2015-08-31T00:00:00",
       "test_start": 332,
       "test_start_date": "2015-08-24T00:00:00",
       "train_end": 332,
@@ -300,12 +282,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-10-19T00:00:00",
-        "2015-10-26T00:00:00",
-        "2015-11-02T00:00:00",
-        "2015-11-09T00:00:00"
+        "2015-10-26T00:00:00"
       ],
-      "test_end": 344,
-      "test_end_date": "2015-11-09T00:00:00",
+      "test_end": 342,
+      "test_end_date": "2015-10-26T00:00:00",
       "test_start": 340,
       "test_start_date": "2015-10-19T00:00:00",
       "train_end": 340,
@@ -326,12 +306,10 @@
       "selection_reused": true,
       "test_dates": [
         "2015-12-14T00:00:00",
-        "2015-12-21T00:00:00",
-        "2015-12-28T00:00:00",
-        "2016-01-04T00:00:00"
+        "2015-12-21T00:00:00"
       ],
-      "test_end": 352,
-      "test_end_date": "2016-01-04T00:00:00",
+      "test_end": 350,
+      "test_end_date": "2015-12-21T00:00:00",
       "test_start": 348,
       "test_start_date": "2015-12-14T00:00:00",
       "train_end": 348,
@@ -352,12 +330,10 @@
       "selection_reused": false,
       "test_dates": [
         "2016-02-08T00:00:00",
-        "2016-02-15T00:00:00",
-        "2016-02-22T00:00:00",
-        "2016-02-29T00:00:00"
+        "2016-02-15T00:00:00"
       ],
-      "test_end": 360,
-      "test_end_date": "2016-02-29T00:00:00",
+      "test_end": 358,
+      "test_end_date": "2016-02-15T00:00:00",
       "test_start": 356,
       "test_start_date": "2016-02-08T00:00:00",
       "train_end": 356,
@@ -378,12 +354,10 @@
       "selection_reused": true,
       "test_dates": [
         "2016-04-04T00:00:00",
-        "2016-04-11T00:00:00",
-        "2016-04-18T00:00:00",
-        "2016-04-25T00:00:00"
+        "2016-04-11T00:00:00"
       ],
-      "test_end": 368,
-      "test_end_date": "2016-04-25T00:00:00",
+      "test_end": 366,
+      "test_end_date": "2016-04-11T00:00:00",
       "test_start": 364,
       "test_start_date": "2016-04-04T00:00:00",
       "train_end": 364,
@@ -404,12 +378,10 @@
       "selection_reused": true,
       "test_dates": [
         "2016-05-30T00:00:00",
-        "2016-06-06T00:00:00",
-        "2016-06-13T00:00:00",
-        "2016-06-20T00:00:00"
+        "2016-06-06T00:00:00"
       ],
-      "test_end": 376,
-      "test_end_date": "2016-06-20T00:00:00",
+      "test_end": 374,
+      "test_end_date": "2016-06-06T00:00:00",
       "test_start": 372,
       "test_start_date": "2016-05-30T00:00:00",
       "train_end": 372,
@@ -430,12 +402,10 @@
       "selection_reused": true,
       "test_dates": [
         "2016-07-25T00:00:00",
-        "2016-08-01T00:00:00",
-        "2016-08-08T00:00:00",
-        "2016-08-15T00:00:00"
+        "2016-08-01T00:00:00"
       ],
-      "test_end": 384,
-      "test_end_date": "2016-08-15T00:00:00",
+      "test_end": 382,
+      "test_end_date": "2016-08-01T00:00:00",
       "test_start": 380,
       "test_start_date": "2016-07-25T00:00:00",
       "train_end": 380,
@@ -456,12 +426,10 @@
       "selection_reused": false,
       "test_dates": [
         "2016-09-19T00:00:00",
-        "2016-09-26T00:00:00",
-        "2016-10-03T00:00:00",
-        "2016-10-10T00:00:00"
+        "2016-09-26T00:00:00"
       ],
-      "test_end": 392,
-      "test_end_date": "2016-10-10T00:00:00",
+      "test_end": 390,
+      "test_end_date": "2016-09-26T00:00:00",
       "test_start": 388,
       "test_start_date": "2016-09-19T00:00:00",
       "train_end": 388,
@@ -482,12 +450,10 @@
       "selection_reused": true,
       "test_dates": [
         "2016-11-14T00:00:00",
-        "2016-11-21T00:00:00",
-        "2016-11-28T00:00:00",
-        "2016-12-05T00:00:00"
+        "2016-11-21T00:00:00"
       ],
-      "test_end": 400,
-      "test_end_date": "2016-12-05T00:00:00",
+      "test_end": 398,
+      "test_end_date": "2016-11-21T00:00:00",
       "test_start": 396,
       "test_start_date": "2016-11-14T00:00:00",
       "train_end": 396,
@@ -508,12 +474,10 @@
       "selection_reused": true,
       "test_dates": [
         "2017-01-09T00:00:00",
-        "2017-01-16T00:00:00",
-        "2017-01-23T00:00:00",
-        "2017-01-30T00:00:00"
+        "2017-01-16T00:00:00"
       ],
-      "test_end": 408,
-      "test_end_date": "2017-01-30T00:00:00",
+      "test_end": 406,
+      "test_end_date": "2017-01-16T00:00:00",
       "test_start": 404,
       "test_start_date": "2017-01-09T00:00:00",
       "train_end": 404,
@@ -534,12 +498,10 @@
       "selection_reused": true,
       "test_dates": [
         "2017-03-06T00:00:00",
-        "2017-03-13T00:00:00",
-        "2017-03-20T00:00:00",
-        "2017-03-27T00:00:00"
+        "2017-03-13T00:00:00"
       ],
-      "test_end": 416,
-      "test_end_date": "2017-03-27T00:00:00",
+      "test_end": 414,
+      "test_end_date": "2017-03-13T00:00:00",
       "test_start": 412,
       "test_start_date": "2017-03-06T00:00:00",
       "train_end": 412,
@@ -561,12 +523,10 @@
       "selection_reused": false,
       "test_dates": [
         "2017-05-01T00:00:00",
-        "2017-05-08T00:00:00",
-        "2017-05-15T00:00:00",
-        "2017-05-22T00:00:00"
+        "2017-05-08T00:00:00"
       ],
-      "test_end": 424,
-      "test_end_date": "2017-05-22T00:00:00",
+      "test_end": 422,
+      "test_end_date": "2017-05-08T00:00:00",
       "test_start": 420,
       "test_start_date": "2017-05-01T00:00:00",
       "train_end": 420,
@@ -588,12 +548,10 @@
       "selection_reused": true,
       "test_dates": [
         "2017-06-26T00:00:00",
-        "2017-07-03T00:00:00",
-        "2017-07-10T00:00:00",
-        "2017-07-17T00:00:00"
+        "2017-07-03T00:00:00"
       ],
-      "test_end": 432,
-      "test_end_date": "2017-07-17T00:00:00",
+      "test_end": 430,
+      "test_end_date": "2017-07-03T00:00:00",
       "test_start": 428,
       "test_start_date": "2017-06-26T00:00:00",
       "train_end": 428,
@@ -615,12 +573,10 @@
       "selection_reused": true,
       "test_dates": [
         "2017-08-21T00:00:00",
-        "2017-08-28T00:00:00",
-        "2017-09-04T00:00:00",
-        "2017-09-11T00:00:00"
+        "2017-08-28T00:00:00"
       ],
-      "test_end": 440,
-      "test_end_date": "2017-09-11T00:00:00",
+      "test_end": 438,
+      "test_end_date": "2017-08-28T00:00:00",
       "test_start": 436,
       "test_start_date": "2017-08-21T00:00:00",
       "train_end": 436,
@@ -642,12 +598,10 @@
       "selection_reused": true,
       "test_dates": [
         "2017-10-16T00:00:00",
-        "2017-10-23T00:00:00",
-        "2017-10-30T00:00:00",
-        "2017-11-06T00:00:00"
+        "2017-10-23T00:00:00"
       ],
-      "test_end": 448,
-      "test_end_date": "2017-11-06T00:00:00",
+      "test_end": 446,
+      "test_end_date": "2017-10-23T00:00:00",
       "test_start": 444,
       "test_start_date": "2017-10-16T00:00:00",
       "train_end": 444,
@@ -657,23 +611,22 @@
       "window_id": 23
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv"
+        "corn_weekly_rv",
+        "corn_weekly_rvb"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2017-12-11T00:00:00",
-        "2017-12-18T00:00:00",
-        "2017-12-25T00:00:00",
-        "2018-01-01T00:00:00"
+        "2017-12-18T00:00:00"
       ],
-      "test_end": 456,
-      "test_end_date": "2018-01-01T00:00:00",
+      "test_end": 454,
+      "test_end_date": "2017-12-18T00:00:00",
       "test_start": 452,
       "test_start_date": "2017-12-11T00:00:00",
       "train_end": 452,
@@ -683,23 +636,22 @@
       "window_id": 24
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv"
+        "corn_weekly_rv",
+        "corn_weekly_rvb"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2018-02-05T00:00:00",
-        "2018-02-12T00:00:00",
-        "2018-02-19T00:00:00",
-        "2018-02-26T00:00:00"
+        "2018-02-12T00:00:00"
       ],
-      "test_end": 464,
-      "test_end_date": "2018-02-26T00:00:00",
+      "test_end": 462,
+      "test_end_date": "2018-02-12T00:00:00",
       "test_start": 460,
       "test_start_date": "2018-02-05T00:00:00",
       "train_end": 460,
@@ -709,23 +661,22 @@
       "window_id": 25
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv"
+        "corn_weekly_rv",
+        "corn_weekly_rvb"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2018-04-02T00:00:00",
-        "2018-04-09T00:00:00",
-        "2018-04-16T00:00:00",
-        "2018-04-23T00:00:00"
+        "2018-04-09T00:00:00"
       ],
-      "test_end": 472,
-      "test_end_date": "2018-04-23T00:00:00",
+      "test_end": 470,
+      "test_end_date": "2018-04-09T00:00:00",
       "test_start": 468,
       "test_start_date": "2018-04-02T00:00:00",
       "train_end": 468,
@@ -735,23 +686,22 @@
       "window_id": 26
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv"
+        "corn_weekly_rv",
+        "corn_weekly_rvb"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2018-05-28T00:00:00",
-        "2018-06-04T00:00:00",
-        "2018-06-11T00:00:00",
-        "2018-06-18T00:00:00"
+        "2018-06-04T00:00:00"
       ],
-      "test_end": 480,
-      "test_end_date": "2018-06-18T00:00:00",
+      "test_end": 478,
+      "test_end_date": "2018-06-04T00:00:00",
       "test_start": 476,
       "test_start_date": "2018-05-28T00:00:00",
       "train_end": 476,
@@ -772,12 +722,10 @@
       "selection_reused": false,
       "test_dates": [
         "2018-07-23T00:00:00",
-        "2018-07-30T00:00:00",
-        "2018-08-06T00:00:00",
-        "2018-08-13T00:00:00"
+        "2018-07-30T00:00:00"
       ],
-      "test_end": 488,
-      "test_end_date": "2018-08-13T00:00:00",
+      "test_end": 486,
+      "test_end_date": "2018-07-30T00:00:00",
       "test_start": 484,
       "test_start_date": "2018-07-23T00:00:00",
       "train_end": 484,
@@ -798,12 +746,10 @@
       "selection_reused": true,
       "test_dates": [
         "2018-09-17T00:00:00",
-        "2018-09-24T00:00:00",
-        "2018-10-01T00:00:00",
-        "2018-10-08T00:00:00"
+        "2018-09-24T00:00:00"
       ],
-      "test_end": 496,
-      "test_end_date": "2018-10-08T00:00:00",
+      "test_end": 494,
+      "test_end_date": "2018-09-24T00:00:00",
       "test_start": 492,
       "test_start_date": "2018-09-17T00:00:00",
       "train_end": 492,
@@ -824,12 +770,10 @@
       "selection_reused": true,
       "test_dates": [
         "2018-11-12T00:00:00",
-        "2018-11-19T00:00:00",
-        "2018-11-26T00:00:00",
-        "2018-12-03T00:00:00"
+        "2018-11-19T00:00:00"
       ],
-      "test_end": 504,
-      "test_end_date": "2018-12-03T00:00:00",
+      "test_end": 502,
+      "test_end_date": "2018-11-19T00:00:00",
       "test_start": 500,
       "test_start_date": "2018-11-12T00:00:00",
       "train_end": 500,
@@ -850,12 +794,10 @@
       "selection_reused": true,
       "test_dates": [
         "2019-01-07T00:00:00",
-        "2019-01-14T00:00:00",
-        "2019-01-21T00:00:00",
-        "2019-01-28T00:00:00"
+        "2019-01-14T00:00:00"
       ],
-      "test_end": 512,
-      "test_end_date": "2019-01-28T00:00:00",
+      "test_end": 510,
+      "test_end_date": "2019-01-14T00:00:00",
       "test_start": 508,
       "test_start_date": "2019-01-07T00:00:00",
       "train_end": 508,
@@ -878,12 +820,10 @@
       "selection_reused": false,
       "test_dates": [
         "2019-03-04T00:00:00",
-        "2019-03-11T00:00:00",
-        "2019-03-18T00:00:00",
-        "2019-03-25T00:00:00"
+        "2019-03-11T00:00:00"
       ],
-      "test_end": 520,
-      "test_end_date": "2019-03-25T00:00:00",
+      "test_end": 518,
+      "test_end_date": "2019-03-11T00:00:00",
       "test_start": 516,
       "test_start_date": "2019-03-04T00:00:00",
       "train_end": 516,
@@ -906,12 +846,10 @@
       "selection_reused": true,
       "test_dates": [
         "2019-04-29T00:00:00",
-        "2019-05-06T00:00:00",
-        "2019-05-13T00:00:00",
-        "2019-05-20T00:00:00"
+        "2019-05-06T00:00:00"
       ],
-      "test_end": 528,
-      "test_end_date": "2019-05-20T00:00:00",
+      "test_end": 526,
+      "test_end_date": "2019-05-06T00:00:00",
       "test_start": 524,
       "test_start_date": "2019-04-29T00:00:00",
       "train_end": 524,
@@ -934,12 +872,10 @@
       "selection_reused": true,
       "test_dates": [
         "2019-06-24T00:00:00",
-        "2019-07-01T00:00:00",
-        "2019-07-08T00:00:00",
-        "2019-07-15T00:00:00"
+        "2019-07-01T00:00:00"
       ],
-      "test_end": 536,
-      "test_end_date": "2019-07-15T00:00:00",
+      "test_end": 534,
+      "test_end_date": "2019-07-01T00:00:00",
       "test_start": 532,
       "test_start_date": "2019-06-24T00:00:00",
       "train_end": 532,
@@ -962,12 +898,10 @@
       "selection_reused": true,
       "test_dates": [
         "2019-08-19T00:00:00",
-        "2019-08-26T00:00:00",
-        "2019-09-02T00:00:00",
-        "2019-09-09T00:00:00"
+        "2019-08-26T00:00:00"
       ],
-      "test_end": 544,
-      "test_end_date": "2019-09-09T00:00:00",
+      "test_end": 542,
+      "test_end_date": "2019-08-26T00:00:00",
       "test_start": 540,
       "test_start_date": "2019-08-19T00:00:00",
       "train_end": 540,
@@ -977,22 +911,23 @@
       "window_id": 35
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
-        "corn_weekly_rv"
+        "corn_weekly_jumps",
+        "corn_weekly_rv",
+        "corn_weekly_rvb",
+        "corn_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2019-10-14T00:00:00",
-        "2019-10-21T00:00:00",
-        "2019-10-28T00:00:00",
-        "2019-11-04T00:00:00"
+        "2019-10-21T00:00:00"
       ],
-      "test_end": 552,
-      "test_end_date": "2019-11-04T00:00:00",
+      "test_end": 550,
+      "test_end_date": "2019-10-21T00:00:00",
       "test_start": 548,
       "test_start_date": "2019-10-14T00:00:00",
       "train_end": 548,
@@ -1002,22 +937,23 @@
       "window_id": 36
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
-        "corn_weekly_rv"
+        "corn_weekly_jumps",
+        "corn_weekly_rv",
+        "corn_weekly_rvb",
+        "corn_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2019-12-09T00:00:00",
-        "2019-12-16T00:00:00",
-        "2019-12-23T00:00:00",
-        "2019-12-30T00:00:00"
+        "2019-12-16T00:00:00"
       ],
-      "test_end": 560,
-      "test_end_date": "2019-12-30T00:00:00",
+      "test_end": 558,
+      "test_end_date": "2019-12-16T00:00:00",
       "test_start": 556,
       "test_start_date": "2019-12-09T00:00:00",
       "train_end": 556,
@@ -1027,22 +963,23 @@
       "window_id": 37
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
-        "corn_weekly_rv"
+        "corn_weekly_jumps",
+        "corn_weekly_rv",
+        "corn_weekly_rvb",
+        "corn_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2020-02-03T00:00:00",
-        "2020-02-10T00:00:00",
-        "2020-02-17T00:00:00",
-        "2020-02-24T00:00:00"
+        "2020-02-10T00:00:00"
       ],
-      "test_end": 568,
-      "test_end_date": "2020-02-24T00:00:00",
+      "test_end": 566,
+      "test_end_date": "2020-02-10T00:00:00",
       "test_start": 564,
       "test_start_date": "2020-02-03T00:00:00",
       "train_end": 564,
@@ -1052,22 +989,23 @@
       "window_id": 38
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
-        "corn_weekly_rv"
+        "corn_weekly_jumps",
+        "corn_weekly_rv",
+        "corn_weekly_rvb",
+        "corn_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2020-03-30T00:00:00",
-        "2020-04-06T00:00:00",
-        "2020-04-13T00:00:00",
-        "2020-04-20T00:00:00"
+        "2020-04-06T00:00:00"
       ],
-      "test_end": 576,
-      "test_end_date": "2020-04-20T00:00:00",
+      "test_end": 574,
+      "test_end_date": "2020-04-06T00:00:00",
       "test_start": 572,
       "test_start_date": "2020-03-30T00:00:00",
       "train_end": 572,
@@ -1088,12 +1026,10 @@
       "selection_reused": false,
       "test_dates": [
         "2020-05-25T00:00:00",
-        "2020-06-01T00:00:00",
-        "2020-06-08T00:00:00",
-        "2020-06-15T00:00:00"
+        "2020-06-01T00:00:00"
       ],
-      "test_end": 584,
-      "test_end_date": "2020-06-15T00:00:00",
+      "test_end": 582,
+      "test_end_date": "2020-06-01T00:00:00",
       "test_start": 580,
       "test_start_date": "2020-05-25T00:00:00",
       "train_end": 580,
@@ -1114,12 +1050,10 @@
       "selection_reused": true,
       "test_dates": [
         "2020-07-20T00:00:00",
-        "2020-07-27T00:00:00",
-        "2020-08-03T00:00:00",
-        "2020-08-10T00:00:00"
+        "2020-07-27T00:00:00"
       ],
-      "test_end": 592,
-      "test_end_date": "2020-08-10T00:00:00",
+      "test_end": 590,
+      "test_end_date": "2020-07-27T00:00:00",
       "test_start": 588,
       "test_start_date": "2020-07-20T00:00:00",
       "train_end": 588,
@@ -1140,12 +1074,10 @@
       "selection_reused": true,
       "test_dates": [
         "2020-09-14T00:00:00",
-        "2020-09-21T00:00:00",
-        "2020-09-28T00:00:00",
-        "2020-10-05T00:00:00"
+        "2020-09-21T00:00:00"
       ],
-      "test_end": 600,
-      "test_end_date": "2020-10-05T00:00:00",
+      "test_end": 598,
+      "test_end_date": "2020-09-21T00:00:00",
       "test_start": 596,
       "test_start_date": "2020-09-14T00:00:00",
       "train_end": 596,
@@ -1166,12 +1098,10 @@
       "selection_reused": true,
       "test_dates": [
         "2020-11-09T00:00:00",
-        "2020-11-16T00:00:00",
-        "2020-11-23T00:00:00",
-        "2020-11-30T00:00:00"
+        "2020-11-16T00:00:00"
       ],
-      "test_end": 608,
-      "test_end_date": "2020-11-30T00:00:00",
+      "test_end": 606,
+      "test_end_date": "2020-11-16T00:00:00",
       "test_start": 604,
       "test_start_date": "2020-11-09T00:00:00",
       "train_end": 604,
@@ -1193,12 +1123,10 @@
       "selection_reused": false,
       "test_dates": [
         "2021-01-04T00:00:00",
-        "2021-01-11T00:00:00",
-        "2021-01-18T00:00:00",
-        "2021-01-25T00:00:00"
+        "2021-01-11T00:00:00"
       ],
-      "test_end": 616,
-      "test_end_date": "2021-01-25T00:00:00",
+      "test_end": 614,
+      "test_end_date": "2021-01-11T00:00:00",
       "test_start": 612,
       "test_start_date": "2021-01-04T00:00:00",
       "train_end": 612,
@@ -1220,12 +1148,10 @@
       "selection_reused": true,
       "test_dates": [
         "2021-03-01T00:00:00",
-        "2021-03-08T00:00:00",
-        "2021-03-15T00:00:00",
-        "2021-03-22T00:00:00"
+        "2021-03-08T00:00:00"
       ],
-      "test_end": 624,
-      "test_end_date": "2021-03-22T00:00:00",
+      "test_end": 622,
+      "test_end_date": "2021-03-08T00:00:00",
       "test_start": 620,
       "test_start_date": "2021-03-01T00:00:00",
       "train_end": 620,
@@ -1247,12 +1173,10 @@
       "selection_reused": true,
       "test_dates": [
         "2021-04-26T00:00:00",
-        "2021-05-03T00:00:00",
-        "2021-05-10T00:00:00",
-        "2021-05-17T00:00:00"
+        "2021-05-03T00:00:00"
       ],
-      "test_end": 632,
-      "test_end_date": "2021-05-17T00:00:00",
+      "test_end": 630,
+      "test_end_date": "2021-05-03T00:00:00",
       "test_start": 628,
       "test_start_date": "2021-04-26T00:00:00",
       "train_end": 628,
@@ -1274,12 +1198,10 @@
       "selection_reused": true,
       "test_dates": [
         "2021-06-21T00:00:00",
-        "2021-06-28T00:00:00",
-        "2021-07-05T00:00:00",
-        "2021-07-12T00:00:00"
+        "2021-06-28T00:00:00"
       ],
-      "test_end": 640,
-      "test_end_date": "2021-07-12T00:00:00",
+      "test_end": 638,
+      "test_end_date": "2021-06-28T00:00:00",
       "test_start": 636,
       "test_start_date": "2021-06-21T00:00:00",
       "train_end": 636,
@@ -1289,25 +1211,21 @@
       "window_id": 47
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2021-08-16T00:00:00",
-        "2021-08-23T00:00:00",
-        "2021-08-30T00:00:00",
-        "2021-09-06T00:00:00"
+        "2021-08-23T00:00:00"
       ],
-      "test_end": 648,
-      "test_end_date": "2021-09-06T00:00:00",
+      "test_end": 646,
+      "test_end_date": "2021-08-23T00:00:00",
       "test_start": 644,
       "test_start_date": "2021-08-16T00:00:00",
       "train_end": 644,
@@ -1317,25 +1235,21 @@
       "window_id": 48
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2021-10-11T00:00:00",
-        "2021-10-18T00:00:00",
-        "2021-10-25T00:00:00",
-        "2021-11-01T00:00:00"
+        "2021-10-18T00:00:00"
       ],
-      "test_end": 656,
-      "test_end_date": "2021-11-01T00:00:00",
+      "test_end": 654,
+      "test_end_date": "2021-10-18T00:00:00",
       "test_start": 652,
       "test_start_date": "2021-10-11T00:00:00",
       "train_end": 652,
@@ -1345,25 +1259,21 @@
       "window_id": 49
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2021-12-06T00:00:00",
-        "2021-12-13T00:00:00",
-        "2021-12-20T00:00:00",
-        "2021-12-27T00:00:00"
+        "2021-12-13T00:00:00"
       ],
-      "test_end": 664,
-      "test_end_date": "2021-12-27T00:00:00",
+      "test_end": 662,
+      "test_end_date": "2021-12-13T00:00:00",
       "test_start": 660,
       "test_start_date": "2021-12-06T00:00:00",
       "train_end": 660,
@@ -1373,25 +1283,21 @@
       "window_id": 50
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2022-01-31T00:00:00",
-        "2022-02-07T00:00:00",
-        "2022-02-14T00:00:00",
-        "2022-02-21T00:00:00"
+        "2022-02-07T00:00:00"
       ],
-      "test_end": 672,
-      "test_end_date": "2022-02-21T00:00:00",
+      "test_end": 670,
+      "test_end_date": "2022-02-07T00:00:00",
       "test_start": 668,
       "test_start_date": "2022-01-31T00:00:00",
       "train_end": 668,
@@ -1414,12 +1320,10 @@
       "selection_reused": false,
       "test_dates": [
         "2022-03-28T00:00:00",
-        "2022-04-04T00:00:00",
-        "2022-04-11T00:00:00",
-        "2022-04-18T00:00:00"
+        "2022-04-04T00:00:00"
       ],
-      "test_end": 680,
-      "test_end_date": "2022-04-18T00:00:00",
+      "test_end": 678,
+      "test_end_date": "2022-04-04T00:00:00",
       "test_start": 676,
       "test_start_date": "2022-03-28T00:00:00",
       "train_end": 676,
@@ -1442,12 +1346,10 @@
       "selection_reused": true,
       "test_dates": [
         "2022-05-23T00:00:00",
-        "2022-05-30T00:00:00",
-        "2022-06-06T00:00:00",
-        "2022-06-13T00:00:00"
+        "2022-05-30T00:00:00"
       ],
-      "test_end": 688,
-      "test_end_date": "2022-06-13T00:00:00",
+      "test_end": 686,
+      "test_end_date": "2022-05-30T00:00:00",
       "test_start": 684,
       "test_start_date": "2022-05-23T00:00:00",
       "train_end": 684,
@@ -1470,12 +1372,10 @@
       "selection_reused": true,
       "test_dates": [
         "2022-07-18T00:00:00",
-        "2022-07-25T00:00:00",
-        "2022-08-01T00:00:00",
-        "2022-08-08T00:00:00"
+        "2022-07-25T00:00:00"
       ],
-      "test_end": 696,
-      "test_end_date": "2022-08-08T00:00:00",
+      "test_end": 694,
+      "test_end_date": "2022-07-25T00:00:00",
       "test_start": 692,
       "test_start_date": "2022-07-18T00:00:00",
       "train_end": 692,
@@ -1498,12 +1398,10 @@
       "selection_reused": true,
       "test_dates": [
         "2022-09-12T00:00:00",
-        "2022-09-19T00:00:00",
-        "2022-09-26T00:00:00",
-        "2022-10-03T00:00:00"
+        "2022-09-19T00:00:00"
       ],
-      "test_end": 704,
-      "test_end_date": "2022-10-03T00:00:00",
+      "test_end": 702,
+      "test_end_date": "2022-09-19T00:00:00",
       "test_start": 700,
       "test_start_date": "2022-09-12T00:00:00",
       "train_end": 700,
@@ -1526,12 +1424,10 @@
       "selection_reused": false,
       "test_dates": [
         "2022-11-07T00:00:00",
-        "2022-11-14T00:00:00",
-        "2022-11-21T00:00:00",
-        "2022-11-28T00:00:00"
+        "2022-11-14T00:00:00"
       ],
-      "test_end": 712,
-      "test_end_date": "2022-11-28T00:00:00",
+      "test_end": 710,
+      "test_end_date": "2022-11-14T00:00:00",
       "test_start": 708,
       "test_start_date": "2022-11-07T00:00:00",
       "train_end": 708,
@@ -1554,12 +1450,10 @@
       "selection_reused": true,
       "test_dates": [
         "2023-01-02T00:00:00",
-        "2023-01-09T00:00:00",
-        "2023-01-16T00:00:00",
-        "2023-01-23T00:00:00"
+        "2023-01-09T00:00:00"
       ],
-      "test_end": 720,
-      "test_end_date": "2023-01-23T00:00:00",
+      "test_end": 718,
+      "test_end_date": "2023-01-09T00:00:00",
       "test_start": 716,
       "test_start_date": "2023-01-02T00:00:00",
       "train_end": 716,
@@ -1582,12 +1476,10 @@
       "selection_reused": true,
       "test_dates": [
         "2023-02-27T00:00:00",
-        "2023-03-06T00:00:00",
-        "2023-03-13T00:00:00",
-        "2023-03-20T00:00:00"
+        "2023-03-06T00:00:00"
       ],
-      "test_end": 728,
-      "test_end_date": "2023-03-20T00:00:00",
+      "test_end": 726,
+      "test_end_date": "2023-03-06T00:00:00",
       "test_start": 724,
       "test_start_date": "2023-02-27T00:00:00",
       "train_end": 724,
@@ -1610,12 +1502,10 @@
       "selection_reused": true,
       "test_dates": [
         "2023-04-24T00:00:00",
-        "2023-05-01T00:00:00",
-        "2023-05-08T00:00:00",
-        "2023-05-15T00:00:00"
+        "2023-05-01T00:00:00"
       ],
-      "test_end": 736,
-      "test_end_date": "2023-05-15T00:00:00",
+      "test_end": 734,
+      "test_end_date": "2023-05-01T00:00:00",
       "test_start": 732,
       "test_start_date": "2023-04-24T00:00:00",
       "train_end": 732,
@@ -1625,25 +1515,21 @@
       "window_id": 59
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2023-06-19T00:00:00",
-        "2023-06-26T00:00:00",
-        "2023-07-03T00:00:00",
-        "2023-07-10T00:00:00"
+        "2023-06-26T00:00:00"
       ],
-      "test_end": 744,
-      "test_end_date": "2023-07-10T00:00:00",
+      "test_end": 742,
+      "test_end_date": "2023-06-26T00:00:00",
       "test_start": 740,
       "test_start_date": "2023-06-19T00:00:00",
       "train_end": 740,
@@ -1653,25 +1539,21 @@
       "window_id": 60
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2023-08-14T00:00:00",
-        "2023-08-21T00:00:00",
-        "2023-08-28T00:00:00",
-        "2023-09-04T00:00:00"
+        "2023-08-21T00:00:00"
       ],
-      "test_end": 752,
-      "test_end_date": "2023-09-04T00:00:00",
+      "test_end": 750,
+      "test_end_date": "2023-08-21T00:00:00",
       "test_start": 748,
       "test_start_date": "2023-08-14T00:00:00",
       "train_end": 748,
@@ -1681,25 +1563,21 @@
       "window_id": 61
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2023-10-09T00:00:00",
-        "2023-10-16T00:00:00",
-        "2023-10-23T00:00:00",
-        "2023-10-30T00:00:00"
+        "2023-10-16T00:00:00"
       ],
-      "test_end": 760,
-      "test_end_date": "2023-10-30T00:00:00",
+      "test_end": 758,
+      "test_end_date": "2023-10-16T00:00:00",
       "test_start": 756,
       "test_start_date": "2023-10-09T00:00:00",
       "train_end": 756,
@@ -1709,25 +1587,21 @@
       "window_id": 62
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2023-12-04T00:00:00",
-        "2023-12-11T00:00:00",
-        "2023-12-18T00:00:00",
-        "2023-12-25T00:00:00"
+        "2023-12-11T00:00:00"
       ],
-      "test_end": 768,
-      "test_end_date": "2023-12-25T00:00:00",
+      "test_end": 766,
+      "test_end_date": "2023-12-11T00:00:00",
       "test_start": 764,
       "test_start_date": "2023-12-04T00:00:00",
       "train_end": 764,
@@ -1737,25 +1611,21 @@
       "window_id": 63
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2024-01-29T00:00:00",
-        "2024-02-05T00:00:00",
-        "2024-02-12T00:00:00",
-        "2024-02-19T00:00:00"
+        "2024-02-05T00:00:00"
       ],
-      "test_end": 776,
-      "test_end_date": "2024-02-19T00:00:00",
+      "test_end": 774,
+      "test_end_date": "2024-02-05T00:00:00",
       "test_start": 772,
       "test_start_date": "2024-01-29T00:00:00",
       "train_end": 772,
@@ -1765,25 +1635,21 @@
       "window_id": 64
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2024-03-25T00:00:00",
-        "2024-04-01T00:00:00",
-        "2024-04-08T00:00:00",
-        "2024-04-15T00:00:00"
+        "2024-04-01T00:00:00"
       ],
-      "test_end": 784,
-      "test_end_date": "2024-04-15T00:00:00",
+      "test_end": 782,
+      "test_end_date": "2024-04-01T00:00:00",
       "test_start": 780,
       "test_start_date": "2024-03-25T00:00:00",
       "train_end": 780,
@@ -1793,25 +1659,21 @@
       "window_id": 65
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2024-05-20T00:00:00",
-        "2024-05-27T00:00:00",
-        "2024-06-03T00:00:00",
-        "2024-06-10T00:00:00"
+        "2024-05-27T00:00:00"
       ],
-      "test_end": 792,
-      "test_end_date": "2024-06-10T00:00:00",
+      "test_end": 790,
+      "test_end_date": "2024-05-27T00:00:00",
       "test_start": 788,
       "test_start_date": "2024-05-20T00:00:00",
       "train_end": 788,
@@ -1821,25 +1683,21 @@
       "window_id": 66
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2024-07-15T00:00:00",
-        "2024-07-22T00:00:00",
-        "2024-07-29T00:00:00",
-        "2024-08-05T00:00:00"
+        "2024-07-22T00:00:00"
       ],
-      "test_end": 800,
-      "test_end_date": "2024-08-05T00:00:00",
+      "test_end": 798,
+      "test_end_date": "2024-07-22T00:00:00",
       "test_start": 796,
       "test_start_date": "2024-07-15T00:00:00",
       "train_end": 796,
@@ -1849,25 +1707,21 @@
       "window_id": 67
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
         "2024-09-09T00:00:00",
-        "2024-09-16T00:00:00",
-        "2024-09-23T00:00:00",
-        "2024-09-30T00:00:00"
+        "2024-09-16T00:00:00"
       ],
-      "test_end": 808,
-      "test_end_date": "2024-09-30T00:00:00",
+      "test_end": 806,
+      "test_end_date": "2024-09-16T00:00:00",
       "test_start": 804,
       "test_start_date": "2024-09-09T00:00:00",
       "train_end": 804,
@@ -1877,25 +1731,21 @@
       "window_id": 68
     },
     {
-      "n_selected": 6,
+      "n_selected": 4,
       "selected_features": [
         "corn_monthly_rv",
         "corn_seasonal_rv",
         "corn_weekly_jumps",
-        "corn_weekly_rv",
-        "corn_weekly_rvb",
-        "corn_weekly_rvg"
+        "corn_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
         "2024-11-04T00:00:00",
-        "2024-11-11T00:00:00",
-        "2024-11-18T00:00:00",
-        "2024-11-25T00:00:00"
+        "2024-11-11T00:00:00"
       ],
-      "test_end": 816,
-      "test_end_date": "2024-11-25T00:00:00",
+      "test_end": 814,
+      "test_end_date": "2024-11-11T00:00:00",
       "test_start": 812,
       "test_start_date": "2024-11-04T00:00:00",
       "train_end": 812,
@@ -1909,10 +1759,10 @@
   "selection_frequency": {
     "corn_monthly_rv": 1.0,
     "corn_seasonal_rv": 1.0,
-    "corn_weekly_jumps": 0.6571428571428571,
+    "corn_weekly_jumps": 0.7142857142857143,
     "corn_weekly_rv": 1.0,
-    "corn_weekly_rvb": 0.7714285714285715,
-    "corn_weekly_rvg": 0.37142857142857144
+    "corn_weekly_rvb": 0.6857142857142857,
+    "corn_weekly_rvg": 0.22857142857142856
   },
   "target_col": "RV_target"
 }

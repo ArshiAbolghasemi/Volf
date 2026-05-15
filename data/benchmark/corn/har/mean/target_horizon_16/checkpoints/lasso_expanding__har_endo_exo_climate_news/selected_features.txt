@@ -41,4 +41,3 @@ awnd_moderate_high_wind_in_planting
 corn_weekly_rvg
 pdsi_extreme_wet_in_harvesting
 pdsi_severe_drought_in_planting
-spi_7d_extreme_wet_in_planting

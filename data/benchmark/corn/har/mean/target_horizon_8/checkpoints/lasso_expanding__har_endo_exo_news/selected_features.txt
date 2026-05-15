@@ -8,4 +8,3 @@ wheat_weekly_rv
 Text_Climate_Anomaly
 corn_weekly_jumps
 soybeans_weekly_rv
-corn_weekly_rvg

@@ -8,4 +8,3 @@ soybeans_weekly_rvb
 soybeans_weekly_rvg
 wheat_weekly_rv
 epu_index
-soybeans_weekly_jumps

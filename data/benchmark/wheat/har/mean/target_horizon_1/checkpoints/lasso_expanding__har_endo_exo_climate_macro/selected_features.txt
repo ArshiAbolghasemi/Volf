@@ -10,7 +10,8 @@ wheat_seasonal_rv
 wheat_weekly_rv
 wheat_weekly_rvg
 awnd_moderate_high_wind_in_planting
-wheat_weekly_jumps
 awnd_extreme_high_wind_in_planting
-tmax_very_hot_in_planting
 tmin_cold_in_planting
+wheat_weekly_jumps
+tmax_very_hot_in_planting
+WTI_Index

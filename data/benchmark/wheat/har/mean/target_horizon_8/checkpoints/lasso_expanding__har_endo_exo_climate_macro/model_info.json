@@ -52,7 +52,7 @@
   ],
   "grid_search_best_candidate_idx": 7,
   "grid_search_metric": "test_r2",
-  "grid_search_metric_value": 0.4772750835506696,
+  "grid_search_metric_value": 0.4742477968572144,
   "grid_search_n_candidates": 18,
   "initial_train_size": 260,
   "lasso_config": {
@@ -61,6 +61,7 @@
     "core_columns": null,
     "eps": 0.001,
     "max_iter": 200000,
+    "max_train_size": 260,
     "n_jobs": -1,
     "n_splits": 5,
     "progress_bar": false,

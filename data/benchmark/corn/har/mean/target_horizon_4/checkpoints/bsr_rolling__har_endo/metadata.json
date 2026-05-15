@@ -3,7 +3,7 @@
   "feature_set": "har_endo",
   "model_family": "har",
   "model_type": "bsr_rolling",
-  "saved_at_utc": "2026-05-13T22:03:15.458327+00:00",
+  "saved_at_utc": "2026-05-15T00:32:28.732806+00:00",
   "target_horizon": 4,
   "target_mode": "mean"
 }

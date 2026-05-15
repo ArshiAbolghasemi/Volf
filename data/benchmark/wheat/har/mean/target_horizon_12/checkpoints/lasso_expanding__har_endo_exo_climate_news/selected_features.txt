@@ -36,4 +36,5 @@ awnd_moderate_high_wind_in_harvesting
 NAO_index
 pdsi_extreme_drought_in_planting
 spi_7d_extreme_dry_in_harvesting
-co2_extreme_in_harvesting
+pdsi_severe_drought_in_harvesting
+spi_7d_very_dry_in_planting

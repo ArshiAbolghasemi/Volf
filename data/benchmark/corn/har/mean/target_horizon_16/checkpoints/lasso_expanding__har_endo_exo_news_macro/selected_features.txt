@@ -10,5 +10,4 @@ soybeans_weekly_rv
 wheat_weekly_rv
 Text_Climate_Anomaly
 corn_weekly_jumps
-corn_weekly_rvg
 WTI_Index

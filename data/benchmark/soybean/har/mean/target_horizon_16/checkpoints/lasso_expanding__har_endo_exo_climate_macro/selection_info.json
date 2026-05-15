@@ -1,9 +1,9 @@
 {
-  "best_alpha": 0.04077838804947325,
+  "best_alpha": 0.02682945634572758,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.101011     0.040500    0.020961\n1   0.094203     0.039884    0.021159\n2   0.087854     0.039259    0.021365\n3   0.081933     0.038628    0.021490\n4   0.076411     0.037644    0.020799\n..       ...          ...         ...\n95  0.000134     0.108895    0.112308\n96  0.000125     0.111086    0.116439\n97  0.000116     0.113207    0.120450\n98  0.000108     0.115252    0.124328\n99  0.000101     0.117219    0.128066\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.101011     0.039810    0.015017\n1   0.094203     0.039429    0.015355\n2   0.087854     0.039003    0.015691\n3   0.081933     0.038397    0.015888\n4   0.076411     0.037766    0.015992\n..       ...          ...         ...\n95  0.000134     0.135810    0.109836\n96  0.000125     0.138243    0.113630\n97  0.000116     0.140592    0.117328\n98  0.000108     0.142852    0.120916\n99  0.000101     0.145020    0.124384\n\n[100 rows x 3 columns]",
   "dropped_features": [
-    "Broad_Dollar_index",
     "DJIA_Index",
     "NAO_index",
     "SOI_index",
@@ -15,7 +15,6 @@
     "co2_extreme_in_harvesting",
     "co2_extreme_in_planting",
     "pdsi_extreme_drought_in_harvesting",
-    "pdsi_extreme_drought_in_planting",
     "pdsi_extreme_wet_in_harvesting",
     "pdsi_extreme_wet_in_planting",
     "pdsi_severe_drought_in_harvesting",
@@ -33,16 +32,13 @@
     "spi_7d_very_wet_in_harvesting",
     "spi_7d_very_wet_in_planting",
     "ssta_elino",
-    "ssta_lanina",
     "tmax_hot_in_harvesting",
-    "tmax_hot_in_planting",
     "tmax_very_hot_in_harvesting",
     "tmax_very_hot_in_planting",
     "tmin_cold_in_harvesting",
     "tmin_cold_in_planting",
     "tmin_very_cold_in_harvesting",
-    "tmin_very_cold_in_planting",
-    "wheat_weekly_rv"
+    "tmin_very_cold_in_planting"
   ],
   "final_eps": 0.001,
   "final_max_iter": 200000,
@@ -55,39 +51,46 @@
     "soybeans_weekly_rvg",
     "ssta_elino",
     "NAO_index",
-    "pdsi_extreme_wet_in_planting",
-    "tmax_hot_in_harvesting",
-    "tmax_hot_in_planting",
-    "tmin_very_cold_in_planting",
     "SOI_index",
     "Stock_Uncertainty",
     "awnd_moderate_high_wind_in_harvesting",
     "co2_extreme_in_planting",
+    "pdsi_extreme_wet_in_planting",
     "spi_7d_extreme_wet_in_harvesting",
     "spi_7d_very_dry_in_planting",
     "spi_7d_very_wet_in_planting",
+    "tmax_hot_in_harvesting",
+    "tmax_hot_in_planting",
     "tmax_very_hot_in_planting",
     "tmin_very_cold_in_harvesting",
+    "tmin_very_cold_in_planting",
     "wheat_weekly_rv",
     "WTI_Index",
     "Broad_Dollar_index",
     "pdsi_extreme_wet_in_harvesting",
     "ssta_lanina",
     "corn_weekly_rv",
-    "pdsi_extreme_drought_in_planting"
+    "pdsi_extreme_drought_in_planting",
+    "awnd_extreme_high_wind_in_harvesting",
+    "tmin_cold_in_harvesting"
   ],
   "lasso_selected_features": [
     "soybeans_weekly_rv",
     "soybeans_monthly_rv",
     "soybeans_weekly_rvg",
+    "wheat_weekly_rv",
     "corn_weekly_rv",
-    "WTI_Index"
+    "ssta_lanina",
+    "tmax_hot_in_planting",
+    "pdsi_extreme_drought_in_planting",
+    "WTI_Index",
+    "Broad_Dollar_index"
   ],
   "method": "lasso",
   "n_candidate_features": 46,
   "n_samples_used": 696,
-  "n_selected_by_lasso": 5,
-  "n_selected_total": 6,
+  "n_selected_by_lasso": 10,
+  "n_selected_total": 11,
   "n_windows": 50,
   "per_window_selection": [
     {
@@ -395,19 +398,13 @@
       "window_id": 11
     },
     {
-      "n_selected": 11,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "NAO_index",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "tmax_hot_in_harvesting",
-        "tmax_hot_in_planting",
-        "tmin_very_cold_in_planting"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -425,19 +422,13 @@
       "window_id": 12
     },
     {
-      "n_selected": 11,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "NAO_index",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "tmax_hot_in_harvesting",
-        "tmax_hot_in_planting",
-        "tmin_very_cold_in_planting"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -455,19 +446,13 @@
       "window_id": 13
     },
     {
-      "n_selected": 11,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "NAO_index",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "tmax_hot_in_harvesting",
-        "tmax_hot_in_planting",
-        "tmin_very_cold_in_planting"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -485,19 +470,13 @@
       "window_id": 14
     },
     {
-      "n_selected": 11,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "NAO_index",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "tmax_hot_in_harvesting",
-        "tmax_hot_in_planting",
-        "tmin_very_cold_in_planting"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -899,21 +878,18 @@
       "window_id": 27
     },
     {
-      "n_selected": 20,
+      "n_selected": 17,
       "selected_features": [
         "Broad_Dollar_index",
         "DJIA_Index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "pdsi_extreme_wet_in_harvesting",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
@@ -938,21 +914,18 @@
       "window_id": 28
     },
     {
-      "n_selected": 20,
+      "n_selected": 17,
       "selected_features": [
         "Broad_Dollar_index",
         "DJIA_Index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "pdsi_extreme_wet_in_harvesting",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
@@ -977,21 +950,18 @@
       "window_id": 29
     },
     {
-      "n_selected": 20,
+      "n_selected": 17,
       "selected_features": [
         "Broad_Dollar_index",
         "DJIA_Index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "pdsi_extreme_wet_in_harvesting",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
@@ -1016,21 +986,18 @@
       "window_id": 30
     },
     {
-      "n_selected": 20,
+      "n_selected": 17,
       "selected_features": [
         "Broad_Dollar_index",
         "DJIA_Index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "pdsi_extreme_wet_in_harvesting",
-        "pdsi_extreme_wet_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
@@ -1055,12 +1022,10 @@
       "window_id": 31
     },
     {
-      "n_selected": 21,
+      "n_selected": 18,
       "selected_features": [
         "Broad_Dollar_index",
-        "NAO_index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "corn_weekly_rv",
         "pdsi_extreme_drought_in_planting",
         "pdsi_extreme_wet_in_harvesting",
@@ -1075,7 +1040,6 @@
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
@@ -1095,12 +1059,10 @@
       "window_id": 32
     },
     {
-      "n_selected": 21,
+      "n_selected": 18,
       "selected_features": [
         "Broad_Dollar_index",
-        "NAO_index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "corn_weekly_rv",
         "pdsi_extreme_drought_in_planting",
         "pdsi_extreme_wet_in_harvesting",
@@ -1115,7 +1077,6 @@
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
@@ -1135,12 +1096,10 @@
       "window_id": 33
     },
     {
-      "n_selected": 21,
+      "n_selected": 18,
       "selected_features": [
         "Broad_Dollar_index",
-        "NAO_index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "corn_weekly_rv",
         "pdsi_extreme_drought_in_planting",
         "pdsi_extreme_wet_in_harvesting",
@@ -1155,7 +1114,6 @@
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
@@ -1175,12 +1133,10 @@
       "window_id": 34
     },
     {
-      "n_selected": 21,
+      "n_selected": 18,
       "selected_features": [
         "Broad_Dollar_index",
-        "NAO_index",
         "Stock_Uncertainty",
-        "co2_extreme_in_planting",
         "corn_weekly_rv",
         "pdsi_extreme_drought_in_planting",
         "pdsi_extreme_wet_in_harvesting",
@@ -1195,7 +1151,6 @@
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
@@ -1215,20 +1170,16 @@
       "window_id": 35
     },
     {
-      "n_selected": 13,
+      "n_selected": 9,
       "selected_features": [
-        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
-        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg",
         "ssta_lanina",
         "tmax_hot_in_planting",
-        "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1247,20 +1198,16 @@
       "window_id": 36
     },
     {
-      "n_selected": 13,
+      "n_selected": 9,
       "selected_features": [
-        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
-        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg",
         "ssta_lanina",
         "tmax_hot_in_planting",
-        "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1279,20 +1226,16 @@
       "window_id": 37
     },
     {
-      "n_selected": 13,
+      "n_selected": 9,
       "selected_features": [
-        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
-        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg",
         "ssta_lanina",
         "tmax_hot_in_planting",
-        "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1311,20 +1254,16 @@
       "window_id": 38
     },
     {
-      "n_selected": 13,
+      "n_selected": 9,
       "selected_features": [
-        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
-        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg",
         "ssta_lanina",
         "tmax_hot_in_planting",
-        "tmax_very_hot_in_planting",
-        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1343,12 +1282,13 @@
       "window_id": 39
     },
     {
-      "n_selected": 23,
+      "n_selected": 26,
       "selected_features": [
         "Broad_Dollar_index",
         "NAO_index",
         "Stock_Uncertainty",
         "WTI_Index",
+        "awnd_extreme_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_harvesting",
         "co2_extreme_in_planting",
         "corn_weekly_rv",
@@ -1361,10 +1301,12 @@
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_wet_in_planting",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
+        "tmin_cold_in_harvesting",
         "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
@@ -1385,12 +1327,13 @@
       "window_id": 40
     },
     {
-      "n_selected": 23,
+      "n_selected": 26,
       "selected_features": [
         "Broad_Dollar_index",
         "NAO_index",
         "Stock_Uncertainty",
         "WTI_Index",
+        "awnd_extreme_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_harvesting",
         "co2_extreme_in_planting",
         "corn_weekly_rv",
@@ -1403,10 +1346,12 @@
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_wet_in_planting",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
+        "tmin_cold_in_harvesting",
         "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
@@ -1427,12 +1372,13 @@
       "window_id": 41
     },
     {
-      "n_selected": 23,
+      "n_selected": 26,
       "selected_features": [
         "Broad_Dollar_index",
         "NAO_index",
         "Stock_Uncertainty",
         "WTI_Index",
+        "awnd_extreme_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_harvesting",
         "co2_extreme_in_planting",
         "corn_weekly_rv",
@@ -1445,10 +1391,12 @@
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_wet_in_planting",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
+        "tmin_cold_in_harvesting",
         "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
@@ -1469,12 +1417,13 @@
       "window_id": 42
     },
     {
-      "n_selected": 23,
+      "n_selected": 26,
       "selected_features": [
         "Broad_Dollar_index",
         "NAO_index",
         "Stock_Uncertainty",
         "WTI_Index",
+        "awnd_extreme_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_harvesting",
         "co2_extreme_in_planting",
         "corn_weekly_rv",
@@ -1487,10 +1436,12 @@
         "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
         "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_wet_in_planting",
         "ssta_lanina",
         "tmax_hot_in_harvesting",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_planting",
+        "tmin_cold_in_harvesting",
         "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
@@ -1511,14 +1462,24 @@
       "window_id": 43
     },
     {
-      "n_selected": 7,
+      "n_selected": 17,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
+        "spi_7d_extreme_wet_in_harvesting",
+        "ssta_lanina",
+        "tmax_hot_in_harvesting",
+        "tmax_hot_in_planting",
+        "tmax_very_hot_in_planting",
+        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1537,14 +1498,24 @@
       "window_id": 44
     },
     {
-      "n_selected": 7,
+      "n_selected": 17,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
+        "spi_7d_extreme_wet_in_harvesting",
+        "ssta_lanina",
+        "tmax_hot_in_harvesting",
+        "tmax_hot_in_planting",
+        "tmax_very_hot_in_planting",
+        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1563,14 +1534,24 @@
       "window_id": 45
     },
     {
-      "n_selected": 7,
+      "n_selected": 17,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
+        "spi_7d_extreme_wet_in_harvesting",
+        "ssta_lanina",
+        "tmax_hot_in_harvesting",
+        "tmax_hot_in_planting",
+        "tmax_very_hot_in_planting",
+        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1589,14 +1570,24 @@
       "window_id": 46
     },
     {
-      "n_selected": 7,
+      "n_selected": 17,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg",
+        "spi_7d_extreme_wet_in_harvesting",
+        "ssta_lanina",
+        "tmax_hot_in_harvesting",
+        "tmax_hot_in_planting",
+        "tmax_very_hot_in_planting",
+        "tmin_very_cold_in_planting",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1615,14 +1606,19 @@
       "window_id": 47
     },
     {
-      "n_selected": 6,
+      "n_selected": 11,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rvg",
+        "ssta_lanina",
+        "tmax_hot_in_planting",
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -1640,14 +1636,19 @@
       "window_id": 48
     },
     {
-      "n_selected": 6,
+      "n_selected": 11,
       "selected_features": [
+        "Broad_Dollar_index",
         "WTI_Index",
         "corn_weekly_rv",
+        "pdsi_extreme_drought_in_planting",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rvg",
+        "ssta_lanina",
+        "tmax_hot_in_planting",
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1667,34 +1668,36 @@
   ],
   "retried_after_warning": false,
   "selection_frequency": {
-    "Broad_Dollar_index": 0.32,
+    "Broad_Dollar_index": 0.36,
     "DJIA_Index": 0.64,
-    "NAO_index": 0.32,
+    "NAO_index": 0.16,
     "SOI_index": 0.08,
     "Stock_Uncertainty": 0.4,
     "WTI_Index": 0.36,
+    "awnd_extreme_high_wind_in_harvesting": 0.08,
     "awnd_moderate_high_wind_in_harvesting": 0.16,
-    "co2_extreme_in_planting": 0.32,
+    "co2_extreme_in_planting": 0.16,
     "corn_weekly_rv": 0.36,
-    "pdsi_extreme_drought_in_planting": 0.16,
+    "pdsi_extreme_drought_in_planting": 0.28,
     "pdsi_extreme_wet_in_harvesting": 0.32,
-    "pdsi_extreme_wet_in_planting": 0.4,
+    "pdsi_extreme_wet_in_planting": 0.24,
     "soybeans_monthly_rv": 1.0,
     "soybeans_seasonal_rv": 1.0,
     "soybeans_weekly_rv": 1.0,
     "soybeans_weekly_rvb": 0.64,
     "soybeans_weekly_rvg": 1.0,
-    "spi_7d_extreme_wet_in_harvesting": 0.32,
+    "spi_7d_extreme_wet_in_harvesting": 0.4,
     "spi_7d_very_dry_in_planting": 0.08,
-    "spi_7d_very_wet_in_planting": 0.08,
-    "ssta_elino": 0.32,
-    "ssta_lanina": 0.32,
+    "spi_7d_very_wet_in_planting": 0.16,
+    "ssta_elino": 0.24,
+    "ssta_lanina": 0.44,
     "tmax_hot_in_harvesting": 0.4,
-    "tmax_hot_in_planting": 0.64,
+    "tmax_hot_in_planting": 0.68,
     "tmax_very_hot_in_planting": 0.4,
-    "tmin_very_cold_in_harvesting": 0.32,
-    "tmin_very_cold_in_planting": 0.56,
-    "wheat_weekly_rv": 0.56
+    "tmin_cold_in_harvesting": 0.08,
+    "tmin_very_cold_in_harvesting": 0.24,
+    "tmin_very_cold_in_planting": 0.48,
+    "wheat_weekly_rv": 0.6
   },
   "target_col": "RV_target"
 }

@@ -3,7 +3,7 @@
   "feature_set": "har_endo_exo_climate_news",
   "model_family": "har",
   "model_type": "lasso_expanding",
-  "saved_at_utc": "2026-05-13T21:06:03.488160+00:00",
+  "saved_at_utc": "2026-05-15T00:21:10.931047+00:00",
   "target_horizon": 16,
   "target_mode": "mean"
 }

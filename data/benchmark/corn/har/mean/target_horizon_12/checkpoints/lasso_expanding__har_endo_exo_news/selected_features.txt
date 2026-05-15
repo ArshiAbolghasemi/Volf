@@ -7,5 +7,4 @@ frbsf_sentiment
 wheat_weekly_rv
 Text_Climate_Anomaly
 corn_weekly_jumps
-corn_weekly_rvg
 soybeans_weekly_rv

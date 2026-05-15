@@ -6,9 +6,7 @@ soybeans_weekly_rvg
 frbsf_sentiment
 soybeans_weekly_rvb
 corn_weekly_rv
-wheat_weekly_rv
 Stock_Uncertainty
-WTI_Index
-epu_index
+wheat_weekly_rv
 Broad_Dollar_index
-Text_Climate_Anomaly
+WTI_Index

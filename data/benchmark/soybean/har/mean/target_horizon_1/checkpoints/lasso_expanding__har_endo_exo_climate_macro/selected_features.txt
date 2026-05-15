@@ -4,6 +4,9 @@ soybeans_weekly_rv
 soybeans_weekly_rvg
 corn_weekly_rv
 DJIA_Index
+Stock_Uncertainty
+pdsi_severe_drought_in_planting
+spi_7d_very_wet_in_planting
 tmin_very_cold_in_harvesting
 Broad_Dollar_index
 WTI_Index

@@ -1,7 +1,8 @@
 {
-  "best_alpha": 0.009044723055527766,
+  "best_alpha": 0.007866638856499337,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.181730     0.074392    0.043607\n1   0.169482     0.073918    0.043980\n2   0.158059     0.071897    0.044591\n3   0.147406     0.068989    0.045524\n4   0.137472     0.066423    0.046397\n..       ...          ...         ...\n95  0.000240     0.063536    0.057659\n96  0.000224     0.063841    0.058529\n97  0.000209     0.064125    0.059336\n98  0.000195     0.064393    0.060095\n99  0.000182     0.064647    0.060808\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.181730     0.076667    0.044324\n1   0.169482     0.076331    0.044691\n2   0.158059     0.074565    0.044830\n3   0.147406     0.073019    0.045097\n4   0.137472     0.071287    0.045630\n..       ...          ...         ...\n95  0.000240     0.062723    0.057572\n96  0.000224     0.063069    0.058421\n97  0.000209     0.063393    0.059210\n98  0.000195     0.063698    0.059951\n99  0.000182     0.063987    0.060647\n\n[100 rows x 3 columns]",
   "dropped_features": [
     "Broad_Dollar_index",
     "DJIA_Index",
@@ -24,8 +25,8 @@
     "wheat_seasonal_rv",
     "wheat_weekly_rv",
     "WTI_Index",
-    "frbsf_sentiment",
     "wheat_weekly_jumps",
+    "frbsf_sentiment",
     "epu_index",
     "Broad_Dollar_index",
     "soybeans_weekly_rv"
@@ -446,13 +447,14 @@
       "window_id": 15
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "DJIA_Index",
         "Stock_Uncertainty",
         "corn_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -471,13 +473,14 @@
       "window_id": 16
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "DJIA_Index",
         "Stock_Uncertainty",
         "corn_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -496,13 +499,14 @@
       "window_id": 17
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "DJIA_Index",
         "Stock_Uncertainty",
         "corn_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -521,13 +525,14 @@
       "window_id": 18
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "DJIA_Index",
         "Stock_Uncertainty",
         "corn_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1170,9 +1175,11 @@
       "window_id": 43
     },
     {
-      "n_selected": 5,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
+        "corn_weekly_rv",
+        "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -1194,9 +1201,11 @@
       "window_id": 44
     },
     {
-      "n_selected": 5,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
+        "corn_weekly_rv",
+        "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -1218,9 +1227,11 @@
       "window_id": 45
     },
     {
-      "n_selected": 5,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
+        "corn_weekly_rv",
+        "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -1242,9 +1253,11 @@
       "window_id": 46
     },
     {
-      "n_selected": 5,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
+        "corn_weekly_rv",
+        "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -1366,11 +1379,12 @@
       "window_id": 51
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
         "corn_weekly_rv",
         "frbsf_sentiment",
+        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1391,11 +1405,12 @@
       "window_id": 52
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
         "corn_weekly_rv",
         "frbsf_sentiment",
+        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1416,11 +1431,12 @@
       "window_id": 53
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
         "corn_weekly_rv",
         "frbsf_sentiment",
+        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1441,11 +1457,12 @@
       "window_id": 54
     },
     {
-      "n_selected": 6,
+      "n_selected": 7,
       "selected_features": [
         "WTI_Index",
         "corn_weekly_rv",
         "frbsf_sentiment",
+        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1523,13 +1540,13 @@
     "Stock_Uncertainty": 0.5517241379310345,
     "Text_Climate_Anomaly": 0.27586206896551724,
     "WTI_Index": 0.3103448275862069,
-    "corn_weekly_rv": 0.5172413793103449,
+    "corn_weekly_rv": 0.5862068965517241,
     "epu_index": 0.06896551724137931,
-    "frbsf_sentiment": 0.4482758620689655,
-    "soybeans_weekly_rv": 0.06896551724137931,
+    "frbsf_sentiment": 0.5172413793103449,
+    "soybeans_weekly_rv": 0.13793103448275862,
     "wheat_monthly_rv": 1.0,
     "wheat_seasonal_rv": 1.0,
-    "wheat_weekly_jumps": 0.20689655172413793,
+    "wheat_weekly_jumps": 0.27586206896551724,
     "wheat_weekly_rv": 1.0
   },
   "target_col": "RV_target"

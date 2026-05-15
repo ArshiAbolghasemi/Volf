@@ -4,5 +4,5 @@ corn_weekly_jumps
 corn_weekly_rv
 corn_weekly_rvb
 wheat_weekly_rv
-corn_weekly_rvg
 soybeans_weekly_rv
+corn_weekly_rvg

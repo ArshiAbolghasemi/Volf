@@ -1,8 +1,10 @@
 {
-  "best_alpha": 0.006640388662630449,
+  "best_alpha": 0.00941257936107074,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.202788     0.075345    0.028495\n1   0.189121     0.072706    0.029391\n2   0.176375     0.070371    0.030322\n3   0.164487     0.067066    0.029650\n4   0.153402     0.063141    0.027881\n..       ...          ...         ...\n95  0.000268     0.045606    0.029097\n96  0.000250     0.045997    0.029812\n97  0.000233     0.046367    0.030487\n98  0.000217     0.046717    0.031123\n99  0.000203     0.047046    0.031721\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.202788     0.072463    0.021425\n1   0.189121     0.069810    0.022274\n2   0.176375     0.067460    0.023207\n3   0.164487     0.065016    0.024155\n4   0.153402     0.062513    0.025058\n..       ...          ...         ...\n95  0.000268     0.049075    0.028093\n96  0.000250     0.049514    0.028787\n97  0.000233     0.049930    0.029442\n98  0.000217     0.050322    0.030059\n99  0.000203     0.050692    0.030639\n\n[100 rows x 3 columns]",
   "dropped_features": [
+    "DJIA_Index",
     "Stock_Uncertainty",
     "soybeans_weekly_rvb",
     "wheat_weekly_rv"
@@ -18,8 +20,8 @@
     "soybeans_weekly_rvg",
     "Stock_Uncertainty",
     "soybeans_weekly_jumps",
-    "WTI_Index",
-    "Broad_Dollar_index"
+    "Broad_Dollar_index",
+    "WTI_Index"
   ],
   "lasso_selected_features": [
     "soybeans_weekly_rv",
@@ -27,15 +29,14 @@
     "soybeans_weekly_rvg",
     "soybeans_weekly_jumps",
     "corn_weekly_rv",
-    "DJIA_Index",
     "WTI_Index",
     "Broad_Dollar_index"
   ],
   "method": "lasso",
   "n_candidate_features": 12,
   "n_samples_used": 696,
-  "n_selected_by_lasso": 8,
-  "n_selected_total": 9,
+  "n_selected_by_lasso": 7,
+  "n_selected_total": 8,
   "n_windows": 51,
   "per_window_selection": [
     {
@@ -791,11 +792,9 @@
       "window_id": 27
     },
     {
-      "n_selected": 8,
+      "n_selected": 6,
       "selected_features": [
         "DJIA_Index",
-        "Stock_Uncertainty",
-        "WTI_Index",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
@@ -819,11 +818,9 @@
       "window_id": 28
     },
     {
-      "n_selected": 8,
+      "n_selected": 6,
       "selected_features": [
         "DJIA_Index",
-        "Stock_Uncertainty",
-        "WTI_Index",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
@@ -847,11 +844,9 @@
       "window_id": 29
     },
     {
-      "n_selected": 8,
+      "n_selected": 6,
       "selected_features": [
         "DJIA_Index",
-        "Stock_Uncertainty",
-        "WTI_Index",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
@@ -875,11 +870,9 @@
       "window_id": 30
     },
     {
-      "n_selected": 8,
+      "n_selected": 6,
       "selected_features": [
         "DJIA_Index",
-        "Stock_Uncertainty",
-        "WTI_Index",
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
@@ -1363,10 +1356,9 @@
       "window_id": 47
     },
     {
-      "n_selected": 9,
+      "n_selected": 8,
       "selected_features": [
         "Broad_Dollar_index",
-        "DJIA_Index",
         "WTI_Index",
         "corn_weekly_rv",
         "soybeans_monthly_rv",
@@ -1392,10 +1384,9 @@
       "window_id": 48
     },
     {
-      "n_selected": 9,
+      "n_selected": 8,
       "selected_features": [
         "Broad_Dollar_index",
-        "DJIA_Index",
         "WTI_Index",
         "corn_weekly_rv",
         "soybeans_monthly_rv",
@@ -1421,10 +1412,9 @@
       "window_id": 49
     },
     {
-      "n_selected": 9,
+      "n_selected": 8,
       "selected_features": [
         "Broad_Dollar_index",
-        "DJIA_Index",
         "WTI_Index",
         "corn_weekly_rv",
         "soybeans_monthly_rv",
@@ -1453,9 +1443,9 @@
   "retried_after_warning": false,
   "selection_frequency": {
     "Broad_Dollar_index": 0.21568627450980393,
-    "DJIA_Index": 0.9215686274509803,
-    "Stock_Uncertainty": 0.39215686274509803,
-    "WTI_Index": 0.45098039215686275,
+    "DJIA_Index": 0.8627450980392157,
+    "Stock_Uncertainty": 0.3137254901960784,
+    "WTI_Index": 0.37254901960784315,
     "corn_weekly_rv": 0.9215686274509803,
     "soybeans_monthly_rv": 1.0,
     "soybeans_seasonal_rv": 1.0,

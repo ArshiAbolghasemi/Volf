@@ -1,8 +1,11 @@
 {
-  "best_alpha": 0.002369233089165874,
+  "best_alpha": 0.007235295521059616,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.145374     0.052873    0.022720\n1   0.135576     0.051551    0.023047\n2   0.126439     0.050351    0.023417\n3   0.117917     0.049290    0.023787\n4   0.109970     0.047867    0.023371\n..       ...          ...         ...\n95  0.000192     0.027817    0.009380\n96  0.000179     0.027818    0.009382\n97  0.000167     0.027818    0.009383\n98  0.000156     0.027819    0.009384\n99  0.000145     0.027819    0.009385\n\n[100 rows x 3 columns]",
-  "dropped_features": [],
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.145374     0.052174    0.014732\n1   0.135576     0.050736    0.015036\n2   0.126439     0.049426    0.015434\n3   0.117917     0.048262    0.015856\n4   0.109970     0.047219    0.016289\n..       ...          ...         ...\n95  0.000192     0.029419    0.010466\n96  0.000179     0.029422    0.010469\n97  0.000167     0.029425    0.010471\n98  0.000156     0.029427    0.010474\n99  0.000145     0.029429    0.010476\n\n[100 rows x 3 columns]",
+  "dropped_features": [
+    "soybeans_weekly_rvb"
+  ],
   "final_eps": 0.001,
   "final_max_iter": 200000,
   "final_selected_union": [
@@ -16,15 +19,14 @@
   "lasso_selected_features": [
     "soybeans_weekly_rv",
     "soybeans_monthly_rv",
-    "soybeans_weekly_rvb",
     "soybeans_weekly_rvg",
     "soybeans_weekly_jumps"
   ],
   "method": "lasso",
   "n_candidate_features": 6,
   "n_samples_used": 804,
-  "n_selected_by_lasso": 5,
-  "n_selected_total": 6,
+  "n_selected_by_lasso": 4,
+  "n_selected_total": 5,
   "n_windows": 71,
   "per_window_selection": [
     {
@@ -448,11 +450,13 @@
       "window_id": 15
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -474,11 +478,13 @@
       "window_id": 16
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -500,11 +506,13 @@
       "window_id": 17
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -526,11 +534,13 @@
       "window_id": 18
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -552,11 +562,13 @@
       "window_id": 19
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -578,11 +590,13 @@
       "window_id": 20
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -604,11 +618,13 @@
       "window_id": 21
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -630,11 +646,13 @@
       "window_id": 22
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
+        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -656,10 +674,11 @@
       "window_id": 23
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg"
       ],
@@ -682,10 +701,11 @@
       "window_id": 24
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg"
       ],
@@ -708,10 +728,11 @@
       "window_id": 25
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg"
       ],
@@ -734,10 +755,11 @@
       "window_id": 26
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
+        "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvg"
       ],
@@ -1424,13 +1446,12 @@
       "window_id": 51
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1452,13 +1473,12 @@
       "window_id": 52
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1480,13 +1500,12 @@
       "window_id": 53
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1508,13 +1527,12 @@
       "window_id": 54
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1536,13 +1554,12 @@
       "window_id": 55
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1564,13 +1581,12 @@
       "window_id": 56
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1592,13 +1608,12 @@
       "window_id": 57
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1620,13 +1635,12 @@
       "window_id": 58
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1648,14 +1662,11 @@
       "window_id": 59
     },
     {
-      "n_selected": 6,
+      "n_selected": 3,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
-        "soybeans_weekly_jumps",
-        "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -1676,14 +1687,11 @@
       "window_id": 60
     },
     {
-      "n_selected": 6,
+      "n_selected": 3,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
-        "soybeans_weekly_jumps",
-        "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1704,14 +1712,11 @@
       "window_id": 61
     },
     {
-      "n_selected": 6,
+      "n_selected": 3,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
-        "soybeans_weekly_jumps",
-        "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1732,14 +1737,11 @@
       "window_id": 62
     },
     {
-      "n_selected": 6,
+      "n_selected": 3,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
-        "soybeans_weekly_jumps",
-        "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg"
+        "soybeans_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1760,13 +1762,12 @@
       "window_id": 63
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1788,13 +1789,12 @@
       "window_id": 64
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1816,13 +1816,12 @@
       "window_id": 65
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1844,13 +1843,12 @@
       "window_id": 66
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1872,13 +1870,12 @@
       "window_id": 67
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1900,13 +1897,12 @@
       "window_id": 68
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1928,13 +1924,12 @@
       "window_id": 69
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "soybeans_monthly_rv",
         "soybeans_seasonal_rv",
         "soybeans_weekly_jumps",
         "soybeans_weekly_rv",
-        "soybeans_weekly_rvb",
         "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
@@ -1960,10 +1955,10 @@
   "selection_frequency": {
     "soybeans_monthly_rv": 1.0,
     "soybeans_seasonal_rv": 1.0,
-    "soybeans_weekly_jumps": 0.6619718309859155,
+    "soybeans_weekly_jumps": 0.7746478873239436,
     "soybeans_weekly_rv": 1.0,
-    "soybeans_weekly_rvb": 0.5492957746478874,
-    "soybeans_weekly_rvg": 0.9436619718309859
+    "soybeans_weekly_rvb": 0.39436619718309857,
+    "soybeans_weekly_rvg": 0.8873239436619719
   },
   "target_col": "RV_target"
 }

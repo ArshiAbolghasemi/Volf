@@ -1,7 +1,8 @@
 {
-  "best_alpha": 0.03371717574377889,
+  "best_alpha": 0.019550303556580766,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.126943     0.061659    0.045247\n1   0.118387     0.061534    0.045369\n2   0.110409     0.061059    0.045648\n3   0.102967     0.060581    0.045948\n4   0.096028     0.060051    0.046141\n..       ...          ...         ...\n95  0.000168     0.154179    0.146408\n96  0.000157     0.154382    0.147056\n97  0.000146     0.154492    0.147662\n98  0.000136     0.154259    0.148239\n99  0.000127     0.154036    0.148788\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.128628     0.067650    0.052786\n1   0.119959     0.067528    0.052905\n2   0.111874     0.067348    0.053052\n3   0.104334     0.067012    0.053289\n4   0.097302     0.066729    0.053491\n..       ...          ...         ...\n95  0.000170     0.188428    0.185600\n96  0.000159     0.188954    0.186418\n97  0.000148     0.189348    0.187205\n98  0.000138     0.189415    0.187999\n99  0.000129     0.189476    0.188752\n\n[100 rows x 3 columns]",
   "dropped_features": [
     "Broad_Dollar_index",
     "DJIA_Index",
@@ -9,7 +10,6 @@
     "SOI_index",
     "Stock_Uncertainty",
     "Text_Climate_Anomaly",
-    "WTI_Index",
     "awnd_extreme_high_wind_in_harvesting",
     "awnd_extreme_high_wind_in_planting",
     "awnd_moderate_high_wind_in_harvesting",
@@ -53,6 +53,9 @@
   "final_max_iter": 200000,
   "final_selected_union": [
     "DJIA_Index",
+    "pdsi_extreme_wet_in_harvesting",
+    "pdsi_severe_drought_in_planting",
+    "ssta_lanina",
     "wheat_monthly_rv",
     "wheat_seasonal_rv",
     "wheat_weekly_rv",
@@ -63,46 +66,149 @@
     "epu_index",
     "pdsi_extreme_drought_in_harvesting",
     "pdsi_extreme_drought_in_planting",
-    "pdsi_extreme_wet_in_harvesting",
-    "pdsi_severe_drought_in_planting",
     "spi_7d_extreme_dry_in_planting",
     "spi_7d_extreme_wet_in_harvesting",
     "ssta_elino",
-    "ssta_lanina",
     "tmax_hot_in_planting",
     "tmin_cold_in_harvesting",
-    "awnd_moderate_high_wind_in_harvesting",
-    "soybeans_weekly_rv",
     "frbsf_sentiment",
-    "Stock_Uncertainty",
-    "pdsi_very_wet_in_harvesting",
-    "spi_7d_very_dry_in_harvesting",
     "NAO_index",
+    "awnd_moderate_high_wind_in_harvesting",
     "awnd_moderate_high_wind_in_planting",
     "co2_extreme_in_harvesting",
     "co2_extreme_in_planting",
     "corn_weekly_rv",
     "pdsi_extreme_wet_in_planting",
     "pdsi_severe_drought_in_harvesting",
+    "pdsi_very_wet_in_harvesting",
     "pdsi_very_wet_in_planting",
+    "soybeans_weekly_rv",
     "spi_7d_extreme_dry_in_harvesting",
+    "spi_7d_very_dry_in_harvesting",
+    "spi_7d_very_wet_in_harvesting",
     "tmax_very_hot_in_harvesting",
     "tmax_very_hot_in_planting",
     "tmin_very_cold_in_harvesting",
-    "tmin_very_cold_in_planting"
+    "tmin_very_cold_in_planting",
+    "wheat_weekly_jumps"
   ],
   "lasso_selected_features": [
     "wheat_weekly_rv",
     "wheat_monthly_rv",
-    "ssta_lanina"
+    "ssta_lanina",
+    "WTI_Index"
   ],
   "method": "lasso",
   "n_candidate_features": 49,
-  "n_samples_used": 696,
-  "n_selected_by_lasso": 3,
-  "n_selected_total": 4,
-  "n_windows": 99,
+  "n_samples_used": 676,
+  "n_selected_by_lasso": 4,
+  "n_selected_total": 5,
+  "n_windows": 56,
   "per_window_selection": [
+    {
+      "n_selected": 7,
+      "selected_features": [
+        "DJIA_Index",
+        "pdsi_extreme_wet_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "ssta_lanina",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": false,
+      "test_dates": [
+        "2015-01-12T00:00:00"
+      ],
+      "test_end": 261,
+      "test_end_date": "2015-01-12T00:00:00",
+      "test_start": 260,
+      "test_start_date": "2015-01-12T00:00:00",
+      "train_end": 260,
+      "train_end_date": "2015-01-05T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 0
+    },
+    {
+      "n_selected": 7,
+      "selected_features": [
+        "DJIA_Index",
+        "pdsi_extreme_wet_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "ssta_lanina",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": true,
+      "test_dates": [
+        "2015-03-23T00:00:00"
+      ],
+      "test_end": 269,
+      "test_end_date": "2015-03-23T00:00:00",
+      "test_start": 268,
+      "test_start_date": "2015-03-23T00:00:00",
+      "train_end": 268,
+      "train_end_date": "2015-03-16T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 1
+    },
+    {
+      "n_selected": 7,
+      "selected_features": [
+        "DJIA_Index",
+        "pdsi_extreme_wet_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "ssta_lanina",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": true,
+      "test_dates": [
+        "2015-05-18T00:00:00"
+      ],
+      "test_end": 277,
+      "test_end_date": "2015-05-18T00:00:00",
+      "test_start": 276,
+      "test_start_date": "2015-05-18T00:00:00",
+      "train_end": 276,
+      "train_end_date": "2015-05-11T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 2
+    },
+    {
+      "n_selected": 7,
+      "selected_features": [
+        "DJIA_Index",
+        "pdsi_extreme_wet_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "ssta_lanina",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": true,
+      "test_dates": [
+        "2015-07-20T00:00:00"
+      ],
+      "test_end": 285,
+      "test_end_date": "2015-07-20T00:00:00",
+      "test_start": 284,
+      "test_start_date": "2015-07-20T00:00:00",
+      "train_end": 284,
+      "train_end_date": "2015-07-13T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 3
+    },
     {
       "n_selected": 4,
       "selected_features": [
@@ -114,17 +220,63 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2016-03-07T00:00:00"
+        "2015-09-21T00:00:00"
       ],
-      "test_end": 313,
-      "test_end_date": "2016-03-07T00:00:00",
-      "test_start": 312,
-      "test_start_date": "2016-03-07T00:00:00",
-      "train_end": 312,
-      "train_end_date": "2016-02-29T00:00:00",
+      "test_end": 293,
+      "test_end_date": "2015-09-21T00:00:00",
+      "test_start": 292,
+      "test_start_date": "2015-09-21T00:00:00",
+      "train_end": 292,
+      "train_end_date": "2015-09-14T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 0
+      "window_id": 4
+    },
+    {
+      "n_selected": 4,
+      "selected_features": [
+        "DJIA_Index",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": true,
+      "test_dates": [
+        "2015-11-23T00:00:00"
+      ],
+      "test_end": 301,
+      "test_end_date": "2015-11-23T00:00:00",
+      "test_start": 300,
+      "test_start_date": "2015-11-23T00:00:00",
+      "train_end": 300,
+      "train_end_date": "2015-11-16T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 5
+    },
+    {
+      "n_selected": 4,
+      "selected_features": [
+        "DJIA_Index",
+        "wheat_monthly_rv",
+        "wheat_seasonal_rv",
+        "wheat_weekly_rv"
+      ],
+      "selection_method": "lasso",
+      "selection_reused": true,
+      "test_dates": [
+        "2016-02-01T00:00:00"
+      ],
+      "test_end": 309,
+      "test_end_date": "2016-02-01T00:00:00",
+      "test_start": 308,
+      "test_start_date": "2016-02-01T00:00:00",
+      "train_end": 308,
+      "train_end_date": "2016-01-11T00:00:00",
+      "train_start": 0,
+      "train_start_date": "2009-04-20T00:00:00",
+      "window_id": 6
     },
     {
       "n_selected": 4,
@@ -147,53 +299,7 @@
       "train_end_date": "2016-03-28T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 1
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2016-05-02T00:00:00"
-      ],
-      "test_end": 321,
-      "test_end_date": "2016-05-02T00:00:00",
-      "test_start": 320,
-      "test_start_date": "2016-05-02T00:00:00",
-      "train_end": 320,
-      "train_end_date": "2016-04-25T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 2
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2016-06-06T00:00:00"
-      ],
-      "test_end": 325,
-      "test_end_date": "2016-06-06T00:00:00",
-      "test_start": 324,
-      "test_start_date": "2016-06-06T00:00:00",
-      "train_end": 324,
-      "train_end_date": "2016-05-23T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 3
+      "window_id": 7
     },
     {
       "n_selected": 4,
@@ -206,17 +312,17 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2016-07-11T00:00:00"
+        "2016-06-06T00:00:00"
       ],
-      "test_end": 329,
-      "test_end_date": "2016-07-11T00:00:00",
-      "test_start": 328,
-      "test_start_date": "2016-07-11T00:00:00",
-      "train_end": 328,
-      "train_end_date": "2016-06-27T00:00:00",
+      "test_end": 325,
+      "test_end_date": "2016-06-06T00:00:00",
+      "test_start": 324,
+      "test_start_date": "2016-06-06T00:00:00",
+      "train_end": 324,
+      "train_end_date": "2016-05-23T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 4
+      "window_id": 8
     },
     {
       "n_selected": 4,
@@ -239,30 +345,7 @@
       "train_end_date": "2016-08-01T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 5
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2016-09-12T00:00:00"
-      ],
-      "test_end": 337,
-      "test_end_date": "2016-09-12T00:00:00",
-      "test_start": 336,
-      "test_start_date": "2016-09-12T00:00:00",
-      "train_end": 336,
-      "train_end_date": "2016-08-29T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 6
+      "window_id": 9
     },
     {
       "n_selected": 4,
@@ -285,30 +368,7 @@
       "train_end_date": "2016-10-03T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 7
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2016-11-14T00:00:00"
-      ],
-      "test_end": 345,
-      "test_end_date": "2016-11-14T00:00:00",
-      "test_start": 344,
-      "test_start_date": "2016-11-14T00:00:00",
-      "train_end": 344,
-      "train_end_date": "2016-11-07T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 8
+      "window_id": 10
     },
     {
       "n_selected": 4,
@@ -329,52 +389,6 @@
       "test_start_date": "2016-12-12T00:00:00",
       "train_end": 348,
       "train_end_date": "2016-12-05T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 9
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2017-01-30T00:00:00"
-      ],
-      "test_end": 353,
-      "test_end_date": "2017-01-30T00:00:00",
-      "test_start": 352,
-      "test_start_date": "2017-01-30T00:00:00",
-      "train_end": 352,
-      "train_end_date": "2017-01-23T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 10
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "DJIA_Index",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2017-03-06T00:00:00"
-      ],
-      "test_end": 357,
-      "test_end_date": "2017-03-06T00:00:00",
-      "test_start": 356,
-      "test_start_date": "2017-03-06T00:00:00",
-      "train_end": 356,
-      "train_end_date": "2017-02-27T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
       "window_id": 11
@@ -405,14 +419,14 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2017-04-03T00:00:00"
+        "2017-03-06T00:00:00"
       ],
-      "test_end": 361,
-      "test_end_date": "2017-04-03T00:00:00",
-      "test_start": 360,
-      "test_start_date": "2017-04-03T00:00:00",
-      "train_end": 360,
-      "train_end_date": "2017-03-27T00:00:00",
+      "test_end": 357,
+      "test_end_date": "2017-03-06T00:00:00",
+      "test_start": 356,
+      "test_start_date": "2017-03-06T00:00:00",
+      "train_end": 356,
+      "train_end_date": "2017-02-27T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
       "window_id": 12
@@ -481,14 +495,14 @@
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
-        "2017-06-05T00:00:00"
+        "2017-07-03T00:00:00"
       ],
-      "test_end": 369,
-      "test_end_date": "2017-06-05T00:00:00",
-      "test_start": 368,
-      "test_start_date": "2017-06-05T00:00:00",
-      "train_end": 368,
-      "train_end_date": "2017-05-22T00:00:00",
+      "test_end": 373,
+      "test_end_date": "2017-07-03T00:00:00",
+      "test_start": 372,
+      "test_start_date": "2017-07-03T00:00:00",
+      "train_end": 372,
+      "train_end_date": "2017-06-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
       "window_id": 14
@@ -519,84 +533,6 @@
       "selection_method": "lasso",
       "selection_reused": true,
       "test_dates": [
-        "2017-07-03T00:00:00"
-      ],
-      "test_end": 373,
-      "test_end_date": "2017-07-03T00:00:00",
-      "test_start": 372,
-      "test_start_date": "2017-07-03T00:00:00",
-      "train_end": 372,
-      "train_end_date": "2017-06-26T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 15
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2017-07-31T00:00:00"
-      ],
-      "test_end": 377,
-      "test_end_date": "2017-07-31T00:00:00",
-      "test_start": 376,
-      "test_start_date": "2017-07-31T00:00:00",
-      "train_end": 376,
-      "train_end_date": "2017-07-24T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 16
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
         "2017-08-28T00:00:00"
       ],
       "test_end": 381,
@@ -607,85 +543,7 @@
       "train_end_date": "2017-08-21T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 17
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2017-10-02T00:00:00"
-      ],
-      "test_end": 385,
-      "test_end_date": "2017-10-02T00:00:00",
-      "test_start": 384,
-      "test_start_date": "2017-10-02T00:00:00",
-      "train_end": 384,
-      "train_end_date": "2017-09-25T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 18
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_extreme_wet_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2017-11-06T00:00:00"
-      ],
-      "test_end": 389,
-      "test_end_date": "2017-11-06T00:00:00",
-      "test_start": 388,
-      "test_start_date": "2017-11-06T00:00:00",
-      "train_end": 388,
-      "train_end_date": "2017-10-30T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 19
+      "window_id": 15
     },
     {
       "n_selected": 8,
@@ -702,17 +560,17 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2017-12-04T00:00:00"
+        "2017-11-06T00:00:00"
       ],
-      "test_end": 393,
-      "test_end_date": "2017-12-04T00:00:00",
-      "test_start": 392,
-      "test_start_date": "2017-12-04T00:00:00",
-      "train_end": 392,
-      "train_end_date": "2017-11-27T00:00:00",
+      "test_end": 389,
+      "test_end_date": "2017-11-06T00:00:00",
+      "test_start": 388,
+      "test_start_date": "2017-11-06T00:00:00",
+      "train_end": 388,
+      "train_end_date": "2017-10-30T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 20
+      "window_id": 16
     },
     {
       "n_selected": 8,
@@ -739,34 +597,7 @@
       "train_end_date": "2018-01-08T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 21
-    },
-    {
-      "n_selected": 8,
-      "selected_features": [
-        "DJIA_Index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2018-02-26T00:00:00"
-      ],
-      "test_end": 401,
-      "test_end_date": "2018-02-26T00:00:00",
-      "test_start": 400,
-      "test_start_date": "2018-02-26T00:00:00",
-      "train_end": 400,
-      "train_end_date": "2018-02-12T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 22
+      "window_id": 17
     },
     {
       "n_selected": 8,
@@ -793,36 +624,15 @@
       "train_end_date": "2018-03-19T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 23
+      "window_id": 18
     },
     {
-      "n_selected": 5,
+      "n_selected": 8,
       "selected_features": [
         "DJIA_Index",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2018-04-23T00:00:00"
-      ],
-      "test_end": 409,
-      "test_end_date": "2018-04-23T00:00:00",
-      "test_start": 408,
-      "test_start_date": "2018-04-23T00:00:00",
-      "train_end": 408,
-      "train_end_date": "2018-04-16T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 24
-    },
-    {
-      "n_selected": 5,
-      "selected_features": [
-        "DJIA_Index",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -841,43 +651,19 @@
       "train_end_date": "2018-05-14T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 25
+      "window_id": 19
     },
     {
       "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "ssta_lanina",
+        "frbsf_sentiment",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2018-06-25T00:00:00"
-      ],
-      "test_end": 417,
-      "test_end_date": "2018-06-25T00:00:00",
-      "test_start": 416,
-      "test_start_date": "2018-06-25T00:00:00",
-      "train_end": 416,
-      "train_end_date": "2018-06-18T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 26
-    },
-    {
-      "n_selected": 5,
-      "selected_features": [
-        "DJIA_Index",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2018-07-23T00:00:00"
       ],
@@ -889,39 +675,13 @@
       "train_end_date": "2018-07-16T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 27
+      "window_id": 20
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
         "frbsf_sentiment",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2018-08-20T00:00:00"
-      ],
-      "test_end": 425,
-      "test_end_date": "2018-08-20T00:00:00",
-      "test_start": 424,
-      "test_start_date": "2018-08-20T00:00:00",
-      "train_end": 424,
-      "train_end_date": "2018-08-13T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 28
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "frbsf_sentiment",
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -939,39 +699,13 @@
       "train_end_date": "2018-09-17T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 29
+      "window_id": 21
     },
     {
-      "n_selected": 6,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
         "frbsf_sentiment",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2018-10-29T00:00:00"
-      ],
-      "test_end": 433,
-      "test_end_date": "2018-10-29T00:00:00",
-      "test_start": 432,
-      "test_start_date": "2018-10-29T00:00:00",
-      "train_end": 432,
-      "train_end_date": "2018-10-22T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 30
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "frbsf_sentiment",
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -989,67 +723,13 @@
       "train_end_date": "2018-11-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 31
+      "window_id": 22
     },
     {
-      "n_selected": 20,
+      "n_selected": 5,
       "selected_features": [
         "DJIA_Index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2018-12-31T00:00:00"
-      ],
-      "test_end": 441,
-      "test_end_date": "2018-12-31T00:00:00",
-      "test_start": 440,
-      "test_start_date": "2018-12-31T00:00:00",
-      "train_end": 440,
-      "train_end_date": "2018-12-24T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 32
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
+        "frbsf_sentiment",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1067,85 +747,7 @@
       "train_end_date": "2019-02-04T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 33
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2019-03-18T00:00:00"
-      ],
-      "test_end": 449,
-      "test_end_date": "2019-03-18T00:00:00",
-      "test_start": 448,
-      "test_start_date": "2019-03-18T00:00:00",
-      "train_end": 448,
-      "train_end_date": "2019-03-11T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 34
-    },
-    {
-      "n_selected": 20,
-      "selected_features": [
-        "DJIA_Index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_moderate_high_wind_in_harvesting",
-        "epu_index",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2019-04-15T00:00:00"
-      ],
-      "test_end": 453,
-      "test_end_date": "2019-04-15T00:00:00",
-      "test_start": 452,
-      "test_start_date": "2019-04-15T00:00:00",
-      "train_end": 452,
-      "train_end_date": "2019-04-08T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 35
+      "window_id": 23
     },
     {
       "n_selected": 11,
@@ -1165,17 +767,17 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2019-05-13T00:00:00"
+        "2019-04-15T00:00:00"
       ],
-      "test_end": 457,
-      "test_end_date": "2019-05-13T00:00:00",
-      "test_start": 456,
-      "test_start_date": "2019-05-13T00:00:00",
-      "train_end": 456,
-      "train_end_date": "2019-05-06T00:00:00",
+      "test_end": 453,
+      "test_end_date": "2019-04-15T00:00:00",
+      "test_start": 452,
+      "test_start_date": "2019-04-15T00:00:00",
+      "train_end": 452,
+      "train_end_date": "2019-04-08T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 36
+      "window_id": 24
     },
     {
       "n_selected": 11,
@@ -1205,37 +807,7 @@
       "train_end_date": "2019-06-10T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 37
-    },
-    {
-      "n_selected": 11,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "frbsf_sentiment",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2019-07-15T00:00:00"
-      ],
-      "test_end": 465,
-      "test_end_date": "2019-07-15T00:00:00",
-      "test_start": 464,
-      "test_start_date": "2019-07-15T00:00:00",
-      "train_end": 464,
-      "train_end_date": "2019-07-08T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 38
+      "window_id": 25
     },
     {
       "n_selected": 11,
@@ -1265,38 +837,18 @@
       "train_end_date": "2019-08-05T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 39
+      "window_id": 26
     },
     {
-      "n_selected": 6,
+      "n_selected": 11,
       "selected_features": [
         "DJIA_Index",
         "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2019-09-16T00:00:00"
-      ],
-      "test_end": 473,
-      "test_end_date": "2019-09-16T00:00:00",
-      "test_start": 472,
-      "test_start_date": "2019-09-16T00:00:00",
-      "train_end": 472,
-      "train_end_date": "2019-09-09T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 40
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
+        "frbsf_sentiment",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_harvesting",
+        "pdsi_severe_drought_in_planting",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -1315,57 +867,7 @@
       "train_end_date": "2019-10-07T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 41
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2019-11-25T00:00:00"
-      ],
-      "test_end": 481,
-      "test_end_date": "2019-11-25T00:00:00",
-      "test_start": 480,
-      "test_start_date": "2019-11-25T00:00:00",
-      "train_end": 480,
-      "train_end_date": "2019-11-18T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 42
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2019-12-23T00:00:00"
-      ],
-      "test_end": 485,
-      "test_end_date": "2019-12-23T00:00:00",
-      "test_start": 484,
-      "test_start_date": "2019-12-23T00:00:00",
-      "train_end": 484,
-      "train_end_date": "2019-12-16T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 43
+      "window_id": 27
     },
     {
       "n_selected": 6,
@@ -1380,17 +882,17 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2020-01-27T00:00:00"
+        "2019-12-23T00:00:00"
       ],
-      "test_end": 489,
-      "test_end_date": "2020-01-27T00:00:00",
-      "test_start": 488,
-      "test_start_date": "2020-01-27T00:00:00",
-      "train_end": 488,
-      "train_end_date": "2020-01-13T00:00:00",
+      "test_end": 485,
+      "test_end_date": "2019-12-23T00:00:00",
+      "test_start": 484,
+      "test_start_date": "2019-12-23T00:00:00",
+      "train_end": 484,
+      "train_end_date": "2019-12-16T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 44
+      "window_id": 28
     },
     {
       "n_selected": 6,
@@ -1415,32 +917,7 @@
       "train_end_date": "2020-02-24T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 45
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2020-03-30T00:00:00"
-      ],
-      "test_end": 497,
-      "test_end_date": "2020-03-30T00:00:00",
-      "test_start": 496,
-      "test_start_date": "2020-03-30T00:00:00",
-      "train_end": 496,
-      "train_end_date": "2020-03-23T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 46
+      "window_id": 29
     },
     {
       "n_selected": 6,
@@ -1465,32 +942,7 @@
       "train_end_date": "2020-04-20T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 47
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2020-06-01T00:00:00"
-      ],
-      "test_end": 505,
-      "test_end_date": "2020-06-01T00:00:00",
-      "test_start": 504,
-      "test_start_date": "2020-06-01T00:00:00",
-      "train_end": 504,
-      "train_end_date": "2020-05-18T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 48
+      "window_id": 30
     },
     {
       "n_selected": 6,
@@ -1515,45 +967,51 @@
       "train_end_date": "2020-06-22T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 49
+      "window_id": 31
     },
     {
-      "n_selected": 6,
+      "n_selected": 37,
       "selected_features": [
         "DJIA_Index",
+        "NAO_index",
         "Text_Climate_Anomaly",
+        "WTI_Index",
+        "awnd_extreme_high_wind_in_harvesting",
+        "awnd_moderate_high_wind_in_harvesting",
+        "awnd_moderate_high_wind_in_planting",
+        "co2_extreme_in_harvesting",
+        "co2_extreme_in_planting",
+        "corn_weekly_rv",
+        "epu_index",
+        "frbsf_sentiment",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_extreme_drought_in_planting",
+        "pdsi_extreme_wet_in_planting",
+        "pdsi_severe_drought_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "pdsi_very_wet_in_harvesting",
+        "pdsi_very_wet_in_planting",
+        "soybeans_weekly_rv",
+        "spi_7d_extreme_dry_in_harvesting",
+        "spi_7d_extreme_dry_in_planting",
+        "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_dry_in_harvesting",
+        "spi_7d_very_wet_in_harvesting",
+        "ssta_elino",
         "ssta_lanina",
+        "tmax_hot_in_planting",
+        "tmax_very_hot_in_harvesting",
+        "tmax_very_hot_in_planting",
+        "tmin_cold_in_harvesting",
+        "tmin_very_cold_in_harvesting",
+        "tmin_very_cold_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2020-07-27T00:00:00"
-      ],
-      "test_end": 513,
-      "test_end_date": "2020-07-27T00:00:00",
-      "test_start": 512,
-      "test_start_date": "2020-07-27T00:00:00",
-      "train_end": 512,
-      "train_end_date": "2020-07-20T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 50
-    },
-    {
-      "n_selected": 6,
-      "selected_features": [
-        "DJIA_Index",
-        "Text_Climate_Anomaly",
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2020-08-24T00:00:00"
       ],
@@ -1565,10 +1023,10 @@
       "train_end_date": "2020-08-17T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 51
+      "window_id": 32
     },
     {
-      "n_selected": 34,
+      "n_selected": 37,
       "selected_features": [
         "DJIA_Index",
         "NAO_index",
@@ -1592,7 +1050,9 @@
         "soybeans_weekly_rv",
         "spi_7d_extreme_dry_in_harvesting",
         "spi_7d_extreme_dry_in_planting",
+        "spi_7d_extreme_wet_in_harvesting",
         "spi_7d_very_dry_in_harvesting",
+        "spi_7d_very_wet_in_harvesting",
         "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_planting",
@@ -1603,59 +1063,7 @@
         "tmin_very_cold_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2020-09-28T00:00:00"
-      ],
-      "test_end": 521,
-      "test_end_date": "2020-09-28T00:00:00",
-      "test_start": 520,
-      "test_start_date": "2020-09-28T00:00:00",
-      "train_end": 520,
-      "train_end_date": "2020-09-21T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 52
-    },
-    {
-      "n_selected": 34,
-      "selected_features": [
-        "DJIA_Index",
-        "NAO_index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_planting",
-        "co2_extreme_in_harvesting",
-        "co2_extreme_in_planting",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_planting",
-        "pdsi_severe_drought_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "pdsi_very_wet_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmax_very_hot_in_harvesting",
-        "tmax_very_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "tmin_very_cold_in_harvesting",
-        "tmin_very_cold_in_planting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1671,10 +1079,10 @@
       "train_end_date": "2020-10-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 53
+      "window_id": 33
     },
     {
-      "n_selected": 34,
+      "n_selected": 37,
       "selected_features": [
         "DJIA_Index",
         "NAO_index",
@@ -1698,7 +1106,9 @@
         "soybeans_weekly_rv",
         "spi_7d_extreme_dry_in_harvesting",
         "spi_7d_extreme_dry_in_planting",
+        "spi_7d_extreme_wet_in_harvesting",
         "spi_7d_very_dry_in_harvesting",
+        "spi_7d_very_wet_in_harvesting",
         "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_planting",
@@ -1709,59 +1119,7 @@
         "tmin_very_cold_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2020-11-30T00:00:00"
-      ],
-      "test_end": 529,
-      "test_end_date": "2020-11-30T00:00:00",
-      "test_start": 528,
-      "test_start_date": "2020-11-30T00:00:00",
-      "train_end": 528,
-      "train_end_date": "2020-11-23T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 54
-    },
-    {
-      "n_selected": 34,
-      "selected_features": [
-        "DJIA_Index",
-        "NAO_index",
-        "Text_Climate_Anomaly",
-        "WTI_Index",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_planting",
-        "co2_extreme_in_harvesting",
-        "co2_extreme_in_planting",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_planting",
-        "pdsi_severe_drought_in_harvesting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "pdsi_very_wet_in_planting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_harvesting",
-        "spi_7d_extreme_dry_in_planting",
-        "spi_7d_very_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmax_very_hot_in_harvesting",
-        "tmax_very_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "tmin_very_cold_in_harvesting",
-        "tmin_very_cold_in_planting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1777,85 +1135,47 @@
       "train_end_date": "2020-12-21T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 55
+      "window_id": 34
     },
     {
-      "n_selected": 28,
+      "n_selected": 37,
       "selected_features": [
         "DJIA_Index",
-        "SOI_index",
-        "Stock_Uncertainty",
+        "NAO_index",
         "Text_Climate_Anomaly",
+        "WTI_Index",
         "awnd_extreme_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_harvesting",
         "awnd_moderate_high_wind_in_planting",
         "co2_extreme_in_harvesting",
         "co2_extreme_in_planting",
+        "corn_weekly_rv",
         "epu_index",
         "frbsf_sentiment",
         "pdsi_extreme_drought_in_harvesting",
         "pdsi_extreme_drought_in_planting",
         "pdsi_extreme_wet_in_planting",
+        "pdsi_severe_drought_in_harvesting",
         "pdsi_severe_drought_in_planting",
         "pdsi_very_wet_in_harvesting",
+        "pdsi_very_wet_in_planting",
         "soybeans_weekly_rv",
         "spi_7d_extreme_dry_in_harvesting",
+        "spi_7d_extreme_dry_in_planting",
+        "spi_7d_extreme_wet_in_harvesting",
+        "spi_7d_very_dry_in_harvesting",
+        "spi_7d_very_wet_in_harvesting",
         "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_planting",
         "tmax_very_hot_in_harvesting",
         "tmax_very_hot_in_planting",
         "tmin_cold_in_harvesting",
+        "tmin_very_cold_in_harvesting",
         "tmin_very_cold_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2021-02-01T00:00:00"
-      ],
-      "test_end": 537,
-      "test_end_date": "2021-02-01T00:00:00",
-      "test_start": 536,
-      "test_start_date": "2021-02-01T00:00:00",
-      "train_end": 536,
-      "train_end_date": "2021-01-25T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 56
-    },
-    {
-      "n_selected": 28,
-      "selected_features": [
-        "DJIA_Index",
-        "SOI_index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_planting",
-        "co2_extreme_in_harvesting",
-        "co2_extreme_in_planting",
-        "epu_index",
-        "frbsf_sentiment",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_planting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmax_very_hot_in_harvesting",
-        "tmax_very_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "tmin_very_cold_in_planting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
+        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1871,89 +1191,25 @@
       "train_end_date": "2021-03-01T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 57
+      "window_id": 35
     },
     {
-      "n_selected": 28,
+      "n_selected": 11,
       "selected_features": [
         "DJIA_Index",
         "SOI_index",
-        "Stock_Uncertainty",
         "Text_Climate_Anomaly",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_planting",
-        "co2_extreme_in_harvesting",
-        "co2_extreme_in_planting",
-        "epu_index",
-        "frbsf_sentiment",
         "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_planting",
         "pdsi_severe_drought_in_planting",
         "pdsi_very_wet_in_harvesting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_harvesting",
-        "ssta_elino",
         "ssta_lanina",
         "tmax_hot_in_planting",
-        "tmax_very_hot_in_harvesting",
-        "tmax_very_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "tmin_very_cold_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2021-04-05T00:00:00"
-      ],
-      "test_end": 545,
-      "test_end_date": "2021-04-05T00:00:00",
-      "test_start": 544,
-      "test_start_date": "2021-04-05T00:00:00",
-      "train_end": 544,
-      "train_end_date": "2021-03-29T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 58
-    },
-    {
-      "n_selected": 28,
-      "selected_features": [
-        "DJIA_Index",
-        "SOI_index",
-        "Stock_Uncertainty",
-        "Text_Climate_Anomaly",
-        "awnd_extreme_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_harvesting",
-        "awnd_moderate_high_wind_in_planting",
-        "co2_extreme_in_harvesting",
-        "co2_extreme_in_planting",
-        "epu_index",
-        "frbsf_sentiment",
-        "pdsi_extreme_drought_in_harvesting",
-        "pdsi_extreme_drought_in_planting",
-        "pdsi_extreme_wet_in_planting",
-        "pdsi_severe_drought_in_planting",
-        "pdsi_very_wet_in_harvesting",
-        "soybeans_weekly_rv",
-        "spi_7d_extreme_dry_in_harvesting",
-        "ssta_elino",
-        "ssta_lanina",
-        "tmax_hot_in_planting",
-        "tmax_very_hot_in_harvesting",
-        "tmax_very_hot_in_planting",
-        "tmin_cold_in_harvesting",
-        "tmin_very_cold_in_planting",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2021-05-03T00:00:00"
       ],
@@ -1965,35 +1221,19 @@
       "train_end_date": "2021-04-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 59
+      "window_id": 36
     },
     {
-      "n_selected": 4,
+      "n_selected": 11,
       "selected_features": [
+        "DJIA_Index",
+        "SOI_index",
+        "Text_Climate_Anomaly",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "pdsi_very_wet_in_harvesting",
         "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2021-06-07T00:00:00"
-      ],
-      "test_end": 553,
-      "test_end_date": "2021-06-07T00:00:00",
-      "test_start": 552,
-      "test_start_date": "2021-06-07T00:00:00",
-      "train_end": 552,
-      "train_end_date": "2021-05-24T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 60
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
+        "tmax_hot_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2011,35 +1251,19 @@
       "train_end_date": "2021-06-28T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 61
+      "window_id": 37
     },
     {
-      "n_selected": 4,
+      "n_selected": 11,
       "selected_features": [
+        "DJIA_Index",
+        "SOI_index",
+        "Text_Climate_Anomaly",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "pdsi_very_wet_in_harvesting",
         "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2021-08-09T00:00:00"
-      ],
-      "test_end": 561,
-      "test_end_date": "2021-08-09T00:00:00",
-      "test_start": 560,
-      "test_start_date": "2021-08-09T00:00:00",
-      "train_end": 560,
-      "train_end_date": "2021-08-02T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 62
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
+        "tmax_hot_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2057,33 +1281,19 @@
       "train_end_date": "2021-08-30T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 63
+      "window_id": 38
     },
     {
-      "n_selected": 3,
+      "n_selected": 11,
       "selected_features": [
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2021-10-18T00:00:00"
-      ],
-      "test_end": 569,
-      "test_end_date": "2021-10-18T00:00:00",
-      "test_start": 568,
-      "test_start_date": "2021-10-18T00:00:00",
-      "train_end": 568,
-      "train_end_date": "2021-10-04T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 64
-    },
-    {
-      "n_selected": 3,
-      "selected_features": [
+        "DJIA_Index",
+        "SOI_index",
+        "Text_Climate_Anomaly",
+        "pdsi_extreme_drought_in_harvesting",
+        "pdsi_severe_drought_in_planting",
+        "pdsi_very_wet_in_harvesting",
+        "ssta_lanina",
+        "tmax_hot_in_planting",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2101,51 +1311,7 @@
       "train_end_date": "2021-11-08T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 65
-    },
-    {
-      "n_selected": 3,
-      "selected_features": [
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2021-12-13T00:00:00"
-      ],
-      "test_end": 577,
-      "test_end_date": "2021-12-13T00:00:00",
-      "test_start": 576,
-      "test_start_date": "2021-12-13T00:00:00",
-      "train_end": 576,
-      "train_end_date": "2021-12-06T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 66
-    },
-    {
-      "n_selected": 3,
-      "selected_features": [
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2022-01-10T00:00:00"
-      ],
-      "test_end": 581,
-      "test_end_date": "2022-01-10T00:00:00",
-      "test_start": 580,
-      "test_start_date": "2022-01-10T00:00:00",
-      "train_end": 580,
-      "train_end_date": "2022-01-03T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 67
+      "window_id": 39
     },
     {
       "n_selected": 4,
@@ -2158,17 +1324,17 @@
       "selection_method": "lasso",
       "selection_reused": false,
       "test_dates": [
-        "2022-02-14T00:00:00"
+        "2022-01-10T00:00:00"
       ],
-      "test_end": 585,
-      "test_end_date": "2022-02-14T00:00:00",
-      "test_start": 584,
-      "test_start_date": "2022-02-14T00:00:00",
-      "train_end": 584,
-      "train_end_date": "2022-02-07T00:00:00",
+      "test_end": 581,
+      "test_end_date": "2022-01-10T00:00:00",
+      "test_start": 580,
+      "test_start_date": "2022-01-10T00:00:00",
+      "train_end": 580,
+      "train_end_date": "2022-01-03T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 68
+      "window_id": 40
     },
     {
       "n_selected": 4,
@@ -2191,30 +1357,7 @@
       "train_end_date": "2022-03-14T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 69
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2022-04-18T00:00:00"
-      ],
-      "test_end": 593,
-      "test_end_date": "2022-04-18T00:00:00",
-      "test_start": 592,
-      "test_start_date": "2022-04-18T00:00:00",
-      "train_end": 592,
-      "train_end_date": "2022-04-11T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 70
+      "window_id": 41
     },
     {
       "n_selected": 4,
@@ -2237,30 +1380,7 @@
       "train_end_date": "2022-05-09T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 71
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2022-06-27T00:00:00"
-      ],
-      "test_end": 601,
-      "test_end_date": "2022-06-27T00:00:00",
-      "test_start": 600,
-      "test_start_date": "2022-06-27T00:00:00",
-      "train_end": 600,
-      "train_end_date": "2022-06-13T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 72
+      "window_id": 42
     },
     {
       "n_selected": 4,
@@ -2283,41 +1403,17 @@
       "train_end_date": "2022-07-25T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 73
+      "window_id": 43
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2022-08-29T00:00:00"
-      ],
-      "test_end": 609,
-      "test_end_date": "2022-08-29T00:00:00",
-      "test_start": 608,
-      "test_start_date": "2022-08-29T00:00:00",
-      "train_end": 608,
-      "train_end_date": "2022-08-22T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 74
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2022-10-03T00:00:00"
       ],
@@ -2329,35 +1425,11 @@
       "train_end_date": "2022-09-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 75
+      "window_id": 44
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2022-11-07T00:00:00"
-      ],
-      "test_end": 617,
-      "test_end_date": "2022-11-07T00:00:00",
-      "test_start": 616,
-      "test_start_date": "2022-11-07T00:00:00",
-      "train_end": 616,
-      "train_end_date": "2022-10-31T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 76
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2375,35 +1447,11 @@
       "train_end_date": "2022-11-28T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 77
+      "window_id": 45
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2023-01-23T00:00:00"
-      ],
-      "test_end": 625,
-      "test_end_date": "2023-01-23T00:00:00",
-      "test_start": 624,
-      "test_start_date": "2023-01-23T00:00:00",
-      "train_end": 624,
-      "train_end_date": "2023-01-09T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 78
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2421,35 +1469,11 @@
       "train_end_date": "2023-02-13T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 79
+      "window_id": 46
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2023-03-27T00:00:00"
-      ],
-      "test_end": 633,
-      "test_end_date": "2023-03-27T00:00:00",
-      "test_start": 632,
-      "test_start_date": "2023-03-27T00:00:00",
-      "train_end": 632,
-      "train_end_date": "2023-03-20T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 80
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2467,41 +1491,17 @@
       "train_end_date": "2023-04-17T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 81
+      "window_id": 47
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2023-05-22T00:00:00"
-      ],
-      "test_end": 641,
-      "test_end_date": "2023-05-22T00:00:00",
-      "test_start": 640,
-      "test_start_date": "2023-05-22T00:00:00",
-      "train_end": 640,
-      "train_end_date": "2023-05-15T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 82
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2023-07-03T00:00:00"
       ],
@@ -2513,35 +1513,11 @@
       "train_end_date": "2023-06-26T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 83
+      "window_id": 48
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2023-07-31T00:00:00"
-      ],
-      "test_end": 649,
-      "test_end_date": "2023-07-31T00:00:00",
-      "test_start": 648,
-      "test_start_date": "2023-07-31T00:00:00",
-      "train_end": 648,
-      "train_end_date": "2023-07-24T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 84
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2559,35 +1535,11 @@
       "train_end_date": "2023-08-21T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 85
+      "window_id": 49
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2023-10-02T00:00:00"
-      ],
-      "test_end": 657,
-      "test_end_date": "2023-10-02T00:00:00",
-      "test_start": 656,
-      "test_start_date": "2023-10-02T00:00:00",
-      "train_end": 656,
-      "train_end_date": "2023-09-25T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 86
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2605,35 +1557,11 @@
       "train_end_date": "2023-10-30T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 87
+      "window_id": 50
     },
     {
-      "n_selected": 4,
+      "n_selected": 3,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2023-12-04T00:00:00"
-      ],
-      "test_end": 665,
-      "test_end_date": "2023-12-04T00:00:00",
-      "test_start": 664,
-      "test_start_date": "2023-12-04T00:00:00",
-      "train_end": 664,
-      "train_end_date": "2023-11-27T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 88
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -2651,41 +1579,19 @@
       "train_end_date": "2024-01-08T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 89
+      "window_id": 51
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
+        "WTI_Index",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2024-02-26T00:00:00"
-      ],
-      "test_end": 673,
-      "test_end_date": "2024-02-26T00:00:00",
-      "test_start": 672,
-      "test_start_date": "2024-02-26T00:00:00",
-      "train_end": 672,
-      "train_end_date": "2024-02-12T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 90
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
+      "selection_reused": false,
       "test_dates": [
         "2024-03-25T00:00:00"
       ],
@@ -2697,34 +1603,12 @@
       "train_end_date": "2024-03-18T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 91
+      "window_id": 52
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2024-04-22T00:00:00"
-      ],
-      "test_end": 681,
-      "test_end_date": "2024-04-22T00:00:00",
-      "test_start": 680,
-      "test_start_date": "2024-04-22T00:00:00",
-      "train_end": 680,
-      "train_end_date": "2024-04-15T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 92
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
+        "WTI_Index",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -2743,34 +1627,12 @@
       "train_end_date": "2024-05-13T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 93
+      "window_id": 53
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2024-06-24T00:00:00"
-      ],
-      "test_end": 689,
-      "test_end_date": "2024-06-24T00:00:00",
-      "test_start": 688,
-      "test_start_date": "2024-06-24T00:00:00",
-      "train_end": 688,
-      "train_end_date": "2024-06-17T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 94
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
+        "WTI_Index",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -2789,34 +1651,12 @@
       "train_end_date": "2024-07-15T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 95
+      "window_id": 54
     },
     {
-      "n_selected": 4,
+      "n_selected": 5,
       "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": false,
-      "test_dates": [
-        "2024-08-19T00:00:00"
-      ],
-      "test_end": 697,
-      "test_end_date": "2024-08-19T00:00:00",
-      "test_start": 696,
-      "test_start_date": "2024-08-19T00:00:00",
-      "train_end": 696,
-      "train_end_date": "2024-08-12T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 96
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
+        "WTI_Index",
         "ssta_lanina",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
@@ -2835,71 +1675,49 @@
       "train_end_date": "2024-09-16T00:00:00",
       "train_start": 0,
       "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 97
-    },
-    {
-      "n_selected": 4,
-      "selected_features": [
-        "ssta_lanina",
-        "wheat_monthly_rv",
-        "wheat_seasonal_rv",
-        "wheat_weekly_rv"
-      ],
-      "selection_method": "lasso",
-      "selection_reused": true,
-      "test_dates": [
-        "2024-10-28T00:00:00"
-      ],
-      "test_end": 705,
-      "test_end_date": "2024-10-28T00:00:00",
-      "test_start": 704,
-      "test_start_date": "2024-10-28T00:00:00",
-      "train_end": 704,
-      "train_end_date": "2024-10-21T00:00:00",
-      "train_start": 0,
-      "train_start_date": "2009-04-20T00:00:00",
-      "window_id": 98
+      "window_id": 55
     }
   ],
   "retried_after_warning": false,
   "selection_frequency": {
-    "DJIA_Index": 0.6060606060606061,
-    "NAO_index": 0.04040404040404041,
-    "SOI_index": 0.08080808080808081,
-    "Stock_Uncertainty": 0.08080808080808081,
-    "Text_Climate_Anomaly": 0.36363636363636365,
-    "WTI_Index": 0.16161616161616163,
-    "awnd_extreme_high_wind_in_harvesting": 0.16161616161616163,
-    "awnd_moderate_high_wind_in_harvesting": 0.16161616161616163,
-    "awnd_moderate_high_wind_in_planting": 0.08080808080808081,
-    "co2_extreme_in_harvesting": 0.08080808080808081,
-    "co2_extreme_in_planting": 0.08080808080808081,
-    "corn_weekly_rv": 0.04040404040404041,
-    "epu_index": 0.20202020202020202,
-    "frbsf_sentiment": 0.16161616161616163,
-    "pdsi_extreme_drought_in_harvesting": 0.2828282828282828,
-    "pdsi_extreme_drought_in_planting": 0.2828282828282828,
-    "pdsi_extreme_wet_in_harvesting": 0.20202020202020202,
-    "pdsi_extreme_wet_in_planting": 0.08080808080808081,
-    "pdsi_severe_drought_in_harvesting": 0.04040404040404041,
-    "pdsi_severe_drought_in_planting": 0.24242424242424243,
-    "pdsi_very_wet_in_harvesting": 0.12121212121212122,
-    "pdsi_very_wet_in_planting": 0.04040404040404041,
-    "soybeans_weekly_rv": 0.12121212121212122,
-    "spi_7d_extreme_dry_in_harvesting": 0.08080808080808081,
-    "spi_7d_extreme_dry_in_planting": 0.16161616161616163,
-    "spi_7d_extreme_wet_in_harvesting": 0.08080808080808081,
-    "spi_7d_very_dry_in_harvesting": 0.08080808080808081,
-    "ssta_elino": 0.20202020202020202,
-    "ssta_lanina": 0.8383838383838383,
-    "tmax_hot_in_planting": 0.20202020202020202,
-    "tmax_very_hot_in_harvesting": 0.08080808080808081,
-    "tmax_very_hot_in_planting": 0.08080808080808081,
-    "tmin_cold_in_harvesting": 0.20202020202020202,
-    "tmin_very_cold_in_harvesting": 0.04040404040404041,
-    "tmin_very_cold_in_planting": 0.08080808080808081,
+    "DJIA_Index": 0.7142857142857143,
+    "NAO_index": 0.07142857142857142,
+    "SOI_index": 0.14285714285714285,
+    "Text_Climate_Anomaly": 0.35714285714285715,
+    "WTI_Index": 0.21428571428571427,
+    "awnd_extreme_high_wind_in_harvesting": 0.14285714285714285,
+    "awnd_moderate_high_wind_in_harvesting": 0.07142857142857142,
+    "awnd_moderate_high_wind_in_planting": 0.07142857142857142,
+    "co2_extreme_in_harvesting": 0.07142857142857142,
+    "co2_extreme_in_planting": 0.07142857142857142,
+    "corn_weekly_rv": 0.07142857142857142,
+    "epu_index": 0.14285714285714285,
+    "frbsf_sentiment": 0.21428571428571427,
+    "pdsi_extreme_drought_in_harvesting": 0.35714285714285715,
+    "pdsi_extreme_drought_in_planting": 0.2857142857142857,
+    "pdsi_extreme_wet_in_harvesting": 0.2857142857142857,
+    "pdsi_extreme_wet_in_planting": 0.07142857142857142,
+    "pdsi_severe_drought_in_harvesting": 0.07142857142857142,
+    "pdsi_severe_drought_in_planting": 0.35714285714285715,
+    "pdsi_very_wet_in_harvesting": 0.14285714285714285,
+    "pdsi_very_wet_in_planting": 0.07142857142857142,
+    "soybeans_weekly_rv": 0.07142857142857142,
+    "spi_7d_extreme_dry_in_harvesting": 0.07142857142857142,
+    "spi_7d_extreme_dry_in_planting": 0.14285714285714285,
+    "spi_7d_extreme_wet_in_harvesting": 0.14285714285714285,
+    "spi_7d_very_dry_in_harvesting": 0.07142857142857142,
+    "spi_7d_very_wet_in_harvesting": 0.07142857142857142,
+    "ssta_elino": 0.14285714285714285,
+    "ssta_lanina": 0.6428571428571429,
+    "tmax_hot_in_planting": 0.21428571428571427,
+    "tmax_very_hot_in_harvesting": 0.07142857142857142,
+    "tmax_very_hot_in_planting": 0.07142857142857142,
+    "tmin_cold_in_harvesting": 0.14285714285714285,
+    "tmin_very_cold_in_harvesting": 0.07142857142857142,
+    "tmin_very_cold_in_planting": 0.07142857142857142,
     "wheat_monthly_rv": 1.0,
     "wheat_seasonal_rv": 1.0,
+    "wheat_weekly_jumps": 0.07142857142857142,
     "wheat_weekly_rv": 1.0
   },
   "target_col": "RV_target"

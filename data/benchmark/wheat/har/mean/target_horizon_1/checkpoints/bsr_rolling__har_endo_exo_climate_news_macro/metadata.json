@@ -3,7 +3,7 @@
   "feature_set": "har_endo_exo_climate_news_macro",
   "model_family": "har",
   "model_type": "bsr_rolling",
-  "saved_at_utc": "2026-05-13T21:05:40.981772+00:00",
+  "saved_at_utc": "2026-05-15T00:20:55.341150+00:00",
   "target_horizon": 1,
   "target_mode": "mean"
 }

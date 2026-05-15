@@ -6,6 +6,6 @@ Text_Climate_Anomaly
 WTI_Index
 epu_index
 Stock_Uncertainty
-frbsf_sentiment
 soybeans_weekly_rv
+frbsf_sentiment
 Broad_Dollar_index

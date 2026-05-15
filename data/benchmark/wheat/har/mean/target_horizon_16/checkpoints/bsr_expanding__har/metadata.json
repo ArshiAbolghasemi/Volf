@@ -3,7 +3,7 @@
   "feature_set": "har",
   "model_family": "har",
   "model_type": "bsr_expanding",
-  "saved_at_utc": "2026-05-13T21:06:01.375139+00:00",
+  "saved_at_utc": "2026-05-15T00:21:09.342270+00:00",
   "target_horizon": 16,
   "target_mode": "mean"
 }

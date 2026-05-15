@@ -37,6 +37,6 @@ corn_weekly_jumps
 pdsi_extreme_wet_in_harvesting
 tmax_very_hot_in_harvesting
 pdsi_very_wet_in_planting
-SOI_index
-ssta_lanina
 Broad_Dollar_index
+ssta_lanina
+SOI_index

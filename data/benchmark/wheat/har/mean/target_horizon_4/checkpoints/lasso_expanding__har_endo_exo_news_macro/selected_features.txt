@@ -6,8 +6,8 @@ wheat_monthly_rv
 wheat_seasonal_rv
 wheat_weekly_rv
 WTI_Index
-frbsf_sentiment
 wheat_weekly_jumps
+frbsf_sentiment
 epu_index
 Broad_Dollar_index
 soybeans_weekly_rv

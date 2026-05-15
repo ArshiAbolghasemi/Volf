@@ -1,5 +1,8 @@
 ,coefficient
-corn_weekly_rv,0.019805293842201064
-soybeans_monthly_rv,0.06331758321674774
-soybeans_seasonal_rv,-0.007393220954771407
-soybeans_weekly_rv,0.1137067293353192
+Text_Climate_Anomaly,-0.008947742554111376
+corn_weekly_rv,0.020964915602859346
+soybeans_monthly_rv,0.05773633333967477
+soybeans_seasonal_rv,-0.0058665921981630766
+soybeans_weekly_jumps,-0.021370236632158104
+soybeans_weekly_rv,0.12562314572922845
+wheat_weekly_rv,0.00045808110106492633

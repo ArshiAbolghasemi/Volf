@@ -2,12 +2,11 @@ DJIA_Index
 soybeans_monthly_rv
 soybeans_seasonal_rv
 soybeans_weekly_rv
-soybeans_weekly_rvg
 corn_weekly_rv
+soybeans_weekly_rvg
 frbsf_sentiment
-WTI_Index
-epu_index
-soybeans_weekly_rvb
 Broad_Dollar_index
-Stock_Uncertainty
+WTI_Index
+soybeans_weekly_rvb
 wheat_weekly_rv
+Stock_Uncertainty

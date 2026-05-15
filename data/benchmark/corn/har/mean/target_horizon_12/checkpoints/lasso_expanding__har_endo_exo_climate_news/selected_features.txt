@@ -37,8 +37,6 @@ Text_Climate_Anomaly
 corn_weekly_rvg
 spi_7d_extreme_wet_in_planting
 spi_7d_extreme_wet_in_harvesting
-pdsi_severe_drought_in_planting
 spi_7d_very_wet_in_planting
+pdsi_severe_drought_in_planting
 tmax_very_hot_in_harvesting
-tmin_cold_in_planting
-spi_7d_very_dry_in_harvesting

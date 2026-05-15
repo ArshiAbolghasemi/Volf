@@ -11,6 +11,7 @@ tmax_hot_in_harvesting
 tmax_hot_in_planting
 tmin_very_cold_in_harvesting
 Text_Climate_Anomaly
+WTI_Index
 awnd_moderate_high_wind_in_harvesting
 corn_weekly_jumps
 epu_index

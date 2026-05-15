@@ -1,7 +1,8 @@
 {
-  "best_alpha": 0.006849768376542017,
+  "best_alpha": 0.007875569107783375,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.128352     0.061942    0.042694\n1   0.119702     0.061806    0.042834\n2   0.111634     0.061328    0.043132\n3   0.104110     0.060786    0.043469\n4   0.097094     0.059939    0.043629\n..       ...          ...         ...\n95  0.000170     0.046527    0.031842\n96  0.000158     0.046524    0.031807\n97  0.000148     0.046521    0.031775\n98  0.000138     0.046519    0.031745\n99  0.000128     0.046517    0.031717\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.128352     0.063029    0.044425\n1   0.119702     0.062905    0.044551\n2   0.111634     0.062803    0.044658\n3   0.104110     0.062717    0.044747\n4   0.097094     0.062646    0.044821\n..       ...          ...         ...\n95  0.000170     0.082995    0.074167\n96  0.000158     0.083221    0.074619\n97  0.000148     0.083433    0.075042\n98  0.000138     0.083632    0.075440\n99  0.000128     0.083819    0.075812\n\n[100 rows x 3 columns]",
   "dropped_features": [
     "Text_Climate_Anomaly",
     "epu_index",
@@ -667,12 +668,11 @@
       "window_id": 23
     },
     {
-      "n_selected": 7,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
         "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -693,12 +693,11 @@
       "window_id": 24
     },
     {
-      "n_selected": 7,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
         "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -719,12 +718,11 @@
       "window_id": 25
     },
     {
-      "n_selected": 7,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
         "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -745,12 +743,11 @@
       "window_id": 26
     },
     {
-      "n_selected": 7,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
         "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1115,15 +1112,11 @@
       "window_id": 39
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1142,15 +1135,11 @@
       "window_id": 40
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1169,15 +1158,11 @@
       "window_id": 41
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1196,15 +1181,11 @@
       "window_id": 42
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_jumps",
         "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
@@ -1319,19 +1300,14 @@
       "window_id": 47
     },
     {
-      "n_selected": 11,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -1349,19 +1325,14 @@
       "window_id": 48
     },
     {
-      "n_selected": 11,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1379,19 +1350,14 @@
       "window_id": 49
     },
     {
-      "n_selected": 11,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1409,19 +1375,14 @@
       "window_id": 50
     },
     {
-      "n_selected": 11,
+      "n_selected": 6,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1439,19 +1400,16 @@
       "window_id": 51
     },
     {
-      "n_selected": 11,
+      "n_selected": 8,
       "selected_features": [
         "Text_Climate_Anomaly",
         "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -1469,19 +1427,16 @@
       "window_id": 52
     },
     {
-      "n_selected": 11,
+      "n_selected": 8,
       "selected_features": [
         "Text_Climate_Anomaly",
         "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1499,19 +1454,16 @@
       "window_id": 53
     },
     {
-      "n_selected": 11,
+      "n_selected": 8,
       "selected_features": [
         "Text_Climate_Anomaly",
         "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1529,19 +1481,16 @@
       "window_id": 54
     },
     {
-      "n_selected": 11,
+      "n_selected": 8,
       "selected_features": [
         "Text_Climate_Anomaly",
         "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
         "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv",
-        "wheat_weekly_rvb",
-        "wheat_weekly_rvg"
+        "wheat_weekly_rv"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1559,13 +1508,9 @@
       "window_id": 55
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1586,13 +1531,9 @@
       "window_id": 56
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1613,13 +1554,9 @@
       "window_id": 57
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1640,13 +1577,9 @@
       "window_id": 58
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
         "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
-        "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1667,13 +1600,9 @@
       "window_id": 59
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
-        "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1694,13 +1623,9 @@
       "window_id": 60
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
-        "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1721,13 +1646,9 @@
       "window_id": 61
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
-        "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1748,13 +1669,9 @@
       "window_id": 62
     },
     {
-      "n_selected": 8,
+      "n_selected": 4,
       "selected_features": [
-        "Text_Climate_Anomaly",
-        "corn_weekly_rv",
-        "epu_index",
         "frbsf_sentiment",
-        "soybeans_weekly_rv",
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_rv"
@@ -1927,17 +1844,17 @@
   ],
   "retried_after_warning": false,
   "selection_frequency": {
-    "Text_Climate_Anomaly": 0.9142857142857143,
-    "corn_weekly_rv": 0.4857142857142857,
-    "epu_index": 0.8571428571428571,
-    "frbsf_sentiment": 1.0,
-    "soybeans_weekly_rv": 0.9428571428571428,
+    "Text_Climate_Anomaly": 0.8571428571428571,
+    "corn_weekly_rv": 0.3142857142857143,
+    "epu_index": 0.5714285714285714,
+    "frbsf_sentiment": 0.8857142857142857,
+    "soybeans_weekly_rv": 0.6571428571428571,
     "wheat_monthly_rv": 1.0,
     "wheat_seasonal_rv": 1.0,
-    "wheat_weekly_jumps": 0.2857142857142857,
+    "wheat_weekly_jumps": 0.22857142857142856,
     "wheat_weekly_rv": 1.0,
-    "wheat_weekly_rvb": 0.22857142857142856,
-    "wheat_weekly_rvg": 0.22857142857142856
+    "wheat_weekly_rvb": 0.11428571428571428,
+    "wheat_weekly_rvg": 0.11428571428571428
   },
   "target_col": "RV_target"
 }

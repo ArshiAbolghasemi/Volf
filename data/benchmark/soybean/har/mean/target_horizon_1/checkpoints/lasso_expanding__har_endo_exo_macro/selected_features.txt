@@ -6,5 +6,5 @@ soybeans_weekly_rv
 soybeans_weekly_rvg
 Stock_Uncertainty
 soybeans_weekly_jumps
-WTI_Index
 Broad_Dollar_index
+WTI_Index

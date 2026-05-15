@@ -2,9 +2,9 @@ DJIA_Index
 wheat_monthly_rv
 wheat_seasonal_rv
 wheat_weekly_rv
-Stock_Uncertainty
 Text_Climate_Anomaly
 WTI_Index
+Stock_Uncertainty
 epu_index
 soybeans_weekly_rv
 frbsf_sentiment

@@ -1,7 +1,8 @@
 {
   "best_alpha": 0.009079779552651079,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.128704     0.062293    0.044238\n1   0.120029     0.062159    0.044373\n2   0.111940     0.061716    0.044647\n3   0.104395     0.061192    0.044974\n4   0.097359     0.060605    0.045189\n..       ...          ...         ...\n95  0.000170     0.047645    0.038801\n96  0.000159     0.047637    0.038762\n97  0.000148     0.047630    0.038727\n98  0.000138     0.047623    0.038694\n99  0.000129     0.047617    0.038663\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.128704     0.063844    0.046916\n1   0.120029     0.063723    0.047037\n2   0.111940     0.063621    0.047138\n3   0.104395     0.063538    0.047223\n4   0.097359     0.063468    0.047293\n..       ...          ...         ...\n95  0.000170     0.074686    0.066327\n96  0.000159     0.074867    0.066646\n97  0.000148     0.075037    0.066945\n98  0.000138     0.075196    0.067227\n99  0.000129     0.075345    0.067491\n\n[100 rows x 3 columns]",
   "dropped_features": [
     "wheat_weekly_jumps",
     "wheat_weekly_rvb",
@@ -2065,11 +2066,14 @@
       "window_id": 83
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2088,11 +2092,14 @@
       "window_id": 84
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2111,11 +2118,14 @@
       "window_id": 85
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2134,11 +2144,14 @@
       "window_id": 86
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2157,11 +2170,14 @@
       "window_id": 87
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2180,11 +2196,14 @@
       "window_id": 88
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2203,11 +2222,14 @@
       "window_id": 89
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2226,11 +2248,14 @@
       "window_id": 90
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2341,11 +2366,14 @@
       "window_id": 95
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2364,11 +2392,14 @@
       "window_id": 96
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2387,11 +2418,14 @@
       "window_id": 97
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2410,11 +2444,14 @@
       "window_id": 98
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2433,11 +2470,14 @@
       "window_id": 99
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2456,11 +2496,14 @@
       "window_id": 100
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2479,11 +2522,14 @@
       "window_id": 101
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2502,11 +2548,14 @@
       "window_id": 102
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2525,12 +2574,14 @@
       "window_id": 103
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv"
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2549,12 +2600,14 @@
       "window_id": 104
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv"
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2573,12 +2626,14 @@
       "window_id": 105
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv"
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2597,12 +2652,14 @@
       "window_id": 106
     },
     {
-      "n_selected": 4,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
         "wheat_weekly_jumps",
-        "wheat_weekly_rv"
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2621,11 +2678,14 @@
       "window_id": 107
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -2644,11 +2704,14 @@
       "window_id": 108
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2667,11 +2730,14 @@
       "window_id": 109
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -2690,11 +2756,14 @@
       "window_id": 110
     },
     {
-      "n_selected": 3,
+      "n_selected": 6,
       "selected_features": [
         "wheat_monthly_rv",
         "wheat_seasonal_rv",
-        "wheat_weekly_rv"
+        "wheat_weekly_jumps",
+        "wheat_weekly_rv",
+        "wheat_weekly_rvb",
+        "wheat_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -3637,10 +3706,10 @@
   "selection_frequency": {
     "wheat_monthly_rv": 1.0,
     "wheat_seasonal_rv": 1.0,
-    "wheat_weekly_jumps": 0.34210526315789475,
+    "wheat_weekly_jumps": 0.47368421052631576,
     "wheat_weekly_rv": 1.0,
-    "wheat_weekly_rvb": 0.18421052631578946,
-    "wheat_weekly_rvg": 0.18421052631578946
+    "wheat_weekly_rvb": 0.34210526315789475,
+    "wheat_weekly_rvg": 0.34210526315789475
   },
   "target_col": "RV_target"
 }

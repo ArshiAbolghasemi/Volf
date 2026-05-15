@@ -12,9 +12,9 @@
     "wheat_weekly_rv",
     "soybeans_weekly_rv"
   ],
-  "grid_search_best_candidate_idx": 11,
+  "grid_search_best_candidate_idx": 9,
   "grid_search_metric": "test_r2",
-  "grid_search_metric_value": 0.22886903864111097,
+  "grid_search_metric_value": 0.22591008664773704,
   "grid_search_n_candidates": 18,
   "initial_train_size": 260,
   "lasso_config": {
@@ -23,6 +23,7 @@
     "core_columns": null,
     "eps": 0.001,
     "max_iter": 200000,
+    "max_train_size": 260,
     "n_jobs": -1,
     "n_splits": 5,
     "progress_bar": false,
@@ -50,7 +51,7 @@
   "target_floor": 1e-10,
   "target_horizon": 16,
   "target_mode": "mean",
-  "test_size": 4,
+  "test_size": 2,
   "transformed_feature_columns": [
     "corn_weekly_rv",
     "corn_monthly_rv",
@@ -61,7 +62,7 @@
   "walk_forward_initial_train_size": 260,
   "walk_forward_rolling_window_size": null,
   "walk_forward_step": 8,
-  "walk_forward_test_size": 4,
+  "walk_forward_test_size": 2,
   "walk_forward_window_type": "expanding",
   "window_type": "expanding"
 }

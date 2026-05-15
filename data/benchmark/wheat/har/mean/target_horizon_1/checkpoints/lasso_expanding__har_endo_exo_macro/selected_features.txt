@@ -7,4 +7,3 @@ wheat_weekly_rv
 wheat_weekly_rvg
 Stock_Uncertainty
 WTI_Index
-soybeans_weekly_rv

@@ -1,7 +1,8 @@
 {
-  "best_alpha": 0.010210660002312313,
+  "best_alpha": 0.013497891610052892,
   "convergence_warning_count": 0,
-  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.144733     0.051565    0.023347\n1   0.134979     0.050186    0.023745\n2   0.125882     0.048979    0.024142\n3   0.117398     0.047921    0.024525\n4   0.109486     0.045880    0.023572\n..       ...          ...         ...\n95  0.000191     0.065260    0.056893\n96  0.000178     0.065667    0.057609\n97  0.000166     0.066049    0.058281\n98  0.000155     0.066407    0.058912\n99  0.000145     0.066742    0.059503\n\n[100 rows x 3 columns]",
+  "cv_max_train_size": 260,
+  "cv_path": "       alpha  cv_mse_mean  cv_mse_std\n0   0.144733     0.049597    0.016639\n1   0.134979     0.048761    0.017297\n2   0.125882     0.047481    0.017588\n3   0.117398     0.046355    0.017903\n4   0.109486     0.045006    0.018314\n..       ...          ...         ...\n95  0.000191     0.079378    0.055909\n96  0.000178     0.079883    0.056583\n97  0.000166     0.080356    0.057215\n98  0.000155     0.080799    0.057809\n99  0.000145     0.081214    0.058366\n\n[100 rows x 3 columns]",
   "dropped_features": [
     "DJIA_Index",
     "Stock_Uncertainty",
@@ -852,7 +853,7 @@
       "window_id": 31
     },
     {
-      "n_selected": 10,
+      "n_selected": 9,
       "selected_features": [
         "Broad_Dollar_index",
         "Stock_Uncertainty",
@@ -862,8 +863,7 @@
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "wheat_weekly_rv"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": false,
@@ -881,7 +881,7 @@
       "window_id": 32
     },
     {
-      "n_selected": 10,
+      "n_selected": 9,
       "selected_features": [
         "Broad_Dollar_index",
         "Stock_Uncertainty",
@@ -891,8 +891,7 @@
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "wheat_weekly_rv"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -910,7 +909,7 @@
       "window_id": 33
     },
     {
-      "n_selected": 10,
+      "n_selected": 9,
       "selected_features": [
         "Broad_Dollar_index",
         "Stock_Uncertainty",
@@ -920,8 +919,7 @@
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "wheat_weekly_rv"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -939,7 +937,7 @@
       "window_id": 34
     },
     {
-      "n_selected": 10,
+      "n_selected": 9,
       "selected_features": [
         "Broad_Dollar_index",
         "Stock_Uncertainty",
@@ -949,8 +947,7 @@
         "soybeans_seasonal_rv",
         "soybeans_weekly_rv",
         "soybeans_weekly_rvb",
-        "soybeans_weekly_rvg",
-        "wheat_weekly_rv"
+        "soybeans_weekly_rvg"
       ],
       "selection_method": "lasso",
       "selection_reused": true,
@@ -1374,7 +1371,7 @@
     "soybeans_weekly_rv": 1.0,
     "soybeans_weekly_rvb": 0.23529411764705882,
     "soybeans_weekly_rvg": 0.9215686274509803,
-    "wheat_weekly_rv": 0.23529411764705882
+    "wheat_weekly_rv": 0.1568627450980392
   },
   "target_col": "RV_target"
 }
