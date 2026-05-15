@@ -47,9 +47,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0209270824333287,
-      "end_mean_abs_shap": 0.0518793948577767,
-      "delta_mean_abs_shap": 0.030952312424448,
+      "start_mean_abs_shap": 0.0211215187133854,
+      "end_mean_abs_shap": 0.0520667132612518,
+      "delta_mean_abs_shap": 0.030945194547866397,
       "trend": "increased"
     },
     {
@@ -61,9 +61,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0122755800734056,
-      "end_mean_abs_shap": 0.0254324985646601,
-      "delta_mean_abs_shap": 0.0131569184912545,
+      "start_mean_abs_shap": 0.0154586247514338,
+      "end_mean_abs_shap": 0.0257872160858618,
+      "delta_mean_abs_shap": 0.010328591334427999,
       "trend": "increased"
     },
     {
@@ -75,10 +75,10 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0124918855250475,
-      "end_mean_abs_shap": 0.0259660781275112,
-      "delta_mean_abs_shap": 0.0134741926024637,
-      "trend": "increased"
+      "start_mean_abs_shap": 0.0113464941131774,
+      "end_mean_abs_shap": 0.0101865017187063,
+      "delta_mean_abs_shap": -0.0011599923944711002,
+      "trend": "decreased"
     },
     {
       "crop": "corn",
@@ -89,9 +89,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0993863923158112,
-      "end_mean_abs_shap": 0.1651807016482138,
-      "delta_mean_abs_shap": 0.0657943093324026,
+      "start_mean_abs_shap": 0.0985524440745477,
+      "end_mean_abs_shap": 0.1903256436268022,
+      "delta_mean_abs_shap": 0.0917731995522545,
       "trend": "increased"
     },
     {
@@ -103,9 +103,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0370627603680143,
-      "end_mean_abs_shap": 0.0495014823273149,
-      "delta_mean_abs_shap": 0.012438721959300597,
+      "start_mean_abs_shap": 0.0382834540496676,
+      "end_mean_abs_shap": 0.05455162429208,
+      "delta_mean_abs_shap": 0.0162681702424124,
       "trend": "increased"
     },
     {
@@ -118,8 +118,8 @@
       "end_horizon": 16,
       "end_label": "h16",
       "start_mean_abs_shap": 0.0,
-      "end_mean_abs_shap": 0.0227614719339336,
-      "delta_mean_abs_shap": 0.0227614719339336,
+      "end_mean_abs_shap": 0.0260092699898131,
+      "delta_mean_abs_shap": 0.0260092699898131,
       "trend": "increased"
     },
     {
@@ -145,9 +145,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0126623890795671,
-      "end_mean_abs_shap": 0.0306787039541981,
-      "delta_mean_abs_shap": 0.018016314874630998,
+      "start_mean_abs_shap": 0.0131360717308635,
+      "end_mean_abs_shap": 0.0349734520698853,
+      "delta_mean_abs_shap": 0.0218373803390218,
       "trend": "increased"
     },
     {
@@ -159,23 +159,9 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0149631063327555,
-      "end_mean_abs_shap": 0.018602689346706,
-      "delta_mean_abs_shap": 0.003639583013950499,
-      "trend": "increased"
-    },
-    {
-      "crop": "corn",
-      "family": "har",
-      "feature_group": "climate",
-      "feature": "tmax_hot_in_planting",
-      "start_horizon": 4,
-      "start_label": "h4",
-      "end_horizon": 16,
-      "end_label": "h16",
-      "start_mean_abs_shap": 0.0064217648412932,
-      "end_mean_abs_shap": 0.0127883840341797,
-      "delta_mean_abs_shap": 0.006366619192886501,
+      "start_mean_abs_shap": 0.0151905181535583,
+      "end_mean_abs_shap": 0.0185584219265655,
+      "delta_mean_abs_shap": 0.0033679037730072,
       "trend": "increased"
     },
     {
@@ -188,36 +174,22 @@
       "end_horizon": 16,
       "end_label": "h16",
       "start_mean_abs_shap": 0.0,
-      "end_mean_abs_shap": 0.0127352525726907,
-      "delta_mean_abs_shap": 0.0127352525726907,
+      "end_mean_abs_shap": 0.0132981056603839,
+      "delta_mean_abs_shap": 0.0132981056603839,
       "trend": "increased"
     },
     {
       "crop": "corn",
       "family": "har",
       "feature_group": "climate",
-      "feature": "NAO_index",
+      "feature": "tmax_hot_in_planting",
       "start_horizon": 4,
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0184319543061947,
-      "end_mean_abs_shap": 0.0106193914531014,
-      "delta_mean_abs_shap": -0.007812562853093298,
-      "trend": "decreased"
-    },
-    {
-      "crop": "corn",
-      "family": "har",
-      "feature_group": "climate",
-      "feature": "tmax_hot_in_harvesting",
-      "start_horizon": 4,
-      "start_label": "h4",
-      "end_horizon": 16,
-      "end_label": "h16",
-      "start_mean_abs_shap": 0.007954711546645,
-      "end_mean_abs_shap": 0.0097447111021411,
-      "delta_mean_abs_shap": 0.001789999555496101,
+      "start_mean_abs_shap": 0.0062090718094034,
+      "end_mean_abs_shap": 0.012987921099578,
+      "delta_mean_abs_shap": 0.0067788492901746,
       "trend": "increased"
     },
     {
@@ -229,37 +201,37 @@
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0030656286066726,
-      "end_mean_abs_shap": 0.0087985108402665,
-      "delta_mean_abs_shap": 0.005732882233593899,
+      "start_mean_abs_shap": 0.0022440666928982,
+      "end_mean_abs_shap": 0.0112473862019247,
+      "delta_mean_abs_shap": 0.0090033195090265,
       "trend": "increased"
     },
     {
       "crop": "corn",
       "family": "har",
       "feature_group": "climate",
-      "feature": "pdsi_severe_drought_in_harvesting",
+      "feature": "NAO_index",
       "start_horizon": 4,
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0017016435803141,
-      "end_mean_abs_shap": 0.0059305770312571,
-      "delta_mean_abs_shap": 0.004228933450943,
-      "trend": "increased"
+      "start_mean_abs_shap": 0.0184761957444437,
+      "end_mean_abs_shap": 0.0101147566468098,
+      "delta_mean_abs_shap": -0.0083614390976339,
+      "trend": "decreased"
     },
     {
       "crop": "corn",
       "family": "har",
       "feature_group": "climate",
-      "feature": "pdsi_very_wet_in_harvesting",
+      "feature": "tmax_hot_in_harvesting",
       "start_horizon": 4,
       "start_label": "h4",
       "end_horizon": 16,
       "end_label": "h16",
-      "start_mean_abs_shap": 0.0,
-      "end_mean_abs_shap": 0.0056211521026845,
-      "delta_mean_abs_shap": 0.0056211521026845,
+      "start_mean_abs_shap": 0.0079178613612508,
+      "end_mean_abs_shap": 0.010053492735783,
+      "delta_mean_abs_shap": 0.0021356313745321993,
       "trend": "increased"
     },
     {
@@ -272,8 +244,36 @@
       "end_horizon": 16,
       "end_label": "h16",
       "start_mean_abs_shap": 0.0,
-      "end_mean_abs_shap": 0.0056179977812786,
-      "delta_mean_abs_shap": 0.0056179977812786,
+      "end_mean_abs_shap": 0.0071527964642418,
+      "delta_mean_abs_shap": 0.0071527964642418,
+      "trend": "increased"
+    },
+    {
+      "crop": "corn",
+      "family": "har",
+      "feature_group": "climate",
+      "feature": "pdsi_very_wet_in_harvesting",
+      "start_horizon": 4,
+      "start_label": "h4",
+      "end_horizon": 16,
+      "end_label": "h16",
+      "start_mean_abs_shap": 0.0,
+      "end_mean_abs_shap": 0.0062310894479214,
+      "delta_mean_abs_shap": 0.0062310894479214,
+      "trend": "increased"
+    },
+    {
+      "crop": "corn",
+      "family": "har",
+      "feature_group": "climate",
+      "feature": "spi_7d_very_dry_in_planting",
+      "start_horizon": 4,
+      "start_label": "h4",
+      "end_horizon": 16,
+      "end_label": "h16",
+      "start_mean_abs_shap": 0.0,
+      "end_mean_abs_shap": 0.0052945271220118,
+      "delta_mean_abs_shap": 0.0052945271220118,
       "trend": "increased"
     }
   ]
