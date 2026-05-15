@@ -6,42 +6,66 @@
   "pairs": [
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 1,
-      "name": "bsr_expanding:exo_vs_full:h1",
+      "name": "bsr_expanding:har_vs_har_endo:h1",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 1,
-      "name": "bsr_expanding:exo_vs_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 1,
-      "name": "bsr_expanding:news_vs_news_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 1,
-      "name": "bsr_rolling:exo_vs_full:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 1,
-      "name": "bsr_rolling:exo_vs_macro:h1",
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 1,
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "bsr_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "bsr_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "bsr_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_vs_har_endo:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_macro:h1",
       "hac_maxlags": null
     },
     {
@@ -49,71 +73,151 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 1,
-      "name": "bsr_rolling:news_vs_news_macro:h1",
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_news:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "bsr_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h1",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 1,
-      "name": "lasso_expanding:exo_vs_full:h1",
+      "name": "lasso_expanding:har_vs_har_endo:h1",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 1,
-      "name": "lasso_expanding:exo_vs_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 1,
-      "name": "lasso_expanding:news_vs_news_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 1,
-      "name": "lasso_rolling:exo_vs_full:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 1,
-      "name": "lasso_rolling:exo_vs_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 1,
-      "name": "lasso_rolling:news_vs_news_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 1,
-      "name": "ols_expanding:exo_vs_full:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 1,
-      "name": "ols_expanding:exo_vs_macro:h1",
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 1,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "lasso_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "lasso_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 1,
+      "name": "lasso_rolling:har_vs_har_endo:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 1,
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 1,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "lasso_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "lasso_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 1,
+      "name": "ols_expanding:har_vs_har_endo:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 1,
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_macro:h1",
       "hac_maxlags": null
     },
     {
@@ -121,7 +225,31 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 1,
-      "name": "ols_expanding:news_vs_news_macro:h1",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 1,
+      "name": "ols_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "name": "ols_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h1",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 1,
+      "name": "ols_rolling:har_vs_har_endo:h1",
       "hac_maxlags": null
     },
     {
@@ -129,7 +257,7 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 1,
-      "name": "ols_rolling:exo_vs_macro:h1",
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_macro:h1",
       "hac_maxlags": null
     },
     {
@@ -137,23 +265,7 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 1,
-      "name": "ols_rolling:news_vs_news_macro:h1",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 4,
-      "name": "bsr_expanding:exo_vs_climate:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 4,
-      "name": "bsr_expanding:exo_vs_full:h4",
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h1",
       "hac_maxlags": null
     },
     {
@@ -161,7 +273,23 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 4,
-      "name": "bsr_expanding:exo_vs_macro:h4",
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 4,
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_climate:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 4,
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h4",
       "hac_maxlags": null
     },
     {
@@ -169,23 +297,15 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "bsr_expanding:news_vs_news_macro:h4",
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
       "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_news",
       "target_horizon": 4,
-      "name": "bsr_rolling:exo_vs_climate:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 4,
-      "name": "bsr_rolling:exo_vs_full:h4",
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_news:h4",
       "hac_maxlags": null
     },
     {
@@ -193,7 +313,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 4,
-      "name": "bsr_rolling:exo_vs_macro:h4",
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 4,
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_climate:h4",
       "hac_maxlags": null
     },
     {
@@ -201,23 +329,31 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "bsr_rolling:news_vs_news_macro:h4",
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:exo_vs_climate:h4",
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:exo_vs_full:h4",
+      "name": "bsr_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "bsr_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h4",
       "hac_maxlags": null
     },
     {
@@ -225,7 +361,31 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:exo_vs_macro:h4",
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 4,
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_climate:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 4,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 4,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
@@ -233,55 +393,111 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:macro_vs_climate_macro:h4",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h4",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:news_vs_news_macro:h4",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news_macro",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 4,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
-      "name": "lasso_expanding:news_macro_vs_full:h4",
+      "name": "lasso_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h4",
       "hac_maxlags": null
     },
     {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
-      "name": "lasso_rolling:exo_vs_full:h4",
+      "name": "lasso_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h4",
       "hac_maxlags": null
     },
     {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 4,
-      "name": "lasso_rolling:exo_vs_macro:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 4,
-      "name": "lasso_rolling:news_vs_news_macro:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
+      "model_type": "lasso_expanding",
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
-      "name": "lasso_rolling:news_macro_vs_full:h4",
+      "name": "lasso_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "lasso_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_news",
+      "target_horizon": 4,
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_news:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 4,
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_macro:h4",
       "hac_maxlags": null
     },
     {
@@ -289,23 +505,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 4,
-      "name": "ols_expanding:exo_vs_climate:h4",
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_climate:h4",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 4,
-      "name": "ols_expanding:exo_vs_full:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 4,
-      "name": "ols_expanding:exo_vs_macro:h4",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h4",
       "hac_maxlags": null
     },
     {
@@ -313,31 +521,63 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "ols_expanding:news_vs_news_macro:h4",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
       "hac_maxlags": null
     },
     {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 4,
-      "name": "ols_rolling:exo_vs_full:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 4,
-      "name": "ols_rolling:exo_vs_macro:h4",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_news",
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 4,
-      "name": "ols_rolling:news_vs_news_macro:h4",
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "ols_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 4,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 4,
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 4,
+      "name": "ols_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_news:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "ols_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h4",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 4,
+      "name": "ols_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h4",
       "hac_maxlags": null
     },
     {
@@ -345,15 +585,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "bsr_expanding:exo_vs_climate:h8",
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_climate:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 8,
-      "name": "bsr_expanding:exo_vs_full:h8",
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -361,15 +601,23 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 8,
-      "name": "bsr_expanding:macro_vs_climate_macro:h8",
+      "name": "bsr_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 8,
-      "name": "bsr_expanding:news_vs_news_macro:h8",
+      "name": "bsr_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_news:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "bsr_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -377,23 +625,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "bsr_expanding:news_macro_vs_full:h8",
+      "name": "bsr_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 8,
-      "name": "bsr_rolling:exo_vs_climate:h8",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 8,
-      "name": "bsr_rolling:exo_vs_full:h8",
+      "name": "bsr_rolling:har_vs_har_endo:h8",
       "hac_maxlags": null
     },
     {
@@ -401,15 +641,23 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 8,
-      "name": "bsr_rolling:exo_vs_macro:h8",
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "bsr_rolling:macro_vs_climate_macro:h8",
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_climate:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -417,7 +665,31 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 8,
-      "name": "bsr_rolling:news_vs_news_macro:h8",
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 8,
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 8,
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "bsr_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -425,7 +697,7 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "bsr_rolling:news_macro_vs_full:h8",
+      "name": "bsr_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -433,15 +705,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "lasso_expanding:exo_vs_climate:h8",
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_climate:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 8,
-      "name": "lasso_expanding:exo_vs_full:h8",
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -449,15 +721,39 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 8,
-      "name": "lasso_expanding:macro_vs_climate_macro:h8",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 8,
-      "name": "lasso_expanding:news_vs_news_macro:h8",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 8,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "lasso_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "lasso_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -465,23 +761,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "lasso_expanding:news_macro_vs_full:h8",
+      "name": "lasso_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 8,
-      "name": "lasso_rolling:exo_vs_climate:h8",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 8,
-      "name": "lasso_rolling:exo_vs_full:h8",
+      "name": "lasso_rolling:har_vs_har_endo:h8",
       "hac_maxlags": null
     },
     {
@@ -489,15 +777,23 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 8,
-      "name": "lasso_rolling:exo_vs_macro:h8",
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "lasso_rolling:macro_vs_climate_macro:h8",
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_climate:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -505,15 +801,39 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 8,
-      "name": "lasso_rolling:news_vs_news_macro:h8",
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_news_macro",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 8,
+      "name": "lasso_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 8,
+      "name": "lasso_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "lasso_rolling:news_macro_vs_full:h8",
+      "name": "lasso_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "lasso_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -521,23 +841,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "ols_expanding:exo_vs_climate:h8",
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_climate:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 8,
-      "name": "ols_expanding:exo_vs_full:h8",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 8,
-      "name": "ols_expanding:macro_vs_climate_macro:h8",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -545,7 +857,47 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 8,
-      "name": "ols_expanding:news_vs_news_macro:h8",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 8,
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 8,
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "ols_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_news:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "ols_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "ols_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -553,23 +905,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "ols_expanding:news_macro_vs_full:h8",
+      "name": "ols_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 8,
-      "name": "ols_rolling:exo_vs_climate:h8",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 8,
-      "name": "ols_rolling:exo_vs_full:h8",
+      "name": "ols_rolling:har_vs_har_endo:h8",
       "hac_maxlags": null
     },
     {
@@ -577,15 +921,23 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 8,
-      "name": "ols_rolling:exo_vs_macro:h8",
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_macro:h8",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 8,
-      "name": "ols_rolling:macro_vs_climate_macro:h8",
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_climate:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h8",
       "hac_maxlags": null
     },
     {
@@ -593,7 +945,39 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 8,
-      "name": "ols_rolling:news_vs_news_macro:h8",
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 8,
+      "name": "ols_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 8,
+      "name": "ols_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_news:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "ols_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 8,
+      "name": "ols_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h8",
       "hac_maxlags": null
     },
     {
@@ -601,7 +985,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
-      "name": "ols_rolling:news_macro_vs_full:h8",
+      "name": "ols_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h8",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 12,
+      "name": "bsr_expanding:har_vs_har_endo:h12",
       "hac_maxlags": null
     },
     {
@@ -609,23 +1001,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 12,
-      "name": "bsr_expanding:exo_vs_climate:h12",
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_climate:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 12,
-      "name": "bsr_expanding:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "bsr_expanding:exo_vs_macro:h12",
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
       "hac_maxlags": null
     },
     {
@@ -633,327 +1017,543 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 12,
-      "name": "bsr_expanding:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "bsr_expanding:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "bsr_expanding:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 12,
-      "name": "bsr_rolling:exo_vs_climate:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "bsr_rolling:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "bsr_rolling:exo_vs_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 12,
-      "name": "bsr_rolling:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "bsr_rolling:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "bsr_rolling:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 12,
-      "name": "lasso_expanding:exo_vs_climate:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_expanding:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "lasso_expanding:exo_vs_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 12,
-      "name": "lasso_expanding:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_expanding:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_expanding:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 12,
-      "name": "lasso_rolling:exo_vs_climate:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_rolling:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "lasso_rolling:exo_vs_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 12,
-      "name": "lasso_rolling:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_rolling:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "lasso_rolling:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 12,
-      "name": "ols_expanding:exo_vs_climate:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "ols_expanding:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "ols_expanding:exo_vs_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 12,
-      "name": "ols_expanding:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "ols_expanding:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "ols_expanding:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 12,
-      "name": "ols_rolling:exo_vs_climate:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "ols_rolling:exo_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 12,
-      "name": "ols_rolling:exo_vs_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 12,
-      "name": "ols_rolling:macro_vs_climate_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 12,
-      "name": "ols_rolling:news_vs_news_macro:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_news_macro",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 12,
-      "name": "ols_rolling:news_macro_vs_full:h12",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 16,
-      "name": "bsr_expanding:exo_vs_climate:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 16,
-      "name": "bsr_expanding:exo_vs_full:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 16,
-      "name": "bsr_expanding:exo_vs_macro:h16",
+      "name": "bsr_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
       "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 16,
-      "name": "bsr_expanding:macro_vs_climate_macro:h16",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "bsr_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
-      "base_feature_set": "har_endo_exo_news",
-      "augmented_feature_set": "har_endo_exo_news_macro",
-      "target_horizon": 16,
-      "name": "bsr_expanding:news_vs_news_macro:h16",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "bsr_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "bsr_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_expanding",
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 16,
-      "name": "bsr_expanding:news_macro_vs_full:h16",
+      "target_horizon": 12,
+      "name": "bsr_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_vs_har_endo:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_macro:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
-      "target_horizon": 16,
-      "name": "bsr_rolling:exo_vs_climate:h16",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_climate:h12",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "bsr_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_vs_har_endo:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
       "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_climate:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_vs_har_endo:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_climate:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "lasso_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_vs_har_endo:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_climate:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_news",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_climate:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_news:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_news_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 12,
+      "name": "ols_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h12",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_vs_har_endo_exo_climate:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 16,
+      "name": "bsr_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_expanding",
+      "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "bsr_rolling:exo_vs_full:h16",
+      "name": "bsr_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_vs_har_endo:h16",
       "hac_maxlags": null
     },
     {
@@ -961,7 +1561,31 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 16,
-      "name": "bsr_rolling:exo_vs_macro:h16",
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_vs_har_endo_exo_climate:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -969,15 +1593,39 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 16,
-      "name": "bsr_rolling:macro_vs_climate_macro:h16",
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "bsr_rolling",
-      "base_feature_set": "har_endo_exo_news",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 16,
-      "name": "bsr_rolling:news_vs_news_macro:h16",
+      "name": "bsr_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "bsr_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "bsr_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -985,23 +1633,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "bsr_rolling:news_macro_vs_full:h16",
+      "name": "bsr_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 16,
-      "name": "lasso_expanding:exo_vs_climate:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 16,
-      "name": "lasso_expanding:exo_vs_full:h16",
+      "name": "lasso_expanding:har_vs_har_endo:h16",
       "hac_maxlags": null
     },
     {
@@ -1009,7 +1649,31 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 16,
-      "name": "lasso_expanding:exo_vs_macro:h16",
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_vs_har_endo_exo_climate:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_news_vs_har_endo_exo_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1017,15 +1681,47 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 16,
-      "name": "lasso_expanding:macro_vs_climate_macro:h16",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_expanding",
-      "base_feature_set": "har_endo_exo_news",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 16,
-      "name": "lasso_expanding:news_vs_news_macro:h16",
+      "name": "lasso_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_news:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "lasso_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1033,23 +1729,15 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "lasso_expanding:news_macro_vs_full:h16",
+      "name": "lasso_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate",
+      "base_feature_set": "har",
+      "augmented_feature_set": "har_endo",
       "target_horizon": 16,
-      "name": "lasso_rolling:exo_vs_climate:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
-      "target_horizon": 16,
-      "name": "lasso_rolling:exo_vs_full:h16",
+      "name": "lasso_rolling:har_vs_har_endo:h16",
       "hac_maxlags": null
     },
     {
@@ -1057,15 +1745,23 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_macro",
       "target_horizon": 16,
-      "name": "lasso_rolling:exo_vs_macro:h16",
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "lasso_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 16,
-      "name": "lasso_rolling:macro_vs_climate_macro:h16",
+      "name": "lasso_rolling:har_endo_exo_vs_har_endo_exo_climate:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
+      "target_horizon": 16,
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
       "hac_maxlags": null
     },
     {
@@ -1073,7 +1769,39 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 16,
-      "name": "lasso_rolling:news_vs_news_macro:h16",
+      "name": "lasso_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "lasso_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "lasso_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "lasso_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "lasso_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "lasso_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1081,7 +1809,7 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "lasso_rolling:news_macro_vs_full:h16",
+      "name": "lasso_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1089,23 +1817,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 16,
-      "name": "ols_expanding:exo_vs_climate:h16",
+      "name": "ols_expanding:har_endo_exo_vs_har_endo_exo_climate:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 16,
-      "name": "ols_expanding:exo_vs_full:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 16,
-      "name": "ols_expanding:exo_vs_macro:h16",
+      "name": "ols_expanding:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
       "hac_maxlags": null
     },
     {
@@ -1113,15 +1833,23 @@
       "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_climate_macro",
       "target_horizon": 16,
-      "name": "ols_expanding:macro_vs_climate_macro:h16",
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_expanding",
-      "base_feature_set": "har_endo_exo_news",
+      "base_feature_set": "har_endo_exo_macro",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 16,
-      "name": "ols_expanding:news_vs_news_macro:h16",
+      "name": "ols_expanding:har_endo_exo_macro_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_expanding",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "ols_expanding:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1129,7 +1857,31 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "ols_expanding:news_macro_vs_full:h16",
+      "name": "ols_expanding:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo",
+      "augmented_feature_set": "har_endo_exo",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_vs_har_endo_exo:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_news",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_news:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo",
+      "augmented_feature_set": "har_endo_exo_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1137,31 +1889,15 @@
       "base_feature_set": "har_endo_exo",
       "augmented_feature_set": "har_endo_exo_climate",
       "target_horizon": 16,
-      "name": "ols_rolling:exo_vs_climate:h16",
+      "name": "ols_rolling:har_endo_exo_vs_har_endo_exo_climate:h16",
       "hac_maxlags": null
     },
     {
       "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "base_feature_set": "har_endo_exo_news",
+      "augmented_feature_set": "har_endo_exo_climate_news",
       "target_horizon": 16,
-      "name": "ols_rolling:exo_vs_full:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo",
-      "augmented_feature_set": "har_endo_exo_macro",
-      "target_horizon": 16,
-      "name": "ols_rolling:exo_vs_macro:h16",
-      "hac_maxlags": null
-    },
-    {
-      "model_type": "ols_rolling",
-      "base_feature_set": "har_endo_exo_macro",
-      "augmented_feature_set": "har_endo_exo_climate_macro",
-      "target_horizon": 16,
-      "name": "ols_rolling:macro_vs_climate_macro:h16",
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_climate_news:h16",
       "hac_maxlags": null
     },
     {
@@ -1169,7 +1905,47 @@
       "base_feature_set": "har_endo_exo_news",
       "augmented_feature_set": "har_endo_exo_news_macro",
       "target_horizon": 16,
-      "name": "ols_rolling:news_vs_news_macro:h16",
+      "name": "ols_rolling:har_endo_exo_news_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_macro_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_macro",
+      "augmented_feature_set": "har_endo_exo_news_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_macro_vs_har_endo_exo_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate",
+      "augmented_feature_set": "har_endo_exo_climate_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_climate_vs_har_endo_exo_climate_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_news",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro:h16",
+      "hac_maxlags": null
+    },
+    {
+      "model_type": "ols_rolling",
+      "base_feature_set": "har_endo_exo_climate_macro",
+      "augmented_feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 16,
+      "name": "ols_rolling:har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     },
     {
@@ -1177,7 +1953,7 @@
       "base_feature_set": "har_endo_exo_news_macro",
       "augmented_feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
-      "name": "ols_rolling:news_macro_vs_full:h16",
+      "name": "ols_rolling:har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro:h16",
       "hac_maxlags": null
     }
   ]
