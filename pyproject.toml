@@ -26,7 +26,7 @@ dependencies = [
     "google-cloud-bigquery-storage==2.25.0",
     "shap==0.45.1",
     "seaborn>=0.13.2",
-    "dvc>=3.67.1",
+    "dvc[s3]>=3.67.1",
 ]
 
 [dependency-groups]
