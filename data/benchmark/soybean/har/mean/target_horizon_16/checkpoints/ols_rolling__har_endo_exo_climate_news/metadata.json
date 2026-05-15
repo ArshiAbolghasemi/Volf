@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/soybean/har/mean/target_horizon_16/checkpoints/ols_rolling__har_endo_exo_climate_news",
-  "feature_set": "har_endo_exo_climate_news",
-  "model_family": "har",
-  "model_type": "ols_rolling",
-  "saved_at_utc": "2026-05-15T00:40:42.049830+00:00",
-  "target_horizon": 16,
-  "target_mode": "mean"
-}

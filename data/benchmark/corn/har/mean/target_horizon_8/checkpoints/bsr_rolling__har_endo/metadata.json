@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/corn/har/mean/target_horizon_8/checkpoints/bsr_rolling__har_endo",
-  "feature_set": "har_endo",
-  "model_family": "har",
-  "model_type": "bsr_rolling",
-  "saved_at_utc": "2026-05-15T00:32:31.371577+00:00",
-  "target_horizon": 8,
-  "target_mode": "mean"
-}

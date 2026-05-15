@@ -1,7 +1,0 @@
-corn_weekly_rv
-corn_monthly_rv
-corn_seasonal_rv
-corn_weekly_jumps
-corn_weekly_rvb
-frbsf_sentiment
-wheat_weekly_rv

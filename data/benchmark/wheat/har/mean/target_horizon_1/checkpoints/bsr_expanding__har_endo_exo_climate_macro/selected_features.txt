@@ -1,7 +1,0 @@
-wheat_weekly_rv
-wheat_monthly_rv
-wheat_seasonal_rv
-tmin_cold_in_harvesting
-pdsi_severe_drought_in_harvesting
-DJIA_Index
-wheat_weekly_jumps

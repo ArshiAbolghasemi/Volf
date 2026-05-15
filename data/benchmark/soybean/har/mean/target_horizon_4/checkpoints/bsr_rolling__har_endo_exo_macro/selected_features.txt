@@ -1,9 +1,0 @@
-soybeans_weekly_rv
-soybeans_monthly_rv
-soybeans_seasonal_rv
-DJIA_Index
-WTI_Index
-Broad_Dollar_index
-corn_weekly_rv
-soybeans_weekly_jumps
-wheat_weekly_rv

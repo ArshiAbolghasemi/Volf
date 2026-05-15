@@ -1,9 +1,0 @@
-wheat_weekly_rv
-wheat_monthly_rv
-wheat_seasonal_rv
-DJIA_Index
-Stock_Uncertainty
-Broad_Dollar_index
-wheat_weekly_rvb
-wheat_weekly_rvg
-WTI_Index

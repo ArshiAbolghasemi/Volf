@@ -1,9 +1,0 @@
-{
-  "checkpoint_dir": "/home/ubuntu/Volf/data/benchmark/soybean/har/mean/target_horizon_12/checkpoints/ols_rolling__har_endo_exo",
-  "feature_set": "har_endo_exo",
-  "model_family": "har",
-  "model_type": "ols_rolling",
-  "saved_at_utc": "2026-05-15T00:40:40.194081+00:00",
-  "target_horizon": 12,
-  "target_mode": "mean"
-}
