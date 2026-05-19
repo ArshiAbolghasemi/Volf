@@ -396,7 +396,7 @@ def _run_tree_shap_common(  # noqa: PLR0915
             data=background,
             feature_perturbation="interventional",
         )
-        explanation_raw = explainer(x_eval_model)
+        explanation_raw = explainer(x_eval_model, check_additivity=False)
         explanation = (
             explanation_raw[0] if isinstance(explanation_raw, list) else explanation_raw
         )
