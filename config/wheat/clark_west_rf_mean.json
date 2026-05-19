@@ -1,0 +1,91 @@
+{
+  "csv_path": "data/ag/wheat.csv",
+  "target_col": "wheat_weekly_rv",
+  "target_mode": "mean",
+  "target_horizons": [1, 4, 8, 12, 16],
+  "checkpoint_root": "wheat/rf/mean",
+  "output_root": "wheat/rf/mean/cw",
+  "hac_maxlags": null,
+  "benchmark_overrides": {
+    "run_configs": {
+      "rf_expanding": null,
+      "rf_rolling": null
+    }
+  },
+  "pair_template": {
+    "model_types": ["rf_expanding", "rf_rolling"],
+    "horizons": [1, 4, 8, 12, 16],
+    "feature_pairs": [
+      {
+        "base_feature_set": "har",
+        "augmented_feature_set": "har_endo",
+        "name": "har_vs_har_endo"
+      },
+      {
+        "base_feature_set": "har_endo",
+        "augmented_feature_set": "har_endo_exo",
+        "name": "har_endo_vs_har_endo_exo"
+      },
+      {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_news",
+        "name": "har_endo_exo_vs_har_endo_exo_news"
+      },
+      {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_macro",
+        "name": "har_endo_exo_vs_har_endo_exo_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_climate",
+        "name": "har_endo_exo_vs_har_endo_exo_climate"
+      },
+      {
+        "base_feature_set": "har_endo_exo_news",
+        "augmented_feature_set": "har_endo_exo_climate_news",
+        "name": "har_endo_exo_news_vs_har_endo_exo_climate_news"
+      },
+      {
+        "base_feature_set": "har_endo_exo_news",
+        "augmented_feature_set": "har_endo_exo_news_macro",
+        "name": "har_endo_exo_news_vs_har_endo_exo_news_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_macro",
+        "augmented_feature_set": "har_endo_exo_climate_macro",
+        "name": "har_endo_exo_macro_vs_har_endo_exo_climate_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_macro",
+        "augmented_feature_set": "har_endo_exo_news_macro",
+        "name": "har_endo_exo_macro_vs_har_endo_exo_news_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_news",
+        "name": "har_endo_exo_climate_vs_har_endo_exo_climate_news"
+      },
+      {
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_macro",
+        "name": "har_endo_exo_climate_vs_har_endo_exo_climate_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_climate_news",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_climate_macro",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro"
+      },
+      {
+        "base_feature_set": "har_endo_exo_news_macro",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro"
+      }
+    ]
+  }
+}
