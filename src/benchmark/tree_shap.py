@@ -196,6 +196,8 @@ def resolve_xgb_run_config_for_shap_job(
 def _pick_report_features(shap_values: pd.DataFrame, job: TreeShapJobConfig) -> list[str]:
     if shap_values.empty:
         return []
+    if shap_values.columns.to_series().duplicated().any():
+        shap_values = shap_values.T.groupby(level=0).mean().T
     if job.include_features:
         selected = [feat for feat in job.include_features if feat in shap_values.columns]
         if selected:
@@ -207,6 +209,9 @@ def _pick_report_features(shap_values: pd.DataFrame, job: TreeShapJobConfig) -> 
 def _build_summary_frame(shap_values: pd.DataFrame) -> pd.DataFrame:
     if shap_values.empty:
         return pd.DataFrame(columns=["feature", "mean_abs_shap", "mean_shap"])
+
+    if shap_values.columns.to_series().duplicated().any():
+        shap_values = shap_values.T.groupby(level=0).mean().T
 
     all_features = shap_values.abs().mean().sort_values(ascending=False).index.tolist()
     return pd.DataFrame(
