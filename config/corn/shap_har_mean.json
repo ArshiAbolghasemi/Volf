@@ -4,7 +4,7 @@
   "jobs": [
     {
       "name": "h4_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_expanding",
+      "model_type": "lasso_rolling",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
       "target_mode": "mean",
@@ -15,7 +15,7 @@
     },
     {
       "name": "h8_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_expanding",
+      "model_type": "lasso_rolling",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
       "target_mode": "mean",
@@ -37,7 +37,7 @@
     },
     {
       "name": "h16_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_expanding",
+      "model_type": "lasso_rolling",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
       "target_mode": "mean",

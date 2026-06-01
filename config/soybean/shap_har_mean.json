@@ -26,7 +26,7 @@
     },
     {
       "name": "h12_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_expanding",
+      "model_type": "lasso_rolling",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 12,
       "target_mode": "mean",
