@@ -30,6 +30,7 @@ from src.benchmark.tree_shap import (
 )
 from src.benchmark.utils import (
     DEFAULT_CORE_COLUMNS,
+    default_core_columns_for_target,
     existing_columns,
     normalize_target_mode,
 )
@@ -261,8 +262,19 @@ def main() -> None:
     if "Date" in data.columns:
         data = data.sort_values("Date").reset_index(drop=True)
 
-    core_columns = benchmark_cfg.core_columns or existing_columns(
-        data, DEFAULT_CORE_COLUMNS
+    target_specific_core = None
+    if (
+        benchmark_cfg.core_columns_by_target
+        and benchmark_cfg.target_col in benchmark_cfg.core_columns_by_target
+    ):
+        target_specific_core = benchmark_cfg.core_columns_by_target[
+            benchmark_cfg.target_col
+        ]
+    core_columns = (
+        target_specific_core
+        or benchmark_cfg.core_columns
+        or existing_columns(data, default_core_columns_for_target(benchmark_cfg.target_col))
+        or existing_columns(data, DEFAULT_CORE_COLUMNS)
     )
     if not core_columns:
         msg = "No valid core columns found in data for SHAP run."

@@ -24,6 +24,7 @@ from src.benchmark.har.shap import (
 )
 from src.benchmark.utils import (
     DEFAULT_CORE_COLUMNS,
+    default_core_columns_for_target,
     existing_columns,
     normalize_target_mode,
 )
@@ -108,6 +109,8 @@ def _load_benchmark_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         csv_path=raw.get("csv_path", str(DATA_DIR / "ag" / "v4.csv")),
         target_col=raw.get("target_col", "wheat_weekly_rv"),
         core_columns=raw.get("core_columns"),
+        core_columns_by_target=raw.get("core_columns_by_target"),
+        climate_columns=raw.get("climate_columns"),
         target_horizon=int(raw.get("target_horizon", 1)),
         target_horizons=(
             [int(v) for v in raw["target_horizons"]]
@@ -193,6 +196,30 @@ def _load_shap_config(
     )
 
 
+def _resolve_core_columns(
+    benchmark_cfg: WheatHARBenchmarkConfig,
+    data: pd.DataFrame,
+) -> list[str]:
+    target_specific_core = None
+    if (
+        benchmark_cfg.core_columns_by_target
+        and benchmark_cfg.target_col in benchmark_cfg.core_columns_by_target
+    ):
+        target_specific_core = benchmark_cfg.core_columns_by_target[
+            benchmark_cfg.target_col
+        ]
+    core_columns = (
+        target_specific_core
+        or benchmark_cfg.core_columns
+        or existing_columns(data, default_core_columns_for_target(benchmark_cfg.target_col))
+        or existing_columns(data, DEFAULT_CORE_COLUMNS)
+    )
+    if not core_columns:
+        msg = "No valid core columns found in data for SHAP run."
+        raise ValueError(msg)
+    return core_columns
+
+
 def main() -> None:
     args = parse_args()
 
@@ -210,15 +237,14 @@ def main() -> None:
         data = data.sort_values("Date").reset_index(drop=True)
 
     model_run_configs = benchmark_cfg.run_configs or default_run_configs()
-    core_columns = benchmark_cfg.core_columns or existing_columns(
-        data,
-        DEFAULT_CORE_COLUMNS,
-    )
-    if not core_columns:
-        msg = "No valid core columns found in data for SHAP run."
-        raise ValueError(msg)
+    core_columns = _resolve_core_columns(benchmark_cfg, data)
 
-    feature_sets = build_wheat_feature_sets(data, core_columns=core_columns)
+    feature_sets = build_wheat_feature_sets(
+        data,
+        target_col=benchmark_cfg.target_col,
+        core_columns=core_columns,
+        climate_columns=benchmark_cfg.climate_columns,
+    )
     crop = _infer_crop_name(benchmark_cfg)
 
     required_jobs = {

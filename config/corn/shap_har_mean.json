@@ -3,6 +3,17 @@
   "output_subdir": "shap",
   "jobs": [
     {
+      "name": "h1_mean_lasso_expanding_har_endo_exo_climate_news_macro",
+      "model_type": "lasso_rolling",
+      "feature_set": "har_endo_exo_climate_news_macro",
+      "target_horizon": 1,
+      "target_mode": "mean",
+      "split": "test",
+      "top_n_features": 20,
+      "dependence_top_n": 3,
+      "waterfall_row": 0
+    },
+    {
       "name": "h4_mean_lasso_expanding_har_endo_exo_climate_news_macro",
       "model_type": "lasso_rolling",
       "feature_set": "har_endo_exo_climate_news_macro",
