@@ -17,7 +17,7 @@ Python 3.10.12 is required (see `.python-version`). All scripts are run via `uv 
 
 ## Running Benchmarks
 
-All benchmarks are configuration-driven. Pass a JSON config from `config/` to the relevant script:
+All benchmarks are configuration-driven. Pass a JSON config from `config/` to the relevant script. Configs are organized by commodity: `config/wheat/`, `config/corn/`, `config/soybean/`.
 
 ```bash
 # HAR models (OLS, Lasso, BSR variants)
@@ -38,6 +38,19 @@ uv run python -m scripts.benchmark.tree_shap --config config/wheat/shap_rf.json
 uv run python -m scripts.benchmark.tree_shap --config config/wheat/shap_xgb.json
 ```
 
+Most config keys can be overridden on the CLI. Useful flags (see `scripts/benchmark/har.py`):
+`--target_horizons 1,4,8` (overrides the config list), `--parallel_jobs N`, `--no_cache` /
+`--cache_overwrite` (force retrain), `--cache_dir`, `--print_hyperparams`, `--log_level DEBUG`.
+
+### Caching vs. checkpoints (two separate mechanisms)
+
+- **Result cache** (`.cache/benchmark/`, `src/benchmark/{family}/cache.py`): memoizes per-run
+  training output keyed by a dataset signature + config hash. Enabled by default; edit code/config
+  and the cache key changes automatically. Use `--no_cache` or `--cache_overwrite` to force retrain.
+- **Best-result checkpoints** (`src/benchmark/checkpoints.py`): the final saved artifacts (best
+  model per horizon) written under `data/benchmark/...`. Clark-West and SHAP scripts read these,
+  so a benchmark run must precede them.
+
 ## Linting
 
 ```bash
@@ -51,14 +64,20 @@ Ruff is configured in `ruff.toml` with strict rules, 92-char line length, and Py
 
 ### Core Flow
 
-1. A JSON config defines: input data path, target horizons, walk-forward window parameters, feature selection method, and model hyperparameters.
-2. The benchmark script loads the config via Dynaconf, instantiates a walk-forward experiment, and trains models over each rolling/expanding window step.
-3. Results (metrics + checkpoints) are written to `data/benchmark/{commodity}/{model}/{target_mode}/target_horizon_{h}/`.
+1. A JSON config defines: input data path, target column/horizons, walk-forward window parameters, feature selection method, and model hyperparameters. The top-level config carries multiple named `run_configs` (e.g. `ols_expanding`, `lasso_rolling`), each a model+window+selection variant run over every feature set and horizon.
+2. The benchmark script loads/parses the config into dataclasses, instantiates a walk-forward experiment, and trains models over each rolling/expanding window step.
+3. Results (metrics + checkpoints) are written to `data/benchmark/{commodity}/{model}/{target_mode}/target_horizon_{h}/`. `target_mode` is `point` or `mean` (set by config `target_mode`, reflected in the `_mean` config filenames); the script auto-rewrites the `--output` path into this layout and splits the summary CSV per horizon.
+
+### Two-layer model/benchmark split
+
+The model logic and the benchmark harness are deliberately separated:
+
+- **`src/model/{har,rf,xgb}/`** — pure estimators and walk-forward experiment logic (`experiment.py`, `types.py`); no benchmarking/IO concerns. `common/preprocessing.py` is shared.
+- **`src/benchmark/{har,rf,xgb}/`** — the harness around each model family, with a consistent file layout per family: `runner.py` (orchestrates the multi-horizon/multi-feature sweep + grid search), `features.py` (builds the feature-set hierarchy), `cache.py` (result cache), `types.py` (benchmark config dataclasses). HAR additionally has `clark_west.py` and `shap.py`.
 
 ### Source Structure
 
-- **`src/model/`** — Model implementations: `har/` (OLS, Lasso, BSR), `rf/`, `xgb/`, `common/` (shared preprocessing)
-- **`src/benchmark/`** — Benchmark runners, checkpoint save/load (`checkpoints.py`), SHAP for tree models (`tree_shap.py`)
+- **`src/benchmark/`** — also holds `checkpoints.py` (best-result save/load) and `tree_shap.py` (SHAP for RF/XGB)
 - **`src/dataset/`** — Data pipelines: `news/` (BigQuery), `climate/` (NOAA), `google_trend/`, `production_by_state/`
 - **`src/variable_selection/`** — Feature selection: `lasso.py`, `bsr.py` (Bayesian Spike & Regression)
 - **`src/metrics/statistical.py`** — Evaluation metrics (R², adjusted R², MSE, etc.)
