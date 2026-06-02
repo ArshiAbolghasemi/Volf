@@ -27,6 +27,78 @@ from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
 
 logger = logging.getLogger(__name__)
 OUTPUT_FILENAME = "clark_west.csv"
+DEFAULT_FEATURE_PAIR_TEMPLATES: list[dict[str, str]] = [
+    {
+        "base_feature_set": "har",
+        "augmented_feature_set": "har_endo",
+        "name": "har_vs_har_endo",
+    },
+    {
+        "base_feature_set": "har_endo",
+        "augmented_feature_set": "har_endo_exo",
+        "name": "har_endo_vs_har_endo_exo",
+    },
+    {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_news",
+        "name": "har_endo_exo_vs_har_endo_exo_news",
+    },
+    {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_macro",
+        "name": "har_endo_exo_vs_har_endo_exo_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo",
+        "augmented_feature_set": "har_endo_exo_climate",
+        "name": "har_endo_exo_vs_har_endo_exo_climate",
+    },
+    {
+        "base_feature_set": "har_endo_exo_news",
+        "augmented_feature_set": "har_endo_exo_climate_news",
+        "name": "har_endo_exo_news_vs_har_endo_exo_climate_news",
+    },
+    {
+        "base_feature_set": "har_endo_exo_news",
+        "augmented_feature_set": "har_endo_exo_news_macro",
+        "name": "har_endo_exo_news_vs_har_endo_exo_news_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_macro",
+        "augmented_feature_set": "har_endo_exo_climate_macro",
+        "name": "har_endo_exo_macro_vs_har_endo_exo_climate_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_macro",
+        "augmented_feature_set": "har_endo_exo_news_macro",
+        "name": "har_endo_exo_macro_vs_har_endo_exo_news_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_news",
+        "name": "har_endo_exo_climate_vs_har_endo_exo_climate_news",
+    },
+    {
+        "base_feature_set": "har_endo_exo_climate",
+        "augmented_feature_set": "har_endo_exo_climate_macro",
+        "name": "har_endo_exo_climate_vs_har_endo_exo_climate_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_climate_news",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_climate_news_vs_har_endo_exo_climate_news_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_climate_macro",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_climate_macro_vs_har_endo_exo_climate_news_macro",
+    },
+    {
+        "base_feature_set": "har_endo_exo_news_macro",
+        "augmented_feature_set": "har_endo_exo_climate_news_macro",
+        "name": "har_endo_exo_news_macro_vs_har_endo_exo_climate_news_macro",
+    },
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -154,9 +226,12 @@ def _build_pairs_from_template(
     template: dict[str, Any],
     benchmark_cfg: WheatHARBenchmarkConfig,
 ) -> list[ClarkWestPairConfig]:
-    horizons = template.get("horizons") or benchmark_cfg.target_horizons
-    model_types = template.get("model_types")
-    feature_pairs = template.get("feature_pairs")
+    horizons = _resolve_template_horizons(template=template, benchmark_cfg=benchmark_cfg)
+    model_types = _resolve_template_model_types(
+        template=template,
+        benchmark_cfg=benchmark_cfg,
+    )
+    feature_pairs = _resolve_template_feature_pairs(template=template)
     if not isinstance(horizons, list) or not horizons:
         msg = "pair_template.horizons must be a non-empty list."
         raise ValueError(msg)
@@ -194,6 +269,35 @@ def _build_pairs_from_template(
                     )
                 )
     return pairs
+
+
+def _resolve_template_horizons(
+    *,
+    template: dict[str, Any],
+    benchmark_cfg: WheatHARBenchmarkConfig,
+) -> Any:
+    horizons_raw = template.get("horizons")
+    if horizons_raw in (None, [], "all"):
+        return benchmark_cfg.target_horizons
+    return horizons_raw
+
+
+def _resolve_template_model_types(
+    *,
+    template: dict[str, Any],
+    benchmark_cfg: WheatHARBenchmarkConfig,
+) -> Any:
+    model_types = template.get("model_types")
+    if model_types in (None, [], "all"):
+        return sorted((benchmark_cfg.run_configs or default_run_configs()).keys())
+    return model_types
+
+
+def _resolve_template_feature_pairs(*, template: dict[str, Any]) -> Any:
+    feature_pairs = template.get("feature_pairs")
+    if feature_pairs in (None, [], "default", "single_feature_augmented", "all"):
+        return DEFAULT_FEATURE_PAIR_TEMPLATES
+    return feature_pairs
 
 
 def _load_pairs(
