@@ -38,8 +38,6 @@
         "step": 1
       },
       "model": {
-        "backend": "xgboost_rf",
-        "device": "cuda",
         "n_estimators": 100,
         "max_depth": 6,
         "min_samples_split": 4,
@@ -61,8 +59,6 @@
         "rolling_window_size": 208
       },
       "model": {
-        "backend": "xgboost_rf",
-        "device": "cuda",
         "n_estimators": 100,
         "max_depth": 6,
         "min_samples_split": 4,
