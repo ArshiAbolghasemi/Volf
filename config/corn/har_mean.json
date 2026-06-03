@@ -33,9 +33,9 @@
     "ols_expanding": {
       "walk_forward": {
         "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
+        "initial_train_size": 312,
+        "test_size": 1,
+        "step": 1,
         "rolling_window_size": null
       },
       "selection": {
@@ -53,10 +53,10 @@
     "ols_rolling": {
       "walk_forward": {
         "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
+        "initial_train_size": 208,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 208
       },
       "selection": {
         "method": "none"
@@ -73,9 +73,9 @@
     "lasso_expanding": {
       "walk_forward": {
         "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
+        "initial_train_size": 312,
+        "test_size": 1,
+        "step": 1,
         "rolling_window_size": null
       },
       "selection": {
@@ -108,10 +108,10 @@
     "lasso_rolling": {
       "walk_forward": {
         "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
+        "initial_train_size": 208,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 208
       },
       "selection": {
         "method": "lasso",
@@ -143,9 +143,9 @@
     "bsr_expanding": {
       "walk_forward": {
         "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
+        "initial_train_size": 312,
+        "test_size": 1,
+        "step": 1,
         "rolling_window_size": null
       },
       "selection": {
@@ -175,10 +175,10 @@
     "bsr_rolling": {
       "walk_forward": {
         "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
+        "initial_train_size": 208,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 208
       },
       "selection": {
         "method": "bsr",
@@ -204,26 +204,6 @@
         "feature_floor": 1e-10
       }
     }
-  },
-  "grid_search": {
-    "enabled": true,
-    "metric": "test_r2",
-    "maximize_metric": true,
-    "initial_train_sizes": [
-      208,
-      260,
-      312
-    ],
-    "test_sizes": [
-      1,
-      2,
-      4
-    ],
-    "steps": [
-      4,
-      8
-    ],
-    "max_candidates": 36
   },
   "parallel_jobs": 1,
   "target_mode": "mean"

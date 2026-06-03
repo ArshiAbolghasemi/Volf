@@ -33,15 +33,15 @@
     "rf_expanding": {
       "walk_forward": {
         "window_type": "expanding",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4
+        "initial_train_size": 208,
+        "test_size": 1,
+        "step": 1
       },
       "model": {
         "backend": "xgboost_rf",
         "device": "cuda",
         "n_estimators": 100,
-        "max_depth": 4,
+        "max_depth": 6,
         "min_samples_split": 4,
         "min_samples_leaf": 2,
         "max_features": "sqrt",
@@ -55,16 +55,16 @@
     "rf_rolling": {
       "walk_forward": {
         "window_type": "rolling",
-        "initial_train_size": 260,
-        "test_size": 4,
-        "step": 4,
-        "rolling_window_size": 260
+        "initial_train_size": 208,
+        "test_size": 1,
+        "step": 1,
+        "rolling_window_size": 208
       },
       "model": {
         "backend": "xgboost_rf",
         "device": "cuda",
         "n_estimators": 100,
-        "max_depth": 4,
+        "max_depth": 6,
         "min_samples_split": 4,
         "min_samples_leaf": 2,
         "max_features": "sqrt",
@@ -75,36 +75,5 @@
         "log_transform_rv_features": true
       }
     }
-  },
-  "grid_search": {
-    "enabled": true,
-    "metric": "test_r2",
-    "maximize_metric": true,
-    "initial_train_sizes": [
-      208,
-      260
-    ],
-    "test_sizes": [
-      2,
-      4
-    ],
-    "steps": [
-      2,
-      4,
-      8
-    ],
-    "max_depths": [
-      4,
-      6
-    ],
-    "min_samples_splits": [
-      4,
-      8
-    ],
-    "min_samples_leafs": [
-      2,
-      4
-    ],
-    "max_candidates": 48
   }
 }
