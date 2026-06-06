@@ -3,8 +3,8 @@
   "output_subdir": "shap",
   "jobs": [
     {
-      "name": "h1_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_rolling",
+      "name": "h1_mean_bsr_expanding_har_endo_exo_climate_news_macro",
+      "model_type": "bsr_expanding",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 1,
       "target_mode": "mean",
@@ -15,7 +15,7 @@
     },
     {
       "name": "h4_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_rolling",
+      "model_type": "lasso_expanding",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 4,
       "target_mode": "mean",
@@ -25,8 +25,8 @@
       "waterfall_row": 0
     },
     {
-      "name": "h8_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_rolling",
+      "name": "h8_mean_bsr_expanding_har_endo_exo_climate_news_macro",
+      "model_type": "bsr_expanding",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 8,
       "target_mode": "mean",
@@ -36,8 +36,8 @@
       "waterfall_row": 0
     },
     {
-      "name": "h12_mean_lasso_rolling_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_rolling",
+      "name": "h12_mean_lasso_expanding_har_endo_exo_climate_news_macro",
+      "model_type": "lasso_expanding",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 12,
       "target_mode": "mean",
@@ -48,7 +48,7 @@
     },
     {
       "name": "h16_mean_lasso_expanding_har_endo_exo_climate_news_macro",
-      "model_type": "lasso_rolling",
+      "model_type": "lasso_expanding",
       "feature_set": "har_endo_exo_climate_news_macro",
       "target_horizon": 16,
       "target_mode": "mean",
