@@ -14,6 +14,7 @@ from src.model.common.preprocessing import (
     build_forecasting_design_matrix,
     build_walk_forward_windows,
     inverse_transform_prediction,
+    log_clip_bounds_from_target,
     log_transform_rv_features,
     split_design_matrix_xy,
     standardize_train_test,
@@ -201,6 +202,9 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
             x_train_sel, x_test_sel, _ = standardize_train_test(x_train_sel, x_test_sel)
 
         y_train_model = transform_target(y_train, model_cfg)
+        # Bound exponentiated predictions to the training-target range so an
+        # ill-conditioned window cannot blow up the level-space forecast.
+        log_clip_bounds = log_clip_bounds_from_target(y_train_model)
         fitted = fit_har_ols(
             x_train=x_train_sel,
             y_train=y_train_model,
@@ -214,14 +218,18 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
             selected_features=selected_features,
             add_constant=model_cfg.add_constant,
         )
-        y_pred_train = inverse_transform_prediction(y_pred_train, model_cfg)
+        y_pred_train = inverse_transform_prediction(
+            y_pred_train, model_cfg, log_clip_bounds=log_clip_bounds
+        )
         y_pred_test = predict_har_ols(
             fitted_model=fitted,
             x=x_test_sel,
             selected_features=selected_features,
             add_constant=model_cfg.add_constant,
         )
-        y_pred_test = inverse_transform_prediction(y_pred_test, model_cfg)
+        y_pred_test = inverse_transform_prediction(
+            y_pred_test, model_cfg, log_clip_bounds=log_clip_bounds
+        )
 
         train_true_parts.append(y_train)
         train_pred_parts.append(y_pred_train)
@@ -374,6 +382,11 @@ def run_har_experiment_from_dataset(
         feature_config.target_mode == "mean" and model_cfg.target_transform == "log"
     )
     if mean_log_target:
+        # Predictions live on the log scale here; bound them to the training
+        # target range before exp so a single ill-conditioned window cannot
+        # explode the level-space metrics. Truths are observed values already
+        # in range, so they are inverted without clipping.
+        log_clip_bounds = log_clip_bounds_from_target(result.y_true_train)
         result.y_true_train = inverse_transform_prediction(
             result.y_true_train.rename("y_true"),
             model_cfg,
@@ -381,6 +394,7 @@ def run_har_experiment_from_dataset(
         result.y_pred_train = inverse_transform_prediction(
             result.y_pred_train.rename("y_pred"),
             model_cfg,
+            log_clip_bounds=log_clip_bounds,
         ).rename("y_pred")
         result.y_true_test = inverse_transform_prediction(
             result.y_true_test.rename("y_true"),
@@ -389,6 +403,7 @@ def run_har_experiment_from_dataset(
         result.y_pred_test = inverse_transform_prediction(
             result.y_pred_test.rename("y_pred"),
             model_cfg,
+            log_clip_bounds=log_clip_bounds,
         ).rename("y_pred")
         result.metrics = {
             "train": evaluate_statistical_metrics(result.y_true_train, result.y_pred_train),

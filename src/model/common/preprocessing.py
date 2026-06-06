@@ -224,14 +224,45 @@ def transform_target(y: pd.Series, model_cfg: ModelConfigLike) -> pd.Series:
 def inverse_transform_prediction(
     y_pred: pd.Series,
     model_cfg: ModelConfigLike,
+    *,
+    log_clip_bounds: tuple[float, float] | None = None,
 ) -> pd.Series:
     if model_cfg.target_transform == "none":
         pred_np = np.clip(y_pred.to_numpy(dtype=float), model_cfg.prediction_floor, None)
         return pd.Series(pred_np, index=y_pred.index, name=y_pred.name)
 
-    pred_np = np.exp(y_pred.to_numpy(dtype=float))
+    log_pred = y_pred.to_numpy(dtype=float)
+    if log_clip_bounds is not None:
+        # Ill-conditioned rolling windows can produce extreme log-scale
+        # predictions; exponentiating them yields ~1e80 outliers that wreck
+        # the level-space metrics. Clip to the training-target range (+margin)
+        # before exp so a single bad window cannot explode the forecast.
+        lo, hi = log_clip_bounds
+        log_pred = np.clip(log_pred, lo, hi)
+    pred_np = np.exp(log_pred)
     pred_np = np.clip(pred_np, model_cfg.prediction_floor, None)
     return pd.Series(pred_np, index=y_pred.index, name=y_pred.name)
+
+
+def log_clip_bounds_from_target(
+    y_train_model: pd.Series,
+    *,
+    margin_frac: float = 0.5,
+) -> tuple[float, float] | None:
+    """Log-scale clip bounds derived from a (log-scale) training target.
+
+    Returns ``[min - margin, max + margin]`` where ``margin`` is
+    ``margin_frac`` of the observed range, or ``None`` if the range cannot be
+    computed (empty/all-NaN target).
+    """
+    values = y_train_model.to_numpy(dtype=float)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return None
+    lo = float(values.min())
+    hi = float(values.max())
+    margin = margin_frac * (hi - lo)
+    return (lo - margin, hi + margin)
 
 
 def aggregate_predictions(
