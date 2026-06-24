@@ -36,10 +36,11 @@ from .utils import fit_har_ols, predict_har_ols
 logger = logging.getLogger(__name__)
 
 
-def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
+def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0913, PLR0915
     x: pd.DataFrame,
     y: pd.Series,
     core_columns: list[str],
+    feature_groups: dict[str, list[str]] | None = None,
     run_config: HARRunConfig | None = None,
     row_dates: pd.Series | None = None,
 ) -> HARExperimentResult:
@@ -115,6 +116,7 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
                 x_train=x_train,
                 y_train=y_train,
                 core_columns=core_columns,
+                feature_groups=feature_groups,
                 config=selection_cfg,
                 walk_forward_config=wf_cfg,
             )
@@ -137,6 +139,13 @@ def run_har_experiment_from_xy(  # noqa: C901, PLR0912, PLR0915
                 best_alpha = selection_info.get("best_alpha")
                 if best_alpha is not None:
                     postfix["alpha"] = f"{float(best_alpha):.2e}"
+            elif selection_cfg.method == "group_lasso":
+                best_alpha = selection_info.get("best_alpha")
+                if best_alpha is not None:
+                    postfix["alpha"] = f"{float(best_alpha):.2e}"
+                selected_groups = selection_info.get("selected_groups")
+                if selected_groups is not None:
+                    postfix["n_grp"] = len(selected_groups)
             elif selection_cfg.method == "bsr":
                 dropped = selection_info.get("total_dropped_features")
                 if dropped is not None:
@@ -374,6 +383,7 @@ def run_har_experiment_from_dataset(
         x=x,
         y=y,
         core_columns=core_columns,
+        feature_groups=feature_config.feature_groups,
         run_config=effective_run_config,
         row_dates=aligned_dates,
     )
@@ -419,10 +429,16 @@ def run_har_experiment_from_dataset(
             "target_floor": feature_config.target_floor,
             "core_columns": feature_config.core_columns,
             "extra_feature_cols": feature_config.extra_feature_cols or [],
+            "feature_groups": feature_config.feature_groups or {},
             "selection_method": selection_cfg.method,
             "selection_refit_every_windows": selection_cfg.refit_every_windows,
             "lasso_config": (
                 vars(selection_cfg.lasso) if selection_cfg.lasso is not None else None
+            ),
+            "group_lasso_config": (
+                vars(selection_cfg.group_lasso)
+                if selection_cfg.group_lasso is not None
+                else None
             ),
             "bsr_config": (
                 vars(selection_cfg.bsr) if selection_cfg.bsr is not None else None

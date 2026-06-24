@@ -58,6 +58,7 @@ class WheatHARBenchmarkConfig:
     core_columns: list[str] | None = None
     core_columns_by_target: dict[str, list[str]] | None = None
     climate_columns: list[str] | None = None
+    feature_groups: dict[str, list[str]] | None = None
     target_horizon: int = 1
     target_horizons: list[int] | None = None
     target_mode: Literal["point", "mean"] = "point"

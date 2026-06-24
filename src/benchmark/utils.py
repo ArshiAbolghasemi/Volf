@@ -49,6 +49,8 @@ NEWS_BASE_COLUMNS = ["frbsf_sentiment", "Text_Climate_Anomaly", "epu_index"]
 MACRO_COLUMNS = ["DJIA_Index", "WTI_Index", "Broad_Dollar_index", "Stock_Uncertainty"]
 
 FEATURE_GROUP_COLUMNS = {
+    "endo": [],
+    "exo": [],
     "news": NEWS_BASE_COLUMNS,
     "macro": MACRO_COLUMNS,
     "climate": CLIMATE_COLUMNS,
@@ -61,9 +63,13 @@ def existing_columns(data: pd.DataFrame, columns: list[str]) -> list[str]:
 
 def get_feature_group_columns(
     *,
+    endo_columns: list[str] | None = None,
+    exo_columns: list[str] | None = None,
     climate_columns: list[str] | None = None,
 ) -> dict[str, list[str]]:
     return {
+        "endo": list(endo_columns or []),
+        "exo": list(exo_columns or []),
         "news": list(NEWS_BASE_COLUMNS),
         "macro": list(MACRO_COLUMNS),
         "climate": list(climate_columns or CLIMATE_COLUMNS),
@@ -73,10 +79,12 @@ def get_feature_group_columns(
 def classify_feature_group(
     feature_name: str,
     *,
+    endo_columns: list[str] | None = None,
+    exo_columns: list[str] | None = None,
     climate_columns: list[str] | None = None,
 ) -> str | None:
     for group_name, columns in get_feature_group_columns(
-        climate_columns=climate_columns
+        endo_columns=endo_columns, exo_columns=exo_columns, climate_columns=climate_columns
     ).items():
         if feature_name in columns:
             return group_name

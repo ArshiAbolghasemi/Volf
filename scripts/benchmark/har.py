@@ -22,7 +22,11 @@ from src.model import (
     HARWalkForwardConfig,
 )
 from src.util.path import DATA_DIR
-from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
+from src.variable_selection import (
+    BSRSelectionConfig,
+    GroupLassoSelectionConfig,
+    LassoSelectionConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -126,12 +130,16 @@ def _build_run_config_from_dict(cfg: dict[str, Any]) -> HARRunConfig:
         bsr_cfg = None
         if isinstance(selection_raw.get("lasso"), dict):
             lasso_cfg = LassoSelectionConfig(**selection_raw["lasso"])
+        group_lasso_cfg = None
+        if isinstance(selection_raw.get("group_lasso"), dict):
+            group_lasso_cfg = GroupLassoSelectionConfig(**selection_raw["group_lasso"])
         if isinstance(selection_raw.get("bsr"), dict):
             bsr_cfg = BSRSelectionConfig(**selection_raw["bsr"])
 
         selection_cfg = HARSelectionConfig(
             method=selection_raw.get("method", "none"),
             lasso=lasso_cfg,
+            group_lasso=group_lasso_cfg,
             bsr=bsr_cfg,
             refit_every_windows=int(selection_raw.get("refit_every_windows", 1)),
         )
@@ -165,6 +173,7 @@ def _load_config_from_json(path: str) -> WheatHARBenchmarkConfig:
         core_columns=raw.get("core_columns"),
         core_columns_by_target=raw.get("core_columns_by_target"),
         climate_columns=raw.get("climate_columns"),
+        feature_groups=raw.get("feature_groups"),
         target_horizon=int(raw.get("target_horizon", 1)),
         target_horizons=(
             [int(v) for v in raw["target_horizons"]]

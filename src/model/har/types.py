@@ -6,7 +6,11 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     import pandas as pd
 
-    from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
+    from src.variable_selection import (
+        BSRSelectionConfig,
+        GroupLassoSelectionConfig,
+        LassoSelectionConfig,
+    )
 
 
 @dataclass
@@ -15,6 +19,7 @@ class HARFeatureConfig:
     core_columns: list[str]
     target_horizon: int = 1
     extra_feature_cols: list[str] | None = None
+    feature_groups: dict[str, list[str]] | None = None
     target_col_name: str = "RV_target"
     target_mode: Literal["point", "mean"] = "point"
     target_floor: float = 1e-10
@@ -22,8 +27,9 @@ class HARFeatureConfig:
 
 @dataclass
 class HARSelectionConfig:
-    method: Literal["lasso", "bsr", "none"] = "lasso"
+    method: Literal["lasso", "group_lasso", "bsr", "none"] = "lasso"
     lasso: LassoSelectionConfig | None = None
+    group_lasso: GroupLassoSelectionConfig | None = None
     bsr: BSRSelectionConfig | None = None
     refit_every_windows: int = 1
 

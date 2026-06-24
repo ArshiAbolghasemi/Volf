@@ -5,9 +5,25 @@ from typing import TYPE_CHECKING
 from src.benchmark.utils import (
     build_target_feature_sets as _build_target_feature_sets_common,
 )
-from src.benchmark.utils import existing_columns as _existing_columns_common
-from src.model import HARModelConfig, HARRunConfig, HARSelectionConfig, HARWalkForwardConfig
-from src.variable_selection import BSRSelectionConfig, LassoSelectionConfig
+from src.benchmark.utils import (
+    default_endo_columns_for_target,
+    default_exo_columns_for_target,
+    get_feature_group_columns,
+)
+from src.benchmark.utils import (
+    existing_columns as _existing_columns_common,
+)
+from src.model import (
+    HARModelConfig,
+    HARRunConfig,
+    HARSelectionConfig,
+    HARWalkForwardConfig,
+)
+from src.variable_selection import (
+    BSRSelectionConfig,
+    GroupLassoSelectionConfig,
+    LassoSelectionConfig,
+)
 
 from .types import (
     DEFAULT_INITIAL_TRAIN_SIZE,
@@ -97,6 +113,45 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             ),
             model=HARModelConfig(standardize_features=True),
         ),
+        "group_lasso_expanding": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(
+                window_type="expanding",
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+            ),
+            selection=HARSelectionConfig(
+                method="group_lasso",
+                group_lasso=GroupLassoSelectionConfig(
+                    n_splits=5,
+                    max_train_size=DEFAULT_ROLLING_WINDOW_SIZE,
+                    alphas=30,
+                    max_iter=5_000,
+                ),
+                refit_every_windows=4,
+            ),
+            model=HARModelConfig(standardize_features=True),
+        ),
+        "group_lasso_rolling": HARRunConfig(
+            walk_forward=HARWalkForwardConfig(
+                window_type="rolling",
+                initial_train_size=DEFAULT_INITIAL_TRAIN_SIZE,
+                test_size=DEFAULT_TEST_SIZE,
+                step=DEFAULT_STEP,
+                rolling_window_size=DEFAULT_ROLLING_WINDOW_SIZE,
+            ),
+            selection=HARSelectionConfig(
+                method="group_lasso",
+                group_lasso=GroupLassoSelectionConfig(
+                    n_splits=5,
+                    max_train_size=DEFAULT_ROLLING_WINDOW_SIZE,
+                    alphas=30,
+                    max_iter=5_000,
+                ),
+                refit_every_windows=4,
+            ),
+            model=HARModelConfig(standardize_features=True),
+        ),
         "bsr_expanding": HARRunConfig(
             walk_forward=HARWalkForwardConfig(
                 window_type="expanding",
@@ -126,4 +181,23 @@ def default_run_configs() -> dict[str, HARRunConfig]:
             ),
             model=HARModelConfig(standardize_features=False),
         ),
+    }
+
+
+def build_feature_groups(
+    data: pd.DataFrame,
+    *,
+    target_col: str = "wheat_weekly_rv",
+    climate_columns: list[str] | None = None,
+) -> dict[str, list[str]]:
+    endo = existing_columns(data, default_endo_columns_for_target(target_col))
+    exo = existing_columns(data, default_exo_columns_for_target(target_col))
+    raw_groups = get_feature_group_columns(
+        endo_columns=endo,
+        exo_columns=exo,
+        climate_columns=climate_columns,
+    )
+    return {
+        group_name: existing_columns(data, columns)
+        for group_name, columns in raw_groups.items()
     }

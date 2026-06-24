@@ -14,6 +14,7 @@ class FeatureConfigLike(Protocol):
     core_columns: list[str]
     target_horizon: int
     extra_feature_cols: list[str] | None
+    feature_groups: dict[str, list[str]] | None
     target_col_name: str
     target_mode: str
     target_floor: float

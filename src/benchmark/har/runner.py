@@ -23,7 +23,12 @@ from src.model import (
 )
 
 from .cache import cache_key, dataset_signature, load_result_cache, save_result_cache
-from .features import build_wheat_feature_sets, default_run_configs, existing_columns
+from .features import (
+    build_feature_groups,
+    build_wheat_feature_sets,
+    default_run_configs,
+    existing_columns,
+)
 from .types import (
     DEFAULT_CORE_COLUMNS,
     HARGridSearchConfig,
@@ -184,6 +189,7 @@ def _run_benchmark_task(  # noqa: PLR0913
     data: pd.DataFrame,
     cfg: WheatHARBenchmarkConfig,
     core: list[str],
+    feature_groups: dict[str, list[str]] | None,
     data_signature_value: str,
     horizon: int,
     model_name: str,
@@ -198,6 +204,7 @@ def _run_benchmark_task(  # noqa: PLR0913
         target_horizon=horizon,
         target_mode=cfg.target_mode,
         extra_feature_cols=extra_cols,
+        feature_groups=feature_groups,
     )
     candidates = _build_param_candidates(run_cfg, cfg.grid_search)
     metric_name = cfg.grid_search.metric if cfg.grid_search else "test_mse"
@@ -338,6 +345,11 @@ def run_wheat_har_benchmark_multi_horizon(  # noqa: C901
         core_columns=core,
         climate_columns=cfg.climate_columns,
     )
+    feature_groups = cfg.feature_groups or build_feature_groups(
+        data,
+        target_col=cfg.target_col,
+        climate_columns=cfg.climate_columns,
+    )
     data_signature_value = dataset_signature(data)
     model_run_configs = cfg.run_configs or default_run_configs()
     horizons = resolve_target_horizons(cfg)
@@ -364,6 +376,7 @@ def run_wheat_har_benchmark_multi_horizon(  # noqa: C901
                 data=data,
                 cfg=cfg,
                 core=core,
+                feature_groups=feature_groups,
                 data_signature_value=data_signature_value,
                 horizon=horizon,
                 model_name=model_name,
@@ -380,6 +393,7 @@ def run_wheat_har_benchmark_multi_horizon(  # noqa: C901
                     data=data,
                     cfg=cfg,
                     core=core,
+                    feature_groups=feature_groups,
                     data_signature_value=data_signature_value,
                     horizon=horizon,
                     model_name=model_name,
@@ -465,6 +479,9 @@ def benchmark_results_to_frame(results: dict[str, dict[str, Any]]) -> pd.DataFra
                 ),
                 "model_feature_floor": model_info.get("model_feature_floor"),
                 "lasso_best_alpha": selection_info.get("best_alpha"),
+                "group_lasso_selected_groups": ",".join(
+                    selection_info.get("selected_groups", [])
+                ),
                 "bsr_alpha": selection_info.get("alpha"),
                 "bsr_window_type": selection_info.get("window_type"),
                 "bsr_window_size": selection_info.get("window_size"),
