@@ -210,6 +210,7 @@ def run_linear_shap_for_job(  # noqa: PLR0915
                 x_train=x_train,
                 y_train=y_train,
                 core_columns=core_columns,
+                feature_groups=feature_cfg.feature_groups,
                 config=selection_cfg,
                 walk_forward_config=wf_cfg,
             )
@@ -455,13 +456,16 @@ def save_shap_job_outputs(
     plots_dir.mkdir(parents=True, exist_ok=True)
 
     summary_path = job_dir / "summary.csv"
+    shap_values_path = job_dir / "shap_values.csv"
+    feature_data_path = job_dir / "feature_data.csv"
     diagnostics_path = job_dir / "diagnostics.json"
 
     summary_plot_path = plots_dir / "summary_plot.png"
     waterfall_path = plots_dir / "waterfall_plot.png"
 
-    # Keep a single CSV artifact (shap_summary.csv); plots are saved separately.
     result.summary.to_csv(summary_path, index=False)
+    result.shap_values.to_csv(shap_values_path, index=True)
+    result.feature_data.to_csv(feature_data_path, index=True)
     pd.Series(result.diagnostics, dtype=object).to_json(diagnostics_path, indent=2)
 
     shap_cols = result.feature_data.columns.tolist()
@@ -488,6 +492,8 @@ def save_shap_job_outputs(
     return {
         "dir": job_dir,
         "summary_csv": summary_path,
+        "shap_values_csv": shap_values_path,
+        "feature_data_csv": feature_data_path,
         "diagnostics_json": diagnostics_path,
         "summary_plot": summary_plot_path,
         "dependence_plots": dep_paths,
