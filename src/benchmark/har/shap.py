@@ -241,7 +241,16 @@ def run_linear_shap_for_job(  # noqa: PLR0915
             add_constant=effective_model_cfg.add_constant,
         )
 
-        explainer = shap.LinearExplainer(model, x_train_model)
+        # Conditional SHAP: the Impute masker accounts for feature dependence via
+        # the training-window covariance (shap's correlation_dependent path,
+        # exact for a linear model under a Gaussian feature assumption), rather
+        # than the marginal/interventional phi_j = beta_j * (x_j - mu_j). Passing
+        # the masker directly is equivalent to feature_perturbation=
+        # "correlation_dependent" but avoids that deprecated kwarg's FutureWarning.
+        explainer = shap.LinearExplainer(
+            model,
+            shap.maskers.Impute(x_train_model),
+        )
         explanation_raw = explainer(x_eval_model)
         explanation = (
             explanation_raw[0] if isinstance(explanation_raw, list) else explanation_raw

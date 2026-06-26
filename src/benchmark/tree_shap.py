@@ -389,17 +389,12 @@ def _run_tree_shap_common(  # noqa: PLR0915
         y_train_model = transform_target(y_train, effective_model_cfg)
         fitted = runner.fit_model(x_train_model, y_train_model, effective_model_cfg)
 
-        background = x_train_model
-        if len(background) > job.max_background_samples:
-            background = background.sample(
-                n=job.max_background_samples,
-                random_state=42,
-            )
-
+        # Conditional SHAP: "tree_path_dependent" uses the node sample coverage
+        # stored in the trees (the conditional distribution implied by the
+        # splits), so it respects feature dependence. No background set is used.
         explainer = shap.TreeExplainer(
             fitted,
-            data=background,
-            feature_perturbation="interventional",
+            feature_perturbation="tree_path_dependent",
         )
         explanation_raw = explainer(x_eval_model, check_additivity=False)
         explanation = (
