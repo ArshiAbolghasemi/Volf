@@ -310,11 +310,6 @@ def run_linear_shap_for_job(  # noqa: PLR0915
     )
 
     report_features = _pick_report_features(shap_df, job)
-    shap_selected = (
-        shap_df[report_features].copy()
-        if report_features
-        else pd.DataFrame(index=shap_df.index)
-    )
     feature_selected = (
         feature_df[report_features].copy()
         if report_features
@@ -323,7 +318,9 @@ def run_linear_shap_for_job(  # noqa: PLR0915
 
     summary = _build_summary_frame(shap_df)
 
-    shap_out = shap_selected.copy()
+    # Keep every feature for exact downstream group aggregation; report plots still
+    # use feature_selected below.
+    shap_out = shap_df.copy()
     if date_series is not None:
         shap_out.insert(0, "Date", date_series.reindex(shap_out.index).to_numpy())
     shap_out.insert(
